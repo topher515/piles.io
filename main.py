@@ -7,6 +7,8 @@ from bottle import route, run, request, abort, redirect, static_file, template
 from pymongo import Connection
 import logging
 logger = logging.getLogger()
+from PIL import Image
+from tempfile import TemporaryFile as TempFile
 
 AWS_ACCESS_KEY_ID = '0Z67F08VD9JMM1WKRDR2'
 AWS_SECRET_ACCESS_KEY = 'g6o8NjU3ClIYJmaGurL+sKctlQrpEUF6irQyrpPX'
@@ -111,6 +113,22 @@ def s3put(fp,name):
 		abort(400, response.message)
 	return response
 	
+
+def s3del(name):
+	conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
+	response = conn.delete(BUCKET_NAME,name,headers={'x-amz-acl':'public-read'})
+	
+	status = response.http_response.status
+	if 200 > status < 300:
+		abort(400, response.message)
+	return response
+	
+
+def s3name(pid,fid,entity):
+	f = entity
+	ext = '.'+f['ext'] if f.get('ext') else ''
+	s3name = '%s-%s%s' % (pid,fid,ext)
+	return s3name, ext
 	
 # Requests
 @route('/piles/:pid/files', method='POST')
@@ -136,6 +154,8 @@ def put_file(pid,fid):
 @route('/piles/:pid/files/:fid', method='DELETE')
 def delete_file(pid,fid):
 	entity = {'pid':pid,'_id':fid}
+	s3name = '%s-%s' % (pid,fid)
+	s3del(s3name)
 	db.files.remove(entity)
 
 
@@ -157,17 +177,34 @@ def put_file_content(pid,fid):
 	if not f:
 		abort(404,"Not a valid resource")
 	data = request.files.get('files[]')
-	s3name = '%s-%s' % (pid,fid)
-	s3put(data.file,s3name)
+	name,ext = s3name(pid,fid,f)
+	s3put(data.file,name)
+	
+	#thumb = TempFile() #'w+b')
+	#data.file.seek(0)
+	#im = Image.open(data.file)
+	#im.thumbnail((128,128), Image.ANTIALIAS)
+	#im.save(thumb,format=im.format)
+	#s3put(thumb,name+'=s128')
 	# print 'Not uploading... in test env'
 
 
 @route('/piles/:pid/files/:fid/content', method='GET')
 def get_file_content(pid,fid):
-	f = db.files.find({'_id':fid,'pid':pid})
+	f = db.files.find_one({'_id':fid,'pid':pid})
 	#return json.dumps(f)
-	return redirect('http://%s.s3.amazonaws.com/%s-%s' % (BUCKET_NAME,pid,fid))
+	name,ext = s3name(pid,fid,f)
+	return redirect('http://%s.s3.amazonaws.com/%s' % (BUCKET_NAME,name))
 
+
+
+
+@route('/piles/:pid/files/:fid/thumbnail', method='GET')
+def get_file_thumbail(pid,fid):
+	f = db.files.find_one({'_id':fid,'pid':pid})
+	#return json.dumps(f)
+	name = s3name(pid,fid,f)
+	return redirect('http://%s.s3.amazonaws.com/%s' % (BUCKET_NAME,name))
 
 
 ### Pages ###

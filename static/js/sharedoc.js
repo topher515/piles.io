@@ -57,7 +57,7 @@
 			var $el = $(this.el)
 			
 			// Bind the view elem for draggability
-			$el.draggable();
+			$el.draggable({ containment: 'parent', opacity: .75 });
 			$el.bind('dragstop',function(e,ui) {
 				model.set({x:ui.position.left, y:ui.position.top})
 			})
@@ -78,9 +78,12 @@
 		render: function() {
 			c = _.template($('#file-tpl').html())
 			var $el = $(this.el)
+			$el.css('position','absolute')
 			$el.css('left',this.model.get('x'))
 			$el.css('top',this.model.get('y'))
-			$el.html(c(this.model.toJSON()))
+			tpl_vals = this.model.toJSON()
+			tpl_vals.ext || (tpl_vals.ext = '')
+			$el.html(c(tpl_vals))
 			return this;
 		}
 	});
@@ -94,21 +97,35 @@
 			this.counter = 0;
 			//this.model.files.bind('add', this.add, this);
 			//this.model.files.bind('all', console.log, this);
-			$el = $(this.el)
-			self = this
+			var $el = $(this.el),
+				file_collection_selector = '.file-collection'
+				self = this
 			
 			// Setup fileuploader
 			$el.fileupload({
 				add:function(e, data) {
 					_.each(data.files, function (file) {
+						var filename = file.name || file.fileName;
+						var namearray = filename.split('.'),
+						 	ext = namearray.length>1 ? _.last(namearray) : '';
+							x = e.pageX - $el.find(file_collection_selector).offset().left
+							y = e.pageY = $el.find(file_collection_selector).offset().top
 						
-						f = new File({x:e.pageX,y:e.pageY,name:file.name});
+						f = new File({
+							x:x,
+							y:y,
+							name:filename,
+							size:file.size,
+							type:file.type,
+							ext:ext
+						});
 						f.content_to_upload = data
 						self.add(f);
 					});
 				},
 				url:"BAD_URL",//this.model.files.url,
 				type:'PUT',
+				//dropZone:$el, <--- So actually we probably want to do the whole document
 				send:function(e, data) {
 				},
 				start:function(e) {
@@ -121,15 +138,16 @@
 		render: function() {
 			$this_el = $(this.el)
 			$this_el.html('')
-			var h = _.template("<span><%= emails %></span>", this.model.toJSON())
-			var fileviews = _.map(this.model.files.models,function(j) { 
-				return new FileView({model:j}); 
+			var $pile_elems = $(_.template($('#pile-tpl').html(), this.model.toJSON()))
+			// Build fileviews
+			$this_el.html($pile_elems)
+			var $collection = $this_el.find('.file-collection')
+			var fileviews = _.map(this.model.files.models,function(m) {
+				return new FileView({model:m})
 			})
-			_.each(fileviews, function(i) {
-				i.render()
-				$this_el.append(i.el)	
+			_.each(fileviews,function(fileview) { 
+				$collection.append(fileview.render().el)
 			})
-			$this_el.append(h)
 			return this;
 		},
 		
@@ -140,7 +158,6 @@
 		},
 		
 	});
-	
 	
 	
 })(jQuery)
