@@ -2,49 +2,23 @@ import json
 import datetime, hashlib
 import bottle
 import requests
-import S3
 from bottle import route, run, request, abort, redirect, static_file, template
 from pymongo import Connection
 import logging
 logger = logging.getLogger()
 from PIL import Image
 from tempfile import TemporaryFile as TempFile
+from utils import *
 
-AWS_ACCESS_KEY_ID = '0Z67F08VD9JMM1WKRDR2'
-AWS_SECRET_ACCESS_KEY = 'g6o8NjU3ClIYJmaGurL+sKctlQrpEUF6irQyrpPX'
-BUCKET_NAME = 'sharedocapp'
-
+from beaker.middleware import SessionMiddleware
 
 connection = Connection('localhost', 27017)
 db = connection.mydatabase
 
 
-### Utils ###
-
-def m2j(x):
-	x['id'] = x['_id']
-	del x['_id']
-	return json.dumps(x)
-
-def ms2js(l):
-	ls = []
-	for x in l:
-		x['id'] = x['_id']
-		del x['_id']
-		ls.append(x)
-	return json.dumps(ls)
-
-def j2m(j):
-	try:
-		j = json.loads(j)
-	except ValueErro:
-		abort(400,'Invalid JSON')
-	j['_id'] = j['id']
-	del j['id']
-	return j
-
-
 ### API ###
+
+## Piles
 
 @route('/piles/:pid', method='PUT')
 def put_pile(pid):
@@ -86,51 +60,8 @@ def get_pile(pid):
 		abort(404, 'No document with id %s' % id)
 	return m2j(entity)
 
+## Files
 
-### Files
-
-# Utils
-def get_stor_data(request):
-	now = datetime.datetime.now()
-	data = request.files.get('data')
-	try:
-		entity = json.loads(request.body.read())
-	except ValueError:
-		abort(400,"Invalid JSON")
-		
-	if entity.get('name'):
-		name = entity['name']
-	else:		
-		name = data.filename or now.strftime("%Y-%m-%d %H:%M:%S")
-	return now,name,entity
-	
-def s3put(fp,name):
-	conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
-	response = conn.put(BUCKET_NAME,name,S3.S3Object(fp),headers={'x-amz-acl':'public-read'})
-	
-	status = response.http_response.status
-	if 200 > status < 300:
-		abort(400, response.message)
-	return response
-	
-
-def s3del(name):
-	conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
-	response = conn.delete(BUCKET_NAME,name,headers={'x-amz-acl':'public-read'})
-	
-	status = response.http_response.status
-	if 200 > status < 300:
-		abort(400, response.message)
-	return response
-	
-
-def s3name(pid,fid,entity):
-	f = entity
-	ext = '.'+f['ext'] if f.get('ext') else ''
-	s3name = '%s-%s%s' % (pid,fid,ext)
-	return s3name, ext
-	
-# Requests
 @route('/piles/:pid/files', method='POST')
 def post_file(pid):
 	now,name,entity = get_stor_data(request)
@@ -197,8 +128,6 @@ def get_file_content(pid,fid):
 	return redirect('http://%s.s3.amazonaws.com/%s' % (BUCKET_NAME,name))
 
 
-
-
 @route('/piles/:pid/files/:fid/thumbnail', method='GET')
 def get_file_thumbail(pid,fid):
 	f = db.files.find_one({'_id':fid,'pid':pid})
@@ -207,17 +136,60 @@ def get_file_thumbail(pid,fid):
 	return redirect('http://%s.s3.amazonaws.com/%s' % (BUCKET_NAME,name))
 
 
-### Pages ###
+
+
+### Misc ###
 
 @route('/favicon.ico')
 def favicon():
 	abort(404)
 
+### Static Files ###
 
 @route('/static/:path#.+#')
 def server_static(path):
     return static_file(path, root='static')
 
+
+### Pages ###
+
+@route('/create')
+def create():
+	return "Not implemented yet"
+
+@route('/login', method="GET")
+def login():
+	return template('login',email='')
+
+@route('/login', method="POST")
+def login():
+	if not request.forms.get('email') or not request.forms.get('password'):
+		return template('login',email=request.forms['email'],errors=['No username or password'])
+		
+	hashed_pwd = hashlib.sha1(request.forms['password']).hexdigest()
+	email = request.forms['email'].lower()
+	user_ent = db.users.find_one({"email":email,"password":hashed_pwd})
+	if not user_ent:
+		return template('login',email=request.forms['email'],errors=['Bad email or password'])
+		
+	s = session(request)
+	s['authenticated_as'] = user_ent
+	s.save()
+	pile = db.piles.find_one({'emails':email})
+	print pile
+	if pile:
+		return redirect('/'+pile['name'])
+	else:
+		return redirect('/create')
+
+@route('/logout')
+def logout():
+	s = session(request)
+	s['authenticated_as'] = None
+	s.save()
+	print "Logged out..."
+	redirect('/login')
+	
 
 @route('/:pilename')
 def pile(pilename):
@@ -233,6 +205,15 @@ def pile(pilename):
 	return template('app',{'pile':m2j(pile),'files':ms2js(files)})
 
 
+
 if __name__ == '__main__':
+	session_opts = {
+		"session.type": "file",
+		'session.cookie_expires': True,
+		'session.auto': True,
+		'session.data_dir': "cache",
+	}
+	app = bottle.default_app()
+	app = SessionMiddleware(app, session_opts)
 	bottle.debug(True)
-	run(host='localhost', port=8080, reloader=True)
+	run(host='localhost', port=8080, app=app, reloader=True)

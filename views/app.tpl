@@ -1,51 +1,44 @@
 %import json
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>sharedocapptest</title>
-</head>
-<body>
-  <!-- link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap-1.1.1.min.css" -->
-  <link rel="stylesheet" href="/static/css/bootstrap-1.1.1.min.css">
+%def style():
   <style>
-	.file-container {
-		position:relative;
+
+	.file-view {
+		width:72px;
+		height:72px;
+		position:absolute;
+		display:block;
 		}
-		.file-container .file-view {
-			width:64px;
-			height:64px;
-			position:absolute;
+		.file-view .delete {
+			cursor: pointer;
+			position: absolute;
+			right: -12px;
+			top: 0px;
+		}
+		.file-view .icon-display {
+			position:relative;
 			}
-			.file-container .file-view .delete {
-				cursor: pointer;
+			.file-view .icon-display > .ext {
 				position: absolute;
-				right: 0px;
-				top: 0px;
+				margin: auto;
+				width: auto;
+				top: 25px;
+				left: 7px;
+				font-size: 1.9em;
 			}
 	.pile-view {
-		
-	}
+		position:relative;
+		margin: 45px auto;
+		max-width:800px;
+		}
+		.pile-view .file-collection {
+			min-height:500px;
+			min-width: 600px;
+		}
   </style>
+%end
 
-	
-  <!-- script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
-  <script src="http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js"></script>
-  <script src="http://ajax.cdnjs.com/ajax/libs/underscore.js/1.1.6/underscore-min.js"></script>
-  <script src="http://ajax.cdnjs.com/ajax/libs/backbone.js/0.3.3/backbone-min.js"></script -->
 
-  <script src="/static/js/jquery.min.js" type="text/javascript"></script>
-  <script src="/static/js/jquery-ui.min.js" type="text/javascript"></script>
-  <script src="/static/js/jquery.iframe-transport.js" type="text/javascript"></script>
-  <script src="/static/js/jquery.fileupload.js" type="text/javascript"></script>
-  <!-- script src="/static/js/jquery.fileupload-ui.js" type="text/javascript"></script-->
-  <script src="/static/js/json2.js" type="text/javascript"></script>
-  <!-- script src="/static/js/underscore-min.js" type="text/javascript"></script-->
-  <script src="/static/js/underscore.js" type="text/javascript"></script>
-  <!-- script src="/static/js/backbone-min.js" type="text/javascript"></script-->
-  <script src="/static/js/backbone.js"></script>
-  <script src="/static/js/sharedoc.js" type="text/javascript"></script>
+%def content():
   <script>
 	$(function() {
 		window.pile = new Pile({{pile}})
@@ -57,8 +50,18 @@
 	
   <script type="text/template" id="file-tpl">
 	<img class="delete" src="/static/img/delete.png" />
-	<img class="icon download" src="<%= icon %>" width="64" style="width:64px" />
+	<div class="icon-display  download" alt="Double click to download">
+		<div class="ext"><%= ext %></div>
+		<img class="icon" src="<%= icon %>" width="64" style="width:64px" />
+	</div>
 	<span><%= name %></span>
   </script>
-</body>
-</html>
+
+  <script type="text/template" id="pile-tpl">
+	<h1>Your Pile</h1>
+	<h6><%= emails %></h6>
+	<div class="file-collection well"></div>
+  </script>
+%end
+  
+%rebase layout content=content, style=style

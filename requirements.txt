@@ -1,3 +1,5 @@
 pymongo
 bottle
 requests
+#beaker
+-e hg+https://bitbucket.org/bbangert/beaker/@v1.5.4#egg=beaker
