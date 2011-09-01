@@ -1,5 +1,7 @@
 import json
-import datetime
+import datetime, base64, hmac, time
+from urllib import quote as urlquote
+from hashlib import sha1
 from bottle import request
 import S3
 import logging
@@ -9,6 +11,10 @@ AWS_ACCESS_KEY_ID = '0Z67F08VD9JMM1WKRDR2'
 AWS_SECRET_ACCESS_KEY = 'g6o8NjU3ClIYJmaGurL+sKctlQrpEUF6irQyrpPX'
 BUCKET_NAME = 'sharedocapp' # //TODO: How many buckets can I have? Maybe every pile has a bucket?
 
+
+# DEBUG
+#AWS_SECRET_ACCESS_KEY = 'OtxrzxIsfpFjA7SwPzILwy8Bw21TLhquhboDYROV'
+#AWS_ACCESS_KEY_ID = '44CF9590006BF252F707'
 
 ### Utils ###
 
@@ -51,6 +57,34 @@ def j2m(j):
 	
 ## S3
 	
+def build_auth_sig(http_verb,path,expiration,secret_key,content_type='',content_md5='',canonical_amz_headers=''):
+	to_sign = [http_verb,'\n',
+				content_md5,'\n',
+				content_type,'\n',
+				str(int(time.mktime(expiration.timetuple()))),'\n',
+				canonical_amz_headers,
+				path]
+	to_sign = ''.join(to_sign)
+	b64sig = base64.b64encode(hmac.new(secret_key,to_sign,sha1).digest()).strip()
+	return urlquote(b64sig,safe='')
+	
+
+def authed_get_url(bucket,path,expires=None):
+	path = path.strip('/')
+	if not expires:
+		expires = datetime.datetime.now() + datetime.timedelta(0,60*10) # In 10 min
+	## DEBUG:
+	#expires = datetime.datetime.fromtimestamp(1141889120)
+	expires_epoch_str = str(int(time.mktime(expires.timetuple())))
+	sig_str = build_auth_sig('GET', path='/'+bucket+'/'+path, expiration=expires, secret_key=AWS_SECRET_ACCESS_KEY)
+	
+	url = ['http://s3.amazonaws.com',
+			'/',bucket,'/',path,'?',
+			'AWSAccessKeyId=',AWS_ACCESS_KEY_ID,'&',
+			'Signature=',sig_str,'&',
+			'Expires=',expires_epoch_str]
+	return ''.join(url)
+	
 def get_stor_data(request):
 	now = datetime.datetime.now()
 	data = request.files.get('data')
@@ -67,7 +101,7 @@ def get_stor_data(request):
 
 def s3put(fp,name):
 	conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
-	response = conn.put(BUCKET_NAME,name,S3.S3Object(fp),headers={'x-amz-acl':'public-read'})
+	response = conn.put(BUCKET_NAME,name,S3.S3Object(fp)) #,headers={'x-amz-acl':'public-read'})
 
 	status = response.http_response.status
 	if 200 > status < 300:
@@ -77,7 +111,7 @@ def s3put(fp,name):
 
 def s3del(name):
 	conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
-	response = conn.delete(BUCKET_NAME,name,headers={'x-amz-acl':'public-read'})
+	response = conn.delete(BUCKET_NAME,name) #,headers={'x-amz-acl':'public-read'})
 
 	status = response.http_response.status
 	if 200 > status < 300:

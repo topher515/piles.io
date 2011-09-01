@@ -1,5 +1,5 @@
 import json
-import datetime, hashlib
+import datetime, hashlib, random
 import bottle
 import requests
 from bottle import route, run, request, abort, redirect, static_file, template
@@ -125,7 +125,9 @@ def get_file_content(pid,fid):
 	f = db.files.find_one({'_id':fid,'pid':pid})
 	#return json.dumps(f)
 	name,ext = s3name(pid,fid,f)
-	return redirect('http://%s.s3.amazonaws.com/%s' % (BUCKET_NAME,name))
+	authed_url = authed_get_url(BUCKET_NAME,name)
+	#print authed_url
+	return redirect(authed_url)
 
 
 @route('/piles/:pid/files/:fid/thumbnail', method='GET')
@@ -153,13 +155,20 @@ def server_static(path):
 
 ### Pages ###
 
+@route('/')
+def front():
+	s = session(request)
+	user_ent =s['authenticated_as']
+	pile = db.piles.find_one({'emails':user_ent['email']})
+	return redirect('/'+pile['name'])
+
 @route('/create')
 def create():
 	return "Not implemented yet"
 
 @route('/login', method="GET")
 def login():
-	return template('login',email='')
+	return template('login',email='',errors=[])
 
 @route('/login', method="POST")
 def login():

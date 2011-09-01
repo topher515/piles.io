@@ -1,5 +1,6 @@
 %import json
-%def style():
+
+%def head():
   <style>
 
 	.file-view {
@@ -64,4 +65,4 @@
   </script>
 %end
   
-%rebase layout content=content, style=style
+%rebase layout content=content, head=head
