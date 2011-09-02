@@ -30,6 +30,9 @@ def logged_in(old_route):
 		else:
 			redirect('/login')
 	return new_route
+	
+def hash_password(pwd):
+	return sha1(pwd+'Yar!, Smell that s@lty see air!').hexdigest()
 
 ## Formatting
 

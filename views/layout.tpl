@@ -2,12 +2,27 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>ShareDocAppTest</title>
+  <title>Piles Alpha</title>
 
   <!-- link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap-1.1.1.min.css" -->
   <link rel="stylesheet" href="/static/css/bootstrap-1.1.1.min.css">
   <link rel="stylesheet" href="/static/css/jquery-ui-1.8.16.custom.css">
 %head()
+  <style>
+	.top-right {
+		position: absolute;
+		padding: 15px;
+		top:0px;
+		right:0px;
+	}
+	.small-center {
+		width:400px;
+		margin:250px auto;
+	}
+	.alert-message p, .alert-message a {
+		margin: 0 1em;
+	}
+  </style>
 
 </head>
 <body>
@@ -31,6 +46,9 @@
   <script src="/static/js/sharedoc.js" type="text/javascript"></script>
 
 	<div class="container">
+		<div class="top-right">
+			<a href="/logout">Logout</a>
+		</div>
 	%content()
 	</div>
 </body>

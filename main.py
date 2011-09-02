@@ -15,6 +15,14 @@ from beaker.middleware import SessionMiddleware
 connection = Connection('localhost', 27017)
 db = connection.mydatabase
 
+VALID_URL_CHARS = set(string.letters + string.digits + '+_-,!')
+def valid_chars(strn):
+	if not strn:
+		return (False,'')
+	for char in strn:
+		if char not in VALID_URL_CHARS:
+			return (False,char)
+	return (True,'')
 
 ### API ###
 
@@ -23,18 +31,17 @@ db = connection.mydatabase
 @route('/piles/:pid', method='PUT')
 def put_pile(pid):
 	data = request.body.read()
-	if not data:
-		abort(400, 'No data received')
-	try:
-		entity = json.loads(data)
-	except ValueError:
-		abort(400, 'Invalid JSON: %s' % data)
+	entity = json.loads(data)
 		
 	entity['_id'] = pid
 	if not entity.get('emails'):
 		abort(400, 'No emails associated with pile')
 	if not entity.get('name'):
 		abort(400, 'No name associated with pile')
+		
+	valid,badness = valid_chars(entity['name'])
+	if not valid:
+		abort(400, 'Not a valid name')
 		
 	try:
 		db.piles.save(entity)
@@ -67,6 +74,8 @@ def post_file(pid):
 	now,name,entity = get_stor_data(request)
 	fid = ''.join([random.choice(string.letters + string.digits) for x in xrange(6)]) # hashlib.md5(str(now)).hexdigest()
 	#sto_file(pid,fid,name,data)
+	
+	valid,invalid_char = valid_chars(name)
 	entity['pid'] = pid
 	entity['_id'] = fid
 	entity['path'] = '%s-%s-%s' % (pid,fid,name)
@@ -131,6 +140,10 @@ def put_file_content(pid,fid):
 	#s3put(thumb,name+'=s128')
 	# print 'Not uploading... in test env'
 
+@route('/~:pid-:fid')
+def short_file_content(pid,fid):
+	f = db.files.find_one({'_id':fid,'pid':pid})
+	return redirect('http://%s.s3.amazonaws.com/%s' % (BUCKET_NAME,f['path']))
 
 @route('/piles/:pid/files/:fid/content', method='GET')
 def get_file_content(pid,fid):
@@ -174,20 +187,79 @@ def front():
 	pile = db.piles.find_one({'emails':user_ent['email']})
 	return redirect('/'+pile['name'])
 
-@route('/create')
+@route('/create', method="GET")
 def create():
-	return "Not implemented yet"
+	return template('create',name="Name for your pile",email='Email',password="Password",code='Invite Code',errors=[])
+
+@route('/create', method="POST")
+def create_do():
+	eml = request.forms.get('email')
+	pwd = request.forms.get('password')
+	code = request.forms.get('code')
+	name = request.forms.get('name')
+	kwargs = {"email":eml,"password":pwd,"code":code,"name":name,"errors":[]}
+	if not eml or '@' not in eml or not pwd:
+		kwargs['errors'].append("Please enter a valid username and password")
+		return template('create',**kwargs)
+	
+	user = db.users.find_one({'email':eml})
+	print user
+	if user:
+		kwargs['errors'].append('That email is already in use! Maybe you want to <a class="btn small" href="/login">login</a>?')
+		return template('create',**kwargs)
+	
+	if not name or name.lower() == 'name':
+		stupid = ['Jills_Mortuary--You_kill_Em_We_Chill_Em','no_fatties,please','Hey!','wonderful-bill','DataDyne-Inc.',\
+			'Wonderful_Me','programmers-delight','The_Colbert_Nation','WackoMan','the-ugly-duckling']
+		kwargs['errors'].append("You must provide a name for your pile. Like '%s' or '%s'" % (random.choice(stupid),random.choice(stupid)))
+		return template('create',**kwargs)
+	
+	valid,invalid_char = valid_chars(name)
+	if not valid:
+		kwargs['errors'].append("That is an invalid name. Just use letters, numbers and '_-,+'. You can't use '%s'." % invalid_char)
+		return template('create',**kwargs)
+	
+	if db.piles.find_one({'name':name}):
+		kwargs['errors'].append('Sorry, that pile name is already in use!')
+		return template('create',**kwargs)
+	
+	invite = db.invites.find_one({'code':code})
+	if not invite:
+		kwargs['errors'].append("That is an invalid code or has already been used. Sorry.")
+		return template('create',**kwargs)
+	
+	if invite.get('remaining', 1) == 1:
+		db.invites.remove(invite)
+	else:
+		invite['remaining'] -= 1
+		db.invites.save(invite)
+	
+	randid = lambda: ''.join([random.choice(string.letters + string.digits) for x in xrange(6)])
+	pid = randid()
+	while db.piles.find_one({"_id":pid}):
+		pid = randid()
+	
+	user = {'email':eml,'password':hash_password(pwd)}
+	pile = {'_id':pid,'emails':[eml],'name':name,'welcome':True}
+	db.piles.save(pile)
+	db.users.save(user)
+	
+	s = session(request)
+	s['authenticated_as'] = user
+	
+	return redirect('/%s' % pile['name'])
+
 
 @route('/login', method="GET")
 def login():
-	return template('login',email='',errors=[])
+	return template('login',email='Email',errors=[])
 
 @route('/login', method="POST")
-def login():
+def login_do():
 	if not request.forms.get('email') or not request.forms.get('password'):
 		return template('login',email=request.forms['email'],errors=['No username or password'])
 		
-	hashed_pwd = hashlib.sha1(request.forms['password']).hexdigest()
+	hashed_pwd = hash_password(request.forms['password'])
 	email = request.forms['email'].lower()
 	user_ent = db.users.find_one({"email":email,"password":hashed_pwd})
 	if not user_ent:
@@ -222,6 +294,8 @@ def pile(pilename):
 	#files = json.loads(requests.get('/piles/%(_id)s/files' % pile))
 	
 	pile = db.piles.find_one({'name':pilename})
+	if not pile:
+		abort(404,'That Pile does not exist.')
 	files = db.files.find({'pid':pile['_id']})
 	return template('app',{'pile':m2j(pile),'files':ms2js(files)})
 

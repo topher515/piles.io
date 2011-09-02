@@ -30,7 +30,7 @@
 		className:'alert-message',
 		
 		events: {
-			'click .alert-message .close': "countdown",
+			'click .alert-message .close': "clear",
 		},
 		render:function() {
 			$el = $(this.el).addClass(this.model.level)
@@ -71,16 +71,25 @@
 						if (self.content_to_upload) {
 							self.content_to_upload.url = model.url()+'/content'
 							self.content_to_upload.submit()
+							self.trigger('startworking')
 							console.log('Uploading file data!')
 							self.content_to_upload = null;
+						} else {
+							self.trigger('stopworking')
+							self.trigger('savesuccess')
 						}
-						self.trigger('stopworking')
-						self.trigger('savesuccess')
 					},
 					error:function(model,response) {
 						self.trigger('stopworking')
 						self.trigger('saveerror',prevattrs)
-						self.set(prevattrs,{silent:true})
+						// Reset the model to BEFORE the save
+						// TODO: Get rid of this major hack that breaks OO
+						// HACK
+						for (var attr in prevattrs) {
+							self.attributes[attr] = prevattrs[attr]
+						}
+						self._previousAttributes = prevattrs
+						// ENDHACK
 					}
 				});
 				
@@ -103,10 +112,25 @@
 	
 	var Pile = window.Pile = Backbone.Model.extend({
 		urlRoot: '/piles',
-		initialize: function() {
-			this.files = new FileCollection,
-			this.files.url = '/piles/'+this.id+'/files'
+		defaults:{
+			welcome:false,
 		},
+		initialize: function() {
+			this.files = new FileCollection
+			this.files.url = '/piles/'+this.id+'/files'
+			var self = this;
+			this.bind('change',function(model) {
+				var new_name = model.hasChanged('name')
+				model.save({},{success: function() {
+					if (new_name) self.trigger('renamesuccess')
+				}});
+			})
+		},
+		validate: function(attrs) {
+			if (attrs.name == '') {
+				return "Name can't be blank";
+			}
+		}
 	});
 
 	/* Views */
@@ -120,31 +144,59 @@
 		className:'file-view',
 		
 		initialize: function() {
-			var model = this.model
-			var $el = $(this.el)
+			var model = this.model,
+				$el = $(this.el),
+				self = this;
 			this.el.view = this; // Add a reference to this view to this element
 			
 			// Bind the view elem for draggability
-			$el.draggable({ containment: 'parent', opacity: .75 });
-			//$el.bind('dragstop',function(e,ui) {
-			//	model.set({x:ui.position.left, y:ui.position.top})
-			//})
+			$el.draggable({
+				containment: 'parent', 
+				opacity: .75,
+				start: function(e,ui) {
+					$el.animate({width:$el.prev_width, height:$el.prev_height})
+				},
+			});
+
+
 			
-			//this.model.bind('change', this.render, this) // maybe?
+			$el.hover(
+				function() {
+					if ($el.hasClass('working')) return
+					if (!$el.prev_height) {
+						$el.prev_height = $el.height()
+						$el.prev_width = $el.width()
+					}
+					if (!$el.auto_height) {
+						$el.css({height:'auto',width:'auto'})
+						$el.auto_height = $el.height()
+						$el.auto_width = $el.width()
+						$el.css({height:$el.prev_height,width:$el.prev_width})
+					}
+					$el.animate({height:$el.auto_height,width:$el.auto_width})
+				},
+				function() {
+					if ($el.hasClass('working')) return
+					$el.animate({height:$el.prev_height,width:$el.prev_width})
+				}
+			)
+			
 			this.model.bind('destroy', this.doremove, this)
 			this.model.bind('uploadprogress', this.updateprogress, this)
+			this.model.bind('uploadsuccess', this.uploadsuccess, this)
 			this.model.bind('startworking', this.startworking, this)
 			this.model.bind('stopworking', this.stopworking, this)
 			this.model.bind('savesuccess', this.savesuccess, this)
 			this.model.bind('saveerror', this.saveerror, this)
+			this.model.bind('change:pub', function(m) { m.get('pub') ? $el.addClass('public') : $el.removeClass('public')}, this)
 		},
 		
 		startworking:function() {
-			$(this.el).addClass('working')
+			$(this.el).addClass('working').draggable('option','disabled',true)
 		},
 		
 		stopworking:function() {
-			$(this.el).removeClass('working')
+			$(this.el).removeClass('working').draggable('option','disabled',false)
 		},
 		
 		savesuccess:function() {
@@ -165,13 +217,15 @@
 		updateprogress: function(percent) {
 			console.log('Upload progress: '+ percent)
 			$pbar = $(this.el).find('.progressbar')
-			if (percent >= 100) {
-				$pbar.hide()
-				notify('info','File upload successful!')
-			} else {
+			if (percent <= 100) {
 				$pbar.progressbar({value:percent})
 				$pbar.show()
 			}
+		},
+		
+		uploadsuccess: function() {
+			$pbar = $(this.el).find('.progressbar').hide('slide',{direction:"right"})
+			this.stopworking()
 		},
 		
 		download: function() {
@@ -204,6 +258,7 @@
 			tpl_vals = this.model.toJSON()
 			tpl_vals.ext || (tpl_vals.ext = '')
 			$el.html(c(tpl_vals))
+			
 			return this;
 		}
 	});
@@ -212,6 +267,10 @@
 	var PileView = window.PileView = Backbone.View.extend({
 			
 		className:'pile-view',
+		
+		events:{
+			'click .pile-view .rename': 'dorename',
+		},
 			
 		initialize: function() {
 			this.counter = 0;
@@ -220,6 +279,26 @@
 			var $el = $(this.el),
 				file_collection_selector = '.file-collection',
 				self = this
+			
+			/* Handle EMPTY */
+			if (this.model.files.models.length == 0) {
+				$el.addClass('empty')
+			} else {
+				$el.removeClass('empty')
+			}
+			
+			/* Setup bindings */
+			this.model.files.bind('add', function() {
+				$el.removeClass('empty')
+			});
+			this.model.files.bind('remove', function() {
+				if (self.model.files.models.length == 0) {
+					$el.addClass('empty')	
+				}
+			});
+			this.model.bind('renamesuccess', this.renamedone, this);
+			
+			
 			
 			// Setup fileuploader
 			$el.fileupload({
@@ -254,12 +333,21 @@
 				send:function(e, data) {
 				},
 				start:function(e) {
+				},
+				done:function(e, data) {
+					notify('info','File upload successful!')
+					data.associated_file_model.trigger('uploadsuccess')
 				}
 			})
 			
 			this.render();
 			
 			this.rebinddroppables()
+			
+			if (this.model.get('welcome')) {
+				notify('info','<strong>Hi! Welcome to Piles</strong>—Where our philosophy is, "Put on some pants for god sakes."')
+				this.model.set({'welcome':false})
+			}
 		},
 		
 		rebinddroppables:function() {
@@ -294,6 +382,15 @@
 			});
 		},
 		
+		dorename: function() {
+			var newname = prompt('New name for your Pile',this.model.get('name'))
+			this.model.set({'name':newname})
+		},
+		renamedone: function() {
+			window.location.href = '/' + this.model.get('name')
+			//$(this.el).find('.pile-name span').html(this.model.get('name'))
+		},
+		
 		render: function() {
 			$this_el = $(this.el)
 			$this_el.html('')
@@ -304,7 +401,7 @@
 			var fileviews = _.map(this.model.files.models,function(m) {
 				return new FileView({model:m})
 			})
-			_.each(fileviews,function(fileview) { 
+			_.each(fileviews,function(fileview) {
 				$collection.append(fileview.render().el)
 			})
 			
