@@ -2,8 +2,9 @@ import json
 import datetime, base64, hmac, time
 from urllib import quote as urlquote
 from hashlib import sha1
-from bottle import request
+from bottle import request, abort
 import S3
+from StringIO import StringIO
 import logging
 logger = logging.getLogger()
 
@@ -56,6 +57,15 @@ def j2m(j):
 	
 	
 ## S3
+
+class MyStringIO(StringIO):
+	def __len__(self):
+		return len(self.getvalue())
+
+			
+public_acp_xml = MyStringIO(open('resources/public-acp.xml').read())
+private_acp_xml = MyStringIO(open('resources/private-acp.xml').read())
+
 	
 def build_auth_sig(http_verb,path,expiration,secret_key,content_type='',content_md5='',canonical_amz_headers=''):
 	to_sign = [http_verb,'\n',
@@ -104,7 +114,7 @@ def s3put(fp,name):
 	response = conn.put(BUCKET_NAME,name,S3.S3Object(fp)) #,headers={'x-amz-acl':'public-read'})
 	status = response.http_response.status
 	if 200 > status < 300:
-		abort(400, response.message)
+		abort(500, 'AWS failure: ' +response.message)
 	return response
 
 
@@ -113,12 +123,36 @@ def s3del(name):
 	response = conn.delete(BUCKET_NAME,name) #,headers={'x-amz-acl':'public-read'})
 	status = response.http_response.status
 	if 200 > status < 300:
-		abort(400, response.message)
+		abort(500, 'AWS failure: ' + response.message)
 	return response
 
+	
+def s3setpub(name):
+	conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
+	response = conn.put_acl(BUCKET_NAME,name,public_acp_xml)
+	#s3put(public_acp_xml,name+'?acl')
+	status = response.http_response.status
+	print response.http_response.status
+	print response.message
+	if status < 200 or status > 299:
+		abort(500, 'AWS failure: ' + response.message)
+	return response
+
+def s3setpriv(name):
+	conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
+	response = conn.put_acl(BUCKET_NAME,name,private_acp_xml)
+	#s3put(private_acp_xml,name+'?acl')
+	status = response.http_response.status
+	print response.http_response.status
+	print response.message
+	if status < 200 or status > 299:
+		abort(500, 'AWS failure:' + response.message)
+	return response
 
 def s3name(pid,fid,entity):
 	f = entity
 	ext = '.'+f['ext'] if f.get('ext') else ''
 	s3name = '%s-%s%s' % (pid,fid,ext)
 	return s3name, ext
+	
+	

@@ -76,14 +76,23 @@ def post_file(pid):
 
 @route('/piles/:pid/files/:fid', method='PUT')
 def put_file(pid,fid):
-	now,name,entity = get_stor_data(request)
-	#sto_file(pid,fid,name,data)
-	entity.update({'pid':pid,'name':name,'_id':fid})
-	db.files.save(entity)
+	now,name,new_entity = get_stor_data(request)
+	new_entity.update({'pid':pid,'name':name,'_id':fid})
+	old_entity = db.files.find_one({'pid':pid,'_id':fid})
 	
+	if new_entity['pub'] and not old_entity.get('pub'):
+		# This entity changed to public
+		s3setpub(new_entity['path'])
+		#pass
+	elif not new_entity['pub'] and old_entity.get('pub'):
+		# This entity changed to private
+		s3setpriv(new_entity['path'])
+		#pass
 	
+	# Save if the amazon change was successful
+	db.files.save(new_entity)
 	
-	return m2j(entity)
+	return m2j(new_entity)
 
 
 @route('/piles/:pid/files/:fid', method='DELETE')

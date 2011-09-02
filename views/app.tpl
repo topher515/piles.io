@@ -2,7 +2,12 @@
 
 %def head():
   <style>
-
+	.alert-message {
+		position:fixed;
+		width: 80%;
+		border-top-left-radius:0;
+		border-top-right-radius:0;
+	}
 	.file-view {
 		width:72px;
 		height:72px;
@@ -36,6 +41,9 @@
 			display:block;
 			position:absolute;
 		}
+	.file-view.working {
+		opacity: .7;
+	}
 	.pile-view {
 		position:relative;
 		margin: 45px auto;
@@ -56,7 +64,7 @@
 		.pile-view .public {
 			margin: 0;
 			height:150px;
-			width: 592px;
+			width: 642px;
 			background-color:#EED;
 			display:inline-block;
 			padding:0;
@@ -67,7 +75,7 @@
 		.pile-view .trash {
 			margin:0;
 			height:150px;
-			width:200px;
+			width:150px;
 			background-color:#EDD;
 			display:inline-block;
 			padding:0;
@@ -95,7 +103,7 @@
 		window.pile = new Pile({{pile}})
 		pile.files.reset({{files}})
 		pileview = new PileView({model:window.pile})
-		$('body').append(pileview.el)
+		$('.container').append(pileview.el)
 		$('#noscript').remove()
 	})
   </script>
@@ -126,6 +134,11 @@
 			</div>
 		</div>
 	</div>
+  </script>
+
+  <script type="text/template" id="notify-tpl">
+		<a class="close" href="#">×</a>
+		<p><%= message %></p>
   </script>
 
   <div id="noscript" style="margin: 300px;">Bro, your javascript is off or broke!</div>
