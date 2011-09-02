@@ -37,6 +37,7 @@
   <script src="/static/js/jquery-ui.min.js" type="text/javascript"></script>
   <script src="/static/js/jquery.iframe-transport.js" type="text/javascript"></script>
   <script src="/static/js/jquery.fileupload.js" type="text/javascript"></script>
+  <script src="/static/js/jquery.blockUI.js" type="text/javascript"></script>
   <!-- script src="/static/js/jquery.fileupload-ui.js" type="text/javascript"></script-->
   <script src="/static/js/json2.js" type="text/javascript"></script>
   <!-- script src="/static/js/underscore-min.js" type="text/javascript"></script-->

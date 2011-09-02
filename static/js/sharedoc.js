@@ -1,13 +1,7 @@
 (function($) {
 	
-	
-	//var notify_tpl = 
-	var notify = function notify(level,msg) {
-		$('.container').prepend((new NotifyView({model:{level:level,message:msg}})).render().el)
-	}
-	
-
-    var rotate = function rotate(degree,plus,$elie) {        
+	/* Utilities */
+	var rotate = function rotate(degree,plus,$elie) {        
         $elie.css({ WebkitTransform: 'rotate(' + degree + 'deg)'});  
         $elie.css({ '-moz-transform': 'rotate(' + degree + 'deg)'});
         if (!$elie.get(0).stop_rotating) {
@@ -17,14 +11,46 @@
 			console.log('still rotating...')
 		}
     }
-
 	var stop_rotate = function stop_rotate($elie) {
 		$elie.get(0).stop_rotating = true
         $elie.css({ WebkitTransform: 'rotate(0 deg)'});  
         $elie.css({ '-moz-transform': 'rotate(0 deg)'});
 	}
-
 	
+	/* Global Helpers */
+	var notify = function notify(level,msg) {
+		$('.container').prepend((new NotifyView({model:{level:level,message:msg}})).render().el)
+	}
+	
+	var ModalFileView = window.ModalFileView = Backbone.View.extend({
+		className:'modal',
+		events: {
+			'click .modal .close': "clear",
+		},
+		initialize: function() {
+			var self = this;
+			$('.blockUI').click(self.clear)
+		},
+		render:function() {
+			var $el = $(this.el),
+				tpl = _.template($('#modal-tpl').html()),
+				attrs = this.model.toJSON()
+			$el.html(tpl(attrs))
+			//$el.dialog({modal:true})
+			return this
+		},
+		countdown:function() {
+			var self = this
+			setTimeout(function() {self.clear()},5000)
+		},
+		clear:function() {
+			var self = this;
+			$.unblockUI()
+			$(this.el).fadeOut(self.remove)
+		}
+	});
+
+
 	var NotifyView = window.NotifyView = Backbone.View.extend({
 		
 		className:'alert-message',
@@ -61,10 +87,10 @@
 		},
 		initialize: function() {
 			this.bind('change', function(model,collection) {
-				var prevattrs = model.previousAttributes()
-				//console.log(model.changedAttributes())
+				var prevattrs = model.previousAttributes(),
+					self = this,
+					attrs = model.attributes
 				console.log('Saving File model: '+this.id)
-				var self = this
 				self.trigger('startworking')
 				model.save({},{
 					success:function(model,response) {
@@ -76,7 +102,7 @@
 							self.content_to_upload = null;
 						} else {
 							self.trigger('stopworking')
-							self.trigger('savesuccess')
+							self.trigger('savesuccess',attrs)
 						}
 					},
 					error:function(model,response) {
@@ -137,8 +163,9 @@
 	var FileView = window.FileView = Backbone.View.extend({
 		
 		events: {
-			'dblclick .file-view .download':	"download",
+			'dblclick .file-view .icon-display': "download",
 			'click .file-view .delete': "dodelete",
+			'click .file-view .info': 'domodal',
 		},
 		
 		className:'file-view',
@@ -155,9 +182,9 @@
 				opacity: .75,
 				start: function(e,ui) {
 					$el.animate({width:$el.prev_width, height:$el.prev_height})
-				},
+				}
 			});
-
+		
 
 			
 			$el.hover(
@@ -188,7 +215,15 @@
 			this.model.bind('stopworking', this.stopworking, this)
 			this.model.bind('savesuccess', this.savesuccess, this)
 			this.model.bind('saveerror', this.saveerror, this)
-			this.model.bind('change:pub', function(m) { m.get('pub') ? $el.addClass('public') : $el.removeClass('public')}, this)
+		},
+		
+		domodal:function() {
+			$.blockUI({
+				message: new ModalFileView({model:this.model}).render().el,
+				css: {cursor:'auto'}
+			})
+			//$(".blockMsg").hide() // Hack
+			//$('.container').append()
 		},
 		
 		startworking:function() {
@@ -199,7 +234,9 @@
 			$(this.el).removeClass('working').draggable('option','disabled',false)
 		},
 		
-		savesuccess:function() {
+		savesuccess:function(attrs) {
+			var $el = $(this.el);
+			attrs.pub ? $el.addClass('public') : $el.removeClass('public');
 			$(this.el).effect("shake", { times:2, direction:'up', distance:5}, 100);
 		},
 		

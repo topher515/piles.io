@@ -4,6 +4,13 @@
 	border-top-left-radius:0;
 	border-top-right-radius:0;
 }
+.grayout {
+	background-color:#666;
+	opacity:.5;
+	width:100%;
+	height:100%;
+	position:absolute;
+}
 .file-view {
 	width:80px;
 	max-width:130px;
@@ -16,6 +23,7 @@
 	padding:3px;
 	text-align:center;
 	border-radius:4px;
+	cursor:pointer;
 	}
 	.file-view.ui-draggable-dragging {
 	}
@@ -28,8 +36,15 @@
 	.file-view .delete {
 		cursor: pointer;
 		position: absolute;
-		right: -13px;
+		left: -13px;
+		top: 0px;
+	}
+	.file-view .info {
+		cursor:pointer;
+		position: absolute;
+		right: -14px;
 		top: 0;
+		width:30px;
 	}
 	.file-view .world-icon {
 		display: none;
@@ -67,6 +82,7 @@
 }
 .file-view.working {
 	opacity: .4;
+	cursor:progress;
 	}	
 	.file-view.working .working{
 		display:block;
@@ -149,4 +165,3 @@
 	.pile-view.empty .help {
 		display:block;
 	}
-	

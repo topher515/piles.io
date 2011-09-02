@@ -19,10 +19,11 @@
   <script type="text/template" id="file-tpl">
 	<img class="world-icon" src="/static/img/world.png" -->
 	<!-- img class="delete" src="/static/img/delete.png" -->
-	<div class="icon-display download" alt="Double click to download">
+	<div class="icon-display" alt="Double click to download">
 		<div class="ext"><%= ext %></div>
 		<img class="working" src="/static/img/loading.gif" />
 		<img class="icon" src="<%= icon %>" width="64" style="width:64px" />
+		<img class="info" src="/static/img/info.png">
 	</div>
 	<div class="progressbar"></div>
 	<span class="file-name"><%= name %></span>
@@ -61,8 +62,26 @@
 		<p><%= message %></p>
   </script>
 
+  <script type="text/template" id="modal-tpl">
+	<div class="modal-header">
+		<h3><%= name %></h3>
+			<a href="#" class="close">×</a>
+		</div>
+	<div class="modal-body">
+		<ul>
+			<li>Size: <%= size %></li>
+			<li>Type: <%= type %></li>
+			<li>Public URL: <% if (pub) {%><a href="http://localhost:8080/~<%= pid %>-<%= id %>">http://localhost:8080/~<%= pid %>-<%= id %></a><% } else { %>None<% } %></li>
+		</ul>
+	</div>
+	<div class="modal-footer">
+		<a href="/piles/<%= pid %>/files/<%= id %>/content" class="btn primary">Download</a>
+	</div>
+  </script>
+
 
   <div id="noscript" style="margin: 300px;">Bro, your javascript is off or broke!</div>
+
 %end
   
 %rebase layout content=content, head=head
