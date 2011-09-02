@@ -80,6 +80,9 @@ def put_file(pid,fid):
 	#sto_file(pid,fid,name,data)
 	entity.update({'pid':pid,'name':name,'_id':fid})
 	db.files.save(entity)
+	
+	
+	
 	return m2j(entity)
 
 

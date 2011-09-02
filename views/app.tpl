@@ -18,8 +18,8 @@
 		.file-view .delete {
 			cursor: pointer;
 			position: absolute;
-			right: -12px;
-			top: 0px;
+			right: -13px;
+			top: 0;
 		}
 		.file-view .icon-display {
 			position:relative;
@@ -42,8 +42,48 @@
 		max-width:800px;
 		}
 		.pile-view .file-collection {
-			min-height:500px;
-			min-width: 600px;
+
+		}
+		.pile-view .private {
+			min-height:400px;
+			width: 800px;
+			margin:0;
+			padding:0;
+		}
+		.pile-view .private.drophover {
+			background-color:#CCC;
+		}
+		.pile-view .public {
+			margin: 0;
+			height:150px;
+			width: 592px;
+			background-color:#EED;
+			display:inline-block;
+			padding:0;
+		}
+		.pile-view .public.drophover {
+			background-color:#DDA;
+		}
+		.pile-view .trash {
+			margin:0;
+			height:150px;
+			width:200px;
+			background-color:#EDD;
+			display:inline-block;
+			padding:0;
+		}
+		.pile-view .trash.drophover {
+			background-color:#DAA;
+		}
+		
+		.pile-view .well {
+			position:relative;
+		}
+		.pile-view .pile-title {
+			position:absolute;
+			top:.3em;
+			left:.3em;
+			opacity: .5;
 		}
   </style>
 %end
@@ -61,7 +101,7 @@
   </script>
 	
   <script type="text/template" id="file-tpl">
-	<img class="delete" src="/static/img/delete.png" />
+	<!-- img class="delete" src="/static/img/delete.png" -->
 	<div class="icon-display  download" alt="Double click to download">
 		<div class="ext"><%= ext %></div>
 		<img class="working" src="/static/img/loading.gif" />
@@ -72,9 +112,20 @@
   </script>
 
   <script type="text/template" id="pile-tpl">
-	<h1>Your Pile</h1>
 	<h6><%= emails %></h6>
-	<div class="file-collection well"></div>
+	<div class="file-collection">
+		<div class="private well">
+			<h1 class="pile-title">Private</h1>
+		</div>
+		<div class="bottom-container">
+			<div class="public well">
+				<h1 class="pile-title">Public</h1>
+			</div>
+			<div class="trash well">
+				<h1 class="pile-title">Trash</h1>
+			</div>
+		</div>
+	</div>
   </script>
 
   <div id="noscript" style="margin: 300px;">Bro, your javascript is off or broke!</div>

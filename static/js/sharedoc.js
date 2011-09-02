@@ -1,5 +1,20 @@
 (function($) {
 	
+
+    var rotate = function rotate(degree,plus,$elie) {        
+        $elie.css({ WebkitTransform: 'rotate(' + degree + 'deg)'});  
+        $elie.css({ '-moz-transform': 'rotate(' + degree + 'deg)'});                      
+        timer = setTimeout(function() {
+            rotate(degree+plus,plus,$elie);
+        },5);
+    }
+
+	var stop_rotate = function stop_rotate($elie) {
+        $elie.css({ WebkitTransform: 'rotate(0 deg)'});  
+        $elie.css({ '-moz-transform': 'rotate(0 deg)'});
+	}
+
+	
 	
 	/* Models */
 	var File = window.File = Backbone.Model.extend({
@@ -9,6 +24,7 @@
 			icon:'/static/img/file.png',
 			x:0,
 			y:0,
+			pub:false,
 		},
 		initialize: function() {
 			this.bind('change', function() {
@@ -67,12 +83,13 @@
 		initialize: function() {
 			var model = this.model
 			var $el = $(this.el)
+			this.el.view = this; // Add a reference to this view to this element
 			
 			// Bind the view elem for draggability
 			$el.draggable({ containment: 'parent', opacity: .75 });
-			$el.bind('dragstop',function(e,ui) {
-				model.set({x:ui.position.left, y:ui.position.top})
-			})
+			//$el.bind('dragstop',function(e,ui) {
+			//	model.set({x:ui.position.left, y:ui.position.top})
+			//})
 			
 			//this.model.bind('change', this.render, this) // maybe?
 			this.model.bind('destroy', this.remove, this)
@@ -106,7 +123,12 @@
 		},
 		
 		delete: function() {
+			$this_el = $(this.el)
+			rotate(0,10,$this_el)
 			this.model.delete();
+			$this_el.hide("scale", {}, 1000, function() {
+				//console.log('hidden')
+			});
 		},
 		
 		render: function() {
@@ -172,6 +194,33 @@
 			})
 			
 			this.render();
+			
+			var $trash = $el.find('.trash')
+			$el.find('.trash').droppable({
+				drop:function(e,ui) {
+					ui.draggable[0].view.delete() // Thats kinda hacky...
+					//ui.draggable[0].view.model.set({x:ui.position.left, y:ui.position.top})
+				},
+				tolerance:'fit',
+				hoverClass:'drophover',
+				greedy:true,
+			});
+			$el.find('.private').droppable({
+				drop:function(e,ui) {
+					ui.draggable[0].view.model.set({pub:false, x:ui.position.left, y:ui.position.top})
+				},
+				tolerance:'intersect',
+				hoverClass:'drophover',
+				greedy:true,
+			});
+			$el.find('.public').droppable({
+				drop:function(e,ui) {
+					ui.draggable[0].view.model.set({pub:true, x:ui.position.left, y:ui.position.top})
+				},
+				tolerance:'intersect',
+				hoverClass:'drophover',
+				greedy:true,
+			});
 		},
 		
 		render: function() {
