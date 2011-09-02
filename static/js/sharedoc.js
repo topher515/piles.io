@@ -14,19 +14,31 @@
 			this.bind('change', function() {
 				console.log('Saving File model: '+this.id)
 				var self = this
-				this.save({},{success:function(model,response) {
-					if (self.content_to_upload) {
-						self.content_to_upload.url = model.url()+'/content'
-						self.content_to_upload.submit()
-						console.log('Uploading file data!')
-						self.content_to_upload = null;
+				self.trigger('startworking')
+				this.save({},{
+					success:function(model,response) {
+						if (self.content_to_upload) {
+							self.content_to_upload.url = model.url()+'/content'
+							self.content_to_upload.submit()
+							console.log('Uploading file data!')
+							self.content_to_upload = null;
+						}
+						self.trigger('stopworking')
+					},
+					error:function(model,response) {
+						self.trigger('stopworking')
 					}
-				}});
+				});
 				
 			}, this)
 		},
 		download_url: function() {
 			return this.url() + '/content'
+		},
+		delete: function() {
+			this.trigger('startworking')
+			var stopwork = function() { self.trigger('stopworking')}
+			this.destroy({success:stopwork,error:stopwork})
 		}
 	});
 	
@@ -64,6 +76,28 @@
 			
 			//this.model.bind('change', this.render, this) // maybe?
 			this.model.bind('destroy', this.remove, this)
+			this.model.bind('uploadprogress', this.updateprogress, this)
+			this.model.bind('startworking', this.startworking, this)
+			this.model.bind('stopworking', this.stopworking, this)
+		},
+		
+		startworking:function() {
+			$(this.el).addClass('working')
+		},
+		
+		stopworking:function() {
+			$(this.el).removeClass('working')
+		},
+		
+		updateprogress: function(percent) {
+			console.log('Upload progress: '+ percent)
+			$pbar = $(this.el).find('.progressbar')
+			if (percent >= 100) {
+				$pbar.hide()
+			} else {
+				$pbar.show()
+				$pbar.progressbar({value:percent})
+			}
 		},
 		
 		download: function() {
@@ -72,7 +106,7 @@
 		},
 		
 		delete: function() {
-			this.model.destroy();
+			this.model.delete();
 		},
 		
 		render: function() {
@@ -119,9 +153,14 @@
 							type:file.type,
 							ext:ext
 						});
+						data.associated_file_model = f
 						f.content_to_upload = data
 						self.add(f);
+						f.save()
 					});
+				},
+				progress: function(e, data) {
+					data.associated_file_model.trigger('uploadprogress',parseInt(data.loaded / data.total * 100))
 				},
 				url:"BAD_URL",//this.model.files.url,
 				type:'PUT',

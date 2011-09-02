@@ -6,6 +6,7 @@
 
   <!-- link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap-1.1.1.min.css" -->
   <link rel="stylesheet" href="/static/css/bootstrap-1.1.1.min.css">
+  <link rel="stylesheet" href="/static/css/jquery-ui-1.8.16.custom.css">
 %head()
 
 </head>

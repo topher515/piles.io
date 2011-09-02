@@ -102,7 +102,6 @@ def get_stor_data(request):
 def s3put(fp,name):
 	conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
 	response = conn.put(BUCKET_NAME,name,S3.S3Object(fp)) #,headers={'x-amz-acl':'public-read'})
-
 	status = response.http_response.status
 	if 200 > status < 300:
 		abort(400, response.message)
@@ -112,7 +111,6 @@ def s3put(fp,name):
 def s3del(name):
 	conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
 	response = conn.delete(BUCKET_NAME,name) #,headers={'x-amz-acl':'public-read'})
-
 	status = response.http_response.status
 	if 200 > status < 300:
 		abort(400, response.message)

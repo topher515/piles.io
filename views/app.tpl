@@ -9,6 +9,12 @@
 		position:absolute;
 		display:block;
 		}
+		.file-view .working {
+			display:none;
+		}
+		.file-view .progressbar {
+			height: 5px;
+		}
 		.file-view .delete {
 			cursor: pointer;
 			position: absolute;
@@ -26,6 +32,10 @@
 				left: 7px;
 				font-size: 1.9em;
 			}
+		.file-view.working .working{
+			display:block;
+			position:absolute;
+		}
 	.pile-view {
 		position:relative;
 		margin: 45px auto;
@@ -46,6 +56,7 @@
 		pile.files.reset({{files}})
 		pileview = new PileView({model:window.pile})
 		$('body').append(pileview.el)
+		$('#noscript').remove()
 	})
   </script>
 	
@@ -53,8 +64,10 @@
 	<img class="delete" src="/static/img/delete.png" />
 	<div class="icon-display  download" alt="Double click to download">
 		<div class="ext"><%= ext %></div>
+		<img class="working" src="/static/img/loading.gif" />
 		<img class="icon" src="<%= icon %>" width="64" style="width:64px" />
 	</div>
+	<div class="progressbar"></div>
 	<span><%= name %></span>
   </script>
 
@@ -63,6 +76,8 @@
 	<h6><%= emails %></h6>
 	<div class="file-collection well"></div>
   </script>
+
+  <div id="noscript" style="margin: 300px;">Bro, your javascript is off or broke!</div>
 %end
   
 %rebase layout content=content, head=head

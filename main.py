@@ -1,5 +1,5 @@
 import json
-import datetime, hashlib, random
+import datetime, hashlib, random, string
 import bottle
 import requests
 from bottle import route, run, request, abort, redirect, static_file, template
@@ -65,10 +65,11 @@ def get_pile(pid):
 @route('/piles/:pid/files', method='POST')
 def post_file(pid):
 	now,name,entity = get_stor_data(request)
-	fid = hashlib.md5(str(now)).hexdigest()
+	fid = ''.join([random.choice(string.letters + string.digits) for x in xrange(6)]) # hashlib.md5(str(now)).hexdigest()
 	#sto_file(pid,fid,name,data)
 	entity['pid'] = pid
 	entity['_id'] = fid
+	entity['path'] = '%s-%s-%s' % (pid,fid,name)
 	db.files.save(entity)
 	return m2j(entity)
 
@@ -84,9 +85,8 @@ def put_file(pid,fid):
 
 @route('/piles/:pid/files/:fid', method='DELETE')
 def delete_file(pid,fid):
-	entity = {'pid':pid,'_id':fid}
-	s3name = '%s-%s' % (pid,fid)
-	s3del(s3name)
+	entity = db.files.find_one({'pid':pid,'_id':fid})
+	s3del(entity['path'])
 	db.files.remove(entity)
 
 
@@ -108,8 +108,8 @@ def put_file_content(pid,fid):
 	if not f:
 		abort(404,"Not a valid resource")
 	data = request.files.get('files[]')
-	name,ext = s3name(pid,fid,f)
-	s3put(data.file,name)
+	#name,ext = s3name(pid,fid,f)
+	s3put(data.file,f['path'])
 	
 	#thumb = TempFile() #'w+b')
 	#data.file.seek(0)
@@ -124,8 +124,8 @@ def put_file_content(pid,fid):
 def get_file_content(pid,fid):
 	f = db.files.find_one({'_id':fid,'pid':pid})
 	#return json.dumps(f)
-	name,ext = s3name(pid,fid,f)
-	authed_url = authed_get_url(BUCKET_NAME,name)
+	#name,ext = s3name(pid,fid,f)
+	authed_url = authed_get_url(BUCKET_NAME,f['path'])
 	#print authed_url
 	return redirect(authed_url)
 
@@ -134,7 +134,7 @@ def get_file_content(pid,fid):
 def get_file_thumbail(pid,fid):
 	f = db.files.find_one({'_id':fid,'pid':pid})
 	#return json.dumps(f)
-	name = s3name(pid,fid,f)
+	# name = s3name(pid,fid,f)
 	return redirect('http://%s.s3.amazonaws.com/%s' % (BUCKET_NAME,name))
 
 
