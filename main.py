@@ -186,7 +186,12 @@ def server_static(path):
 def front():
 	s = session(request)
 	user_ent = s.get('authenticated_as')
-	pile = db.piles.find_one({'emails':user_ent['email']})
+	print user_ent
+	if not user_ent:
+		return redirect('/login')
+	pile = db.piles.find_one({'emails':user_ent.get('email')})
+	if not pile:
+		return abort(404,'Your user account does not have a Pile associated with it. Please report this error!')
 	return redirect('/'+pile['name'])
 
 @route('/create', method="GET")
