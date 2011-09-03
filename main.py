@@ -12,8 +12,11 @@ from utils import *
 
 from beaker.middleware import SessionMiddleware
 
-connection = Connection('localhost', 27017)
-db = connection.mydatabase
+from settings import MONGO_HOST, MONGO_PORT, MONGO_DB_NAME # Override with local settings
+from local_settings import *
+
+db = Connection(MONGO_HOST, MONGO_PORT)[MONGO_DB_NAME]
+
 
 VALID_URL_CHARS = set(string.letters + string.digits + '+_-,!')
 def valid_chars(strn):
