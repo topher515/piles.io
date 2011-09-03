@@ -1,5 +1,5 @@
 import json
-import datetime, base64, hmac, time
+import datetime, base64, hmac, time, os
 from urllib import quote as urlquote
 from hashlib import sha1
 from bottle import request, abort
@@ -12,6 +12,8 @@ AWS_ACCESS_KEY_ID = '0Z67F08VD9JMM1WKRDR2'
 AWS_SECRET_ACCESS_KEY = 'g6o8NjU3ClIYJmaGurL+sKctlQrpEUF6irQyrpPX'
 BUCKET_NAME = 'sharedocapp' # An AWS account can only have 100 buckets, so everybody is gonna share this bucket!
 
+
+DIRNAME = os.path.abspath(os.path.dirname(__file__))
 
 # DEBUG
 #AWS_SECRET_ACCESS_KEY = 'OtxrzxIsfpFjA7SwPzILwy8Bw21TLhquhboDYROV'
@@ -66,8 +68,8 @@ class MyStringIO(StringIO):
 		return len(self.getvalue())
 
 			
-public_acp_xml = MyStringIO(open('resources/public-acp.xml').read())
-private_acp_xml = MyStringIO(open('resources/private-acp.xml').read())
+public_acp_xml = MyStringIO(open(os.path.join(DIRNAME,'resources/public-acp.xml')).read())
+private_acp_xml = MyStringIO(open(os.path.join(DIRNAME,'resources/private-acp.xml')).read())
 
 	
 def build_auth_sig(http_verb,path,expiration,secret_key,content_type='',content_md5='',canonical_amz_headers=''):
