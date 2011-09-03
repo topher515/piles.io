@@ -12,8 +12,7 @@ AWS_ACCESS_KEY_ID = '0Z67F08VD9JMM1WKRDR2'
 AWS_SECRET_ACCESS_KEY = 'g6o8NjU3ClIYJmaGurL+sKctlQrpEUF6irQyrpPX'
 BUCKET_NAME = 'sharedocapp' # An AWS account can only have 100 buckets, so everybody is gonna share this bucket!
 
-
-DIRNAME = os.path.abspath(os.path.dirname(__file__))
+from settings import DIRNAME 
 
 # DEBUG
 #AWS_SECRET_ACCESS_KEY = 'OtxrzxIsfpFjA7SwPzILwy8Bw21TLhquhboDYROV'

@@ -1,5 +1,5 @@
 import json
-import datetime, hashlib, random, string
+import datetime, hashlib, random, string, os
 import bottle
 import requests
 from bottle import route, run, request, abort, redirect, static_file, template
@@ -12,8 +12,7 @@ from utils import *
 
 from beaker.middleware import SessionMiddleware
 
-from settings import MONGO_HOST, MONGO_PORT, MONGO_DB_NAME # Override with local settings
-from local_settings import *
+from settings import DIRNAME, MONGO_HOST, MONGO_PORT, MONGO_DB_NAME # Override with local settings
 
 db = Connection(MONGO_HOST, MONGO_PORT)[MONGO_DB_NAME]
 
@@ -309,7 +308,7 @@ def getapp():
 		"session.type": "file",
 		'session.cookie_expires': True,
 		'session.auto': True,
-		'session.data_dir': "cache",
+		'session.data_dir': os.path.join(DIRNAME,"cache"),
 	}
 	app = bottle.default_app()
 	app = SessionMiddleware(app, session_opts)
