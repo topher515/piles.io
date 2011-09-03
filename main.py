@@ -304,7 +304,7 @@ def pile(pilename):
 
 
 
-if __name__ == '__main__':
+def main():
 	session_opts = {
 		"session.type": "file",
 		'session.cookie_expires': True,
@@ -315,3 +315,8 @@ if __name__ == '__main__':
 	app = SessionMiddleware(app, session_opts)
 	bottle.debug(True)
 	run(host='localhost', port=8080, app=app, reloader=True)
+	return app
+	
+if __name__ == '__main__':
+	main()
+	
