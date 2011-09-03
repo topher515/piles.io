@@ -71,7 +71,7 @@
 		<ul>
 			<li>Size: <%= size %></li>
 			<li>Type: <%= type %></li>
-			<li>Public URL: <% if (pub) {%><a href="http://localhost:8080/~<%= pid %>-<%= id %>">http://localhost:8080/~<%= pid %>-<%= id %></a><% } else { %>None<% } %></li>
+			<li>Public URL: <% if (pub) {%><a href="http://piles.io/~<%= pid %>-<%= id %>">http://localhost:8080/~<%= pid %>-<%= id %></a><% } else { %>None<% } %></li>
 		</ul>
 	</div>
 	<div class="modal-footer">
