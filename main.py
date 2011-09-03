@@ -185,7 +185,7 @@ def server_static(path):
 @route('/')
 def front():
 	s = session(request)
-	user_ent =s['authenticated_as']
+	user_ent = s.get('authenticated_as')
 	pile = db.piles.find_one({'emails':user_ent['email']})
 	return redirect('/'+pile['name'])
 
