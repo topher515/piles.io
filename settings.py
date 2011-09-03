@@ -4,6 +4,7 @@ MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
 MONGO_DB_NAME = 'dev'
 DIRNAME = os.path.abspath(os.path.dirname(__file__))
+TEMPLATE_PATHS = [os.path.join(DIRNAME,'views')]
 
 try:
 	from local_settings import *

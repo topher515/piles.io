@@ -12,7 +12,8 @@ from utils import *
 
 from beaker.middleware import SessionMiddleware
 
-from settings import DIRNAME, MONGO_HOST, MONGO_PORT, MONGO_DB_NAME # Override with local settings
+from settings import DIRNAME, MONGO_HOST, MONGO_PORT, MONGO_DB_NAME, TEMPLATE_PATHS # Override with local settings
+bottle.TEMPLATE_PATH = TEMPLATE_PATHS
 
 db = Connection(MONGO_HOST, MONGO_PORT)[MONGO_DB_NAME]
 
