@@ -17,6 +17,16 @@
         $elie.css({ '-moz-transform': 'rotate(0 deg)'});
 	}
 	
+	window.human_size = function human_size(num) {
+		var sizes = ['bytes','KB','MB','GB','TB']
+		for (x in sizes) {
+			if (num < 1024.0) {
+				return '' + num.toFixed(2) + ' '+ sizes[x]
+			}
+			num = num/ 1024.0 
+		}
+	}
+	
 	/* Global Helpers */
 	var notify = function notify(level,msg) {
 		$('.container').prepend((new NotifyView({model:{level:level,message:msg}})).render().el)

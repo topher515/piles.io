@@ -120,6 +120,15 @@ def delete_file(pid,fid):
 	entity = db.files.find_one({'pid':pid,'_id':fid})
 	s3del(entity['path'])
 	db.files.remove(entity)
+	
+	# File was successfully deleted, so remove it from usage stats
+	authed = session(request)['authenticated']
+	pile = None
+	for pile in authed['piles']:
+		if pile['_id'] == pid: break
+	pile['usage']['up'] -= entity['size']
+	pile['usage']['sto'] += entity['size']
+	db.piles.save(pile)
 
 
 @route('/piles/:pid/files', method='GET')
@@ -143,8 +152,21 @@ def put_file_content(pid,fid):
 	if not f:
 		abort(404,"Not a valid resource")
 	data = request.files.get('files[]')
-	#name,ext = s3name(pid,fid,f)
 	s3put(data.file,f['path'])
+	
+	# The file has successfully uploaded so let's add this to their usage
+	authed = session(request)['authenticated']
+	pile = None
+	for pile in authed['piles']:
+		if pile['_id'] == pid: break
+	
+	if not pile.get('usage'):
+		pile['usage'] = {'sto':0,'down':0,'up':0}
+	print pile
+	pile['usage']['up'] += f['size']
+	pile['usage']['sto'] += f['size']
+	print pile
+	db.piles.save(pile)
 	
 	#thumb = TempFile() #'w+b')
 	#data.file.seek(0)
@@ -208,6 +230,7 @@ def front():
 	if not pile:
 		return abort(404,'Your user account does not have a Pile associated with it. Please report this error!')
 	return redirect('/'+pile['name'])
+
 
 @route('/create', method="GET")
 def create():
@@ -311,7 +334,7 @@ def pile(pilename):
 		abort(404,'That Pile does not exist.')
 	
 	s = session(request)
-	if s.get('authenticated'):
+	if s.get('authenticated') and not request.GET.get('public'):
 		if pile['_id'] in [ p['_id'] for p in s['authenticated']['piles'] ]:
 			files = db.files.find({'pid':pile['_id']})
 			return template('app',{'pile':m2j(pile),'files':ms2js(files)})

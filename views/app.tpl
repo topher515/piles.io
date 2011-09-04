@@ -35,6 +35,10 @@
 	<h1 class="pile-name">Piles | <span><%= name %></span> <button class="btn small rename">Rename</button></h1>
 	<h6><%= emails %></h6>
 		
+	<div class="usage">
+		Up: <%= human_size(usage.up) %> | Down: <%= human_size(usage.down) %> | Storage: <%= human_size(usage.sto) %>
+	</div>
+		
 	<div class="file-collection">
 		<div class="private well">
 			<h1 class="pile-title">Private</h1>

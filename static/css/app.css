@@ -156,8 +156,13 @@
 		}
 		.pile-view .pile-name:hover .rename {
 			visibility:visible;
-		}
-	
+		}	
+	.pile-view .usage {
+		position:absolute;
+		right:0;
+		top:0;
+		padding: 5px;
+	}
 .pile-view.empty {
 	
 	}
