@@ -71,7 +71,6 @@
 			font-size: 1.9em;
 		}
 .file-view:hover {
-	background-color: #EEE;
 	box-shadow: 0 0 5px rgba(0, 0, 255, 1);
 	/*height:auto;
 	width:auto;*/
@@ -88,10 +87,10 @@
 		display:block;
 		position:absolute;
 	}
-.file-view.public {
-	
+.file-view.pub {
+	background-color:transparent;
 	}	
-	.file-view.public .world-icon {
+	.file-view.pub .world-icon {
 		display:block;
 	}
 .pile-view {

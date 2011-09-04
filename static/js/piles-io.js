@@ -185,7 +185,7 @@
 				}
 			});
 		
-
+			if (this.model.get('pub')) $el.addClass('pub')
 			
 			$el.hover(
 				function() {
@@ -236,7 +236,7 @@
 		
 		savesuccess:function(attrs) {
 			var $el = $(this.el);
-			attrs.pub ? $el.addClass('public') : $el.removeClass('public');
+			attrs.pub ? $el.addClass('pub') : $el.removeClass('pub');
 			$(this.el).effect("shake", { times:2, direction:'up', distance:5}, 100);
 		},
 		

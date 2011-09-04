@@ -3,19 +3,21 @@ import datetime, hashlib, random, string, os
 import bottle
 import requests
 from bottle import route, run, request, abort, redirect, static_file, template
-from pymongo import Connection
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger('piles_io.main')
 from PIL import Image
 from tempfile import TemporaryFile as TempFile
+
 from utils import *
+from s3piles import *
+from auth import hash_password, session, do_login, do_logout, auth_json
 
 from beaker.middleware import SessionMiddleware
 
-from settings import DIRNAME, MONGO_HOST, MONGO_PORT, MONGO_DB_NAME, TEMPLATE_PATHS # Override with local settings
+from settings import DIRNAME, TEMPLATE_PATHS # Override with local settings
 bottle.TEMPLATE_PATH = TEMPLATE_PATHS
 
-db = Connection(MONGO_HOST, MONGO_PORT)[MONGO_DB_NAME]
+from db import db
 
 
 VALID_URL_CHARS = set(string.letters + string.digits + '+_-,!')
@@ -32,6 +34,7 @@ def valid_chars(strn):
 ## Piles
 
 @route('/piles/:pid', method='PUT')
+@auth_json
 def put_pile(pid):
 	data = request.body.read()
 	entity = json.loads(data)
@@ -54,6 +57,7 @@ def put_pile(pid):
 
 
 @route('/piles', method='GET')
+@auth_json
 def get_piles():
 	if request.GET.get('name'):
 		piles = db.piles.find({'name':request.GET['name']})
@@ -64,6 +68,7 @@ def get_piles():
 	
 
 @route('/piles/:pid', method='GET')
+@auth_json
 def get_pile(pid):
 	entity = db.piles.find_one({'_id':pid})
 	if not entity:
@@ -73,6 +78,7 @@ def get_pile(pid):
 ## Files
 
 @route('/piles/:pid/files', method='POST')
+@auth_json
 def post_file(pid):
 	now,name,entity = get_stor_data(request)
 	fid = ''.join([random.choice(string.letters + string.digits) for x in xrange(6)]) # hashlib.md5(str(now)).hexdigest()
@@ -87,6 +93,7 @@ def post_file(pid):
 
 
 @route('/piles/:pid/files/:fid', method='PUT')
+@auth_json
 def put_file(pid,fid):
 	now,name,new_entity = get_stor_data(request)
 	new_entity.update({'pid':pid,'name':name,'_id':fid})
@@ -108,6 +115,7 @@ def put_file(pid,fid):
 
 
 @route('/piles/:pid/files/:fid', method='DELETE')
+@auth_json
 def delete_file(pid,fid):
 	entity = db.files.find_one({'pid':pid,'_id':fid})
 	s3del(entity['path'])
@@ -115,18 +123,21 @@ def delete_file(pid,fid):
 
 
 @route('/piles/:pid/files', method='GET')
+@auth_json
 def get_files(pid):
 	files = db.files.find({'pid':pid})
 	return ms2js(files)
 
 
 @route('/piles/:pid/files/:fid', method='GET')
+@auth_json
 def get_file(pid,fid):
 	f = db.files.find_one({'_id':fid,'pid':pid})
 	return m2j(f)
 
 
 @route('/piles/:pid/files/:fid/content', method='PUT')
+@auth_json
 def put_file_content(pid,fid):
 	f = db.files.find_one({'pid':pid,'_id':fid})
 	if not f:
@@ -143,12 +154,14 @@ def put_file_content(pid,fid):
 	#s3put(thumb,name+'=s128')
 	# print 'Not uploading... in test env'
 
+# Public!
 @route('/~:pid-:fid')
 def short_file_content(pid,fid):
 	f = db.files.find_one({'_id':fid,'pid':pid})
-	return redirect('http://%s.s3.amazonaws.com/%s' % (BUCKET_NAME,f['path']))
+	return redirect(public_get_url(f['path']))
 
 @route('/piles/:pid/files/:fid/content', method='GET')
+@auth_json
 def get_file_content(pid,fid):
 	f = db.files.find_one({'_id':fid,'pid':pid})
 	#return json.dumps(f)
@@ -159,6 +172,7 @@ def get_file_content(pid,fid):
 
 
 @route('/piles/:pid/files/:fid/thumbnail', method='GET')
+@auth_json
 def get_file_thumbail(pid,fid):
 	f = db.files.find_one({'_id':fid,'pid':pid})
 	#return json.dumps(f)
@@ -186,7 +200,7 @@ def server_static(path):
 @route('/')
 def front():
 	s = session(request)
-	user_ent = s.get('authenticated_as')
+	user_ent = s.get('authenticated')
 	print user_ent
 	if not user_ent:
 		return redirect('/login')
@@ -252,8 +266,7 @@ def create_do():
 	db.piles.save(pile)
 	db.users.save(user)
 	
-	s = session(request)
-	s['authenticated_as'] = user
+	do_login(request,user) # Let the login look up the piles because they might have more than one!
 	
 	return redirect('/%s' % pile['name'])
 
@@ -273,40 +286,38 @@ def login_do():
 	if not user_ent:
 		return template('login',email=request.forms['email'],errors=['Bad email or password'])
 		
-	s = session(request)
-	s['authenticated_as'] = user_ent
-	s.save()
-	pile = db.piles.find_one({'emails':email})
-	print pile
-	if pile:
-		return redirect('/'+pile['name'])
+	piles = list(db.piles.find({'emails':email}))
+	
+	do_login(request,user_ent,piles)
+	
+	print piles
+	if piles:
+		return redirect('/'+piles[0]['name'])
 	else:
-		return redirect('/create')
+		return redirect('/broke')
 
 @route('/logout')
 def logout():
-	s = session(request)
-	s['authenticated_as'] = None
-	s.save()
+	do_logout(request)
 	print "Logged out..."
 	redirect('/login')
 	
 
 @route('/:pilename')
 def pile(pilename):
-	#r = requests.get('%s/piles?name=%s' % (API_URI,pilename))
-		
-	#if r.status_code != 200:
-	#	return abort(r.status_code)
-	#pile = json.loads(r.content)[0]
-	#files = json.loads(requests.get('/piles/%(_id)s/files' % pile))
 	
 	pile = db.piles.find_one({'name':pilename})
 	if not pile:
 		abort(404,'That Pile does not exist.')
-	files = db.files.find({'pid':pile['_id']})
-	return template('app',{'pile':m2j(pile),'files':ms2js(files)})
-
+	
+	s = session(request)
+	if s.get('authenticated'):
+		if pile['_id'] in [ p['_id'] for p in s['authenticated']['piles'] ]:
+			files = db.files.find({'pid':pile['_id']})
+			return template('app',{'pile':m2j(pile),'files':ms2js(files)})
+	
+	files = db.files.find({'pid':pile['_id'],'pub':True})
+	return template('app_public',pile=pile,files=list(files))
 
 
 def getapp():

@@ -1,4 +1,6 @@
 %import json
+%from s3piles import public_get_url
+
 
 %def head():
   <link rel="stylesheet" href="/static/css/app.css">
