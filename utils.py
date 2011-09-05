@@ -1,5 +1,5 @@
 import json
-import datetime, base64, hmac, time, os
+import datetime, base64, hmac, time, os, string
 from urllib import quote as urlquote
 from hashlib import sha1
 from bottle import request, abort
@@ -7,11 +7,33 @@ import S3
 from StringIO import StringIO
 import logging
 logger = logging.getLogger()
+from smtplib import SMTP
 
+from settings import EMAIL_BOX_NAME, EMAIL_BOX_PWD, EMAIL_FROM_ADDR, EMAIL_SMTP_HOST
 
 ### Utils ###
-## Formatting
 
+
+VALID_URL_CHARS = set(string.letters + string.digits + '+_-,!')
+def valid_chars(strn):
+	if not strn:
+		return (False,'')
+	for char in strn:
+		if char not in VALID_URL_CHARS:
+			return (False,char)
+	return (True,'')
+
+## Email
+def send_email(to_addrs,msg):
+	#from_addr = 'my_email_address@mydomain.tld'
+	#to_addrs = ['team@mydomain.tld']
+	#msg = open('email_msg.txt','r').read()
+	s = SMTP()
+	s.connect(EMAIL_SMTP_HOST)
+	s.login(EMAIL_BOX_NAME,EMAIL_BOX_PWD)
+	s.sendmail(EMAIL_FROM_ADDR, to_addrs, msg)
+
+## Formatting
 def human_size(num):
     for x in ['bytes','KB','MB','GB','TB']:
         if num < 1024.0:

@@ -4,12 +4,11 @@ import bottle
 import requests
 from bottle import route, run, request, abort, redirect, static_file, template
 import logging
-logger = logging.getLogger('piles_io.main')
-from PIL import Image
-from tempfile import TemporaryFile as TempFile
+logger = logging.getLogger('piles_io.api')
 
 from utils import *
 from s3piles import *
+from api import *
 from auth import hash_password, session, do_login, do_logout, auth_json
 
 from beaker.middleware import SessionMiddleware
@@ -20,187 +19,6 @@ bottle.TEMPLATE_PATH = TEMPLATE_PATHS
 from db import db
 
 
-VALID_URL_CHARS = set(string.letters + string.digits + '+_-,!')
-def valid_chars(strn):
-	if not strn:
-		return (False,'')
-	for char in strn:
-		if char not in VALID_URL_CHARS:
-			return (False,char)
-	return (True,'')
-
-### API ###
-
-## Piles
-
-@route('/piles/:pid', method='PUT')
-@auth_json
-def put_pile(pid):
-	data = request.body.read()
-	entity = json.loads(data)
-		
-	entity['_id'] = pid
-	if not entity.get('emails'):
-		abort(400, 'No emails associated with pile')
-	if not entity.get('name'):
-		abort(400, 'No name associated with pile')
-		
-	valid,badness = valid_chars(entity['name'])
-	if not valid:
-		abort(400, 'Not a valid name')
-		
-	try:
-		db.piles.save(entity)
-	except ValidationError as ve:
-		abort(400, str(ve))
-	return m2j(entity)
-
-
-@route('/piles', method='GET')
-@auth_json
-def get_piles():
-	if request.GET.get('name'):
-		piles = db.piles.find({'name':request.GET['name']})
-	else:
-		piles = db.piles.find()
-		
-	return ms2js(piles)
-	
-
-@route('/piles/:pid', method='GET')
-@auth_json
-def get_pile(pid):
-	entity = db.piles.find_one({'_id':pid})
-	if not entity:
-		abort(404, 'No document with id %s' % id)
-	return m2j(entity)
-
-## Files
-
-@route('/piles/:pid/files', method='POST')
-@auth_json
-def post_file(pid):
-	now,name,entity = get_stor_data(request)
-	fid = ''.join([random.choice(string.letters + string.digits) for x in xrange(6)]) # hashlib.md5(str(now)).hexdigest()
-	#sto_file(pid,fid,name,data)
-	
-	valid,invalid_char = valid_chars(name)
-	entity['pid'] = pid
-	entity['_id'] = fid
-	entity['path'] = '%s-%s-%s' % (pid,fid,name)
-	db.files.save(entity)
-	return m2j(entity)
-
-
-@route('/piles/:pid/files/:fid', method='PUT')
-@auth_json
-def put_file(pid,fid):
-	now,name,new_entity = get_stor_data(request)
-	new_entity.update({'pid':pid,'name':name,'_id':fid})
-	old_entity = db.files.find_one({'pid':pid,'_id':fid})
-	
-	if new_entity['pub'] and not old_entity.get('pub'):
-		# This entity changed to public
-		s3setpub(new_entity['path'])
-		#pass
-	elif not new_entity['pub'] and old_entity.get('pub'):
-		# This entity changed to private
-		s3setpriv(new_entity['path'])
-		#pass
-	
-	# Save if the amazon change was successful
-	db.files.save(new_entity)
-	
-	return m2j(new_entity)
-
-
-@route('/piles/:pid/files/:fid', method='DELETE')
-@auth_json
-def delete_file(pid,fid):
-	entity = db.files.find_one({'pid':pid,'_id':fid})
-	s3del(entity['path'])
-	db.files.remove(entity)
-	
-	# File was successfully deleted, so remove it from usage stats
-	authed = session(request)['authenticated']
-	pile = None
-	for pile in authed['piles']:
-		if pile['_id'] == pid: break
-	pile['usage']['up'] -= entity['size']
-	pile['usage']['sto'] -= entity['size']
-	db.piles.save(pile)
-
-
-@route('/piles/:pid/files', method='GET')
-@auth_json
-def get_files(pid):
-	files = db.files.find({'pid':pid})
-	return ms2js(files)
-
-
-@route('/piles/:pid/files/:fid', method='GET')
-@auth_json
-def get_file(pid,fid):
-	f = db.files.find_one({'_id':fid,'pid':pid})
-	return m2j(f)
-
-
-@route('/piles/:pid/files/:fid/content', method='PUT')
-@auth_json
-def put_file_content(pid,fid):
-	f = db.files.find_one({'pid':pid,'_id':fid})
-	if not f:
-		abort(404,"Not a valid resource")
-	data = request.files.get('files[]')
-	s3put(data.file,f['path'])
-	
-	# The file has successfully uploaded so let's add this to their usage
-	authed = session(request)['authenticated']
-	pile = None
-	for pile in authed['piles']:
-		if pile['_id'] == pid: break
-	
-	if not pile.get('usage'):
-		pile['usage'] = {'sto':0,'down':0,'up':0}
-	print pile
-	pile['usage']['up'] += f['size']
-	pile['usage']['sto'] += f['size']
-	print pile
-	db.piles.save(pile)
-	
-	#thumb = TempFile() #'w+b')
-	#data.file.seek(0)
-	#im = Image.open(data.file)
-	#im.thumbnail((128,128), Image.ANTIALIAS)
-	#im.save(thumb,format=im.format)
-	#s3put(thumb,name+'=s128')
-	# print 'Not uploading... in test env'
-
-# Public!
-@route('/~:pid-:fid')
-def short_file_content(pid,fid):
-	f = db.files.find_one({'_id':fid,'pid':pid})
-	return redirect(public_get_url(f['path']))
-
-@route('/piles/:pid/files/:fid/content', method='GET')
-@auth_json
-def get_file_content(pid,fid):
-	f = db.files.find_one({'_id':fid,'pid':pid})
-	#return json.dumps(f)
-	#name,ext = s3name(pid,fid,f)
-	authed_url = authed_get_url(BUCKET_NAME,f['path'])
-	#print authed_url
-	return redirect(authed_url)
-
-
-@route('/piles/:pid/files/:fid/thumbnail', method='GET')
-@auth_json
-def get_file_thumbail(pid,fid):
-	f = db.files.find_one({'_id':fid,'pid':pid})
-	#return json.dumps(f)
-	# name = s3name(pid,fid,f)
-	return redirect('http://%s.s3.amazonaws.com/%s' % (BUCKET_NAME,name))
-
 
 
 
@@ -208,7 +26,7 @@ def get_file_thumbail(pid,fid):
 
 @route('/favicon.ico')
 def favicon():
-	abort(404)
+	return static_file('img/pile_32.png', root='static')
 
 ### Static Files ###
 
@@ -222,13 +40,12 @@ def server_static(path):
 @route('/')
 def front():
 	s = session(request)
-	user_ent = s.get('authenticated')
-	print user_ent
-	if not user_ent:
+	authed = s.get('authenticated')
+	if not authed:
 		return redirect('/login')
-	pile = db.piles.find_one({'emails':user_ent.get('email')})
+	pile = authed['piles'][0]
 	if not pile:
-		return abort(404,'Your user account does not have a Pile associated with it. Please report this error!')
+		return abort(404,'Your user account (%s) does not have a Pile associated with it. Please report this error!' % user_ent['email'])
 	return redirect('/'+pile['name'])
 
 
@@ -325,6 +142,45 @@ def logout():
 	print "Logged out..."
 	redirect('/login')
 	
+	
+@route('/verify',method="GET")
+def verify():
+	code = request.GET.get('code')
+	email = request.GET.get('email')
+	if not code or not email:
+		return template('verify',code='Verification Code',email='Email',errors=['Enter a valid code and email address'])
+	
+	verify = db.verifies.find_one({'code':code,'email':email})
+	if verify:
+		s = session(request)
+		if not s.get('messages'):
+			s['messages'] = []
+		s['messages'].append('Email verified.')
+		return redirect('/')
+	else:
+		return template('verify',code=code,email=email,errors=['Enter a valid code and email address'])
+
+
+@route('/password',method="GET")
+def password():
+	share = db.shares.find_one({'code':code})
+	if not share:
+		abort(400,"That's not a valid code.")
+	return template('password', code=request.GET.get('code'))
+	
+	
+@route('/password', method='POST')
+def password_do():
+	code = request.forms.get('code')
+	share = db.shares.find_one({'code':code})
+	if not share:
+		abort(400,"That is not a valid password reset code.")
+	user = db.users.find_one({'email':share['email']})
+	user['password'] = hash_password(request.forms.get('new_password'))
+	db.users.save(user)
+	do_login(request,user)
+	return redirect('/')
+		
 
 @route('/:pilename')
 def pile(pilename):

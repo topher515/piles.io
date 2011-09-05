@@ -12,10 +12,10 @@
 	position:absolute;
 }
 .file-view {
-	width:80px;
-	max-width:130px;
-	min-height:90px;
-	max-height:120px;
+	width:70px;
+	max-width:110px;
+	min-height:70px;
+	max-height:110px;
 	position:absolute;
 	display:block;
 	line-height: 1em;
@@ -42,9 +42,9 @@
 	.file-view .info {
 		cursor:pointer;
 		position: absolute;
-		right: -14px;
+		right: -10px;
 		top: 0;
-		width:30px;
+		width:24px;
 	}
 	.file-view .world-icon {
 		display: none;

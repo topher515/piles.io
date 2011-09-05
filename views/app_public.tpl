@@ -12,11 +12,11 @@ $(function() {
 
 %def content():
 <div class="content">
-	<h1 style="margin: 25px inherit 0px inherit">Public Piles Alpha | {{pile['name']}}</h1>
+	<h1 style="margin: 25px inherit 0px inherit"><img src="/static/img/pile_64.png" /> {{pile['name']}}</h1>
 	<h6>These are the files that this Pile's users have shared with the public.</h6>
 	%if len(files) == 0:
 	<div>
-		<p>The user's of this pile haven't shared any files.</p>
+		<p>The users of this pile haven't shared any files.</p>
 	</div>
 	%else:
 	<table id="pub-files" class="zebra-striped">

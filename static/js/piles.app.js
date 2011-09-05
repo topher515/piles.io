@@ -1,5 +1,44 @@
 (function($) {
 	
+	var get_icon = window.get_icon = function(ext) {
+		var img_icons = {
+			aac:'aac_icon.png',
+			ai:'ai_icon.png',
+			avi:'avi_icon.png',
+			css:'css_icon.png',
+			doc:'doc_icon.png',
+			docx:'docx_icon.png',
+			gif:'gif_icon.png',
+			gzip:'gzip_icon.png',
+			gz:'gzip_icon.png',
+			html:'html_icon.png',
+			jpeg:'jpeg_icon.png',
+			jpg:'jpg_icon.png',
+			js:'js_icon.png',
+			ma:'ma_icon.png',
+			mov:'mov_icon.png',
+			mp:'mp_icon.png',
+			mpeg2:'mpeg_icon.png',
+			mp2:'mpeg_icon.png',
+			mpg:'mpg_icon.png',
+			mv:'mv_icon.png',
+			pdf:'pdf_icon.png',
+			php:'php_icon.png',
+			php3:'php_icon.png',
+			png:'png_icon.png',
+			psd:'psd_icon.png',
+			raw:'raw_icon.png',
+			rtf:'rtf_icon.png',
+			tar:'tar_icon.png',
+			tiff:'tiff_icon.png',
+			wav:'wav_icon.png',
+			wmv:'wmv_icon.png',
+			zip:'zip_icon.png',
+		}
+		if (img_icons[ext]) return '/static/img/icons/' + img_icons[ext]
+		return '/static/img/file.png'
+	}
+	
 	/* Utilities */
 	var rotate = function rotate(degree,plus,$elie) {        
         $elie.css({ WebkitTransform: 'rotate(' + degree + 'deg)'});  

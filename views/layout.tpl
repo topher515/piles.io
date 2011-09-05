@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <title>Piles Alpha</title>
 
+  <link rel="shortcut icon" href="/static/img/pile_32.png">
+
   <!-- link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap-1.1.1.min.css" -->
   <link rel="stylesheet" href="/static/css/bootstrap-1.1.1.min.css">
   <link rel="stylesheet" href="/static/css/jquery-ui-1.8.16.custom.css">
@@ -25,7 +27,30 @@
   <script src="/static/js/underscore.js" type="text/javascript"></script>
   <!-- script src="/static/js/backbone-min.js" type="text/javascript"></script-->
   <script src="/static/js/backbone.js"></script>
-  <script src="/static/js/piles-io.js" type="text/javascript"></script>
+
+  <!-- Begin Feedback -->
+<script type="text/javascript">
+reformal_wdg_domain    = "piles_io";
+reformal_wdg_mode    = 0;
+reformal_wdg_title   = "Piles.io";
+reformal_wdg_ltitle  = "Bugs? Comments? Leave Feedback";
+reformal_wdg_lfont   = "";
+reformal_wdg_lsize   = "";
+reformal_wdg_color   = "#FFA000";
+reformal_wdg_bcolor  = "#516683";
+reformal_wdg_tcolor  = "#FFFFFF";
+reformal_wdg_align   = "left";
+reformal_wdg_waction = 0;
+reformal_wdg_vcolor  = "#9FCE54";
+reformal_wdg_cmline  = "#E0E0E0";
+reformal_wdg_glcolor  = "#105895";
+reformal_wdg_tbcolor  = "#FFFFFF";
+
+reformal_wdg_bimage = "52fd91ce34775cff4dd90673aff5b434.png";
+
+</script>
+
+<script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=piles_io"></script><noscript><a href="http://piles_io.idea.informer.com">Piles.io feedback </a> <a href="http://idea.informer.com"><img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" /></a></noscript>
 
 %head()
 

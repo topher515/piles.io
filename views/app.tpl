@@ -4,6 +4,8 @@
 
 %def head():
   <link rel="stylesheet" href="/static/css/app.css">
+  <script src="/static/js/piles.app.js" type="text/javascript"></script>
+  <script src="/static/js/piles.usage.js" type="text/javascript"></script>
 %end
 
 
@@ -22,18 +24,26 @@
 	<img class="world-icon" src="/static/img/world.png" -->
 	<!-- img class="delete" src="/static/img/delete.png" -->
 	<div class="icon-display" alt="Double click to download">
-		<div class="ext"><%= ext %></div>
+		<!-- div class="ext"><%= ext %></div -->
 		<img class="working" src="/static/img/loading.gif" />
-		<img class="icon" src="<%= icon %>" width="64" style="width:64px" />
+		<img class="icon" src="<%= get_icon(ext) %>" height="48" />
 		<img class="info" src="/static/img/info.png">
 	</div>
 	<div class="progressbar"></div>
 	<span class="file-name"><%= name %></span>
   </script>
 
+  <script type="text/template" id="email-tpl">
+	<li><h6><%= email %></h6></li>
+  </script>
+
   <script type="text/template" id="pile-tpl">
-	<h1 class="pile-name">Piles | <span><%= name %></span> <button class="btn small rename">Rename</button></h1>
-	<h6><%= emails %></h6>
+	<h1 class="pile-name"><img src="/static/img/pile_32.png"  /> <span><%= name %></span> <button class="btn small rename">Rename</button></h1>
+	
+	<div class="emails">
+		<h6 class="current"><%= emails %></h6>
+		<input type="text" value="Email" /><button class="btn small">Add</button>
+	</div>
 		
 	<div class="usage">
 		Up: <span class="usage-up"><%= human_size(usage.up) %></span> 

@@ -8,12 +8,7 @@ from StringIO import StringIO
 import logging
 logger = logging.getLogger()
 
-AWS_ACCESS_KEY_ID = '0Z67F08VD9JMM1WKRDR2'
-AWS_SECRET_ACCESS_KEY = 'g6o8NjU3ClIYJmaGurL+sKctlQrpEUF6irQyrpPX'
-BUCKET_NAME = 'sharedocapp' # An AWS account can only have 100 buckets, so everybody is gonna share this bucket!
-
-from settings import DIRNAME
-
+from settings import DIRNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME
 
 ## S3
 
