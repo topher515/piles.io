@@ -36,7 +36,9 @@
 	<h6><%= emails %></h6>
 		
 	<div class="usage">
-		Up: <%= human_size(usage.up) %> | Down: <%= human_size(usage.down) %> | Storage: <%= human_size(usage.sto) %>
+		Up: <span class="usage-up"><%= human_size(usage.up) %></span> 
+		| Down: <span class="usage-down"><<%= human_size(usage.down) %></span> 
+		| Storage: <span class="usage-sto"><%= human_size(usage.sto) %></span>
 	</div>
 		
 	<div class="file-collection">

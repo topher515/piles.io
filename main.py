@@ -127,7 +127,7 @@ def delete_file(pid,fid):
 	for pile in authed['piles']:
 		if pile['_id'] == pid: break
 	pile['usage']['up'] -= entity['size']
-	pile['usage']['sto'] += entity['size']
+	pile['usage']['sto'] -= entity['size']
 	db.piles.save(pile)
 
 
@@ -285,7 +285,7 @@ def create_do():
 		pid = randid()
 	
 	user = {'email':eml,'password':hash_password(pwd)}
-	pile = {'_id':pid,'emails':[eml],'name':name,'welcome':True}
+	pile = {'_id':pid,'emails':[eml],'name':name,'welcome':True,'usage':{'up':0,'down':0,'sto':0}}
 	db.piles.save(pile)
 	db.users.save(user)
 	

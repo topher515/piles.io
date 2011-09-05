@@ -160,13 +160,13 @@
 				model.save({},{success: function() {
 					if (new_name) self.trigger('renamesuccess')
 				}});
-			})
+			});
 		},
 		validate: function(attrs) {
 			if (attrs.name == '') {
 				return "Name can't be blank";
 			}
-		}
+		},
 	});
 
 	/* Views */
@@ -247,7 +247,7 @@
 		savesuccess:function(attrs) {
 			var $el = $(this.el);
 			attrs.pub ? $el.addClass('pub') : $el.removeClass('pub');
-			$(this.el).effect("shake", { times:2, direction:'up', distance:5}, 100);
+			$el.effect("shake", { times:2, direction:'up', distance:5}, 100);
 		},
 		
 		saveerror:function(prevattrs) {
@@ -325,7 +325,7 @@
 			//this.model.files.bind('all', console.log, this);
 			var $el = $(this.el),
 				file_collection_selector = '.file-collection',
-				self = this
+				self = this;
 			
 			/* Handle EMPTY */
 			if (this.model.files.models.length == 0) {
@@ -343,9 +343,13 @@
 					$el.addClass('empty')	
 				}
 			});
+			
+			/* Handle renames */
 			this.model.bind('renamesuccess', this.renamedone, this);
-			
-			
+			/* Check for usage change on remove */
+			self.model.files.bind('remove',function() {self.model.fetch() })
+			/* Handle usage changes */
+			this.model.bind('change:usage',this.updateusage,this)
 			
 			// Setup fileuploader
 			$el.fileupload({
@@ -384,6 +388,8 @@
 				done:function(e, data) {
 					notify('info','File upload successful!')
 					data.associated_file_model.trigger('uploadsuccess')
+					// Grab new usage stats
+					self.model.fetch()
 				}
 			})
 			
@@ -427,6 +433,14 @@
 				hoverClass:'drophover',
 				greedy:true,
 			});
+		},
+		
+		updateusage: function() {
+			var usage = this.model.get('usage'),
+				$el = $(this.el)
+			$el.find('.usage .usage-up').html(human_size(usage.up))
+			$el.find('.usage .usage-down').html(human_size(usage.down))
+			$el.find('.usage .usage-sto').html(human_size(usage.sto))
 		},
 		
 		dorename: function() {
