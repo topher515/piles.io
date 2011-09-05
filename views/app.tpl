@@ -42,7 +42,7 @@
 	
 	<div class="emails">
 		<h6 class="current"><%= emails %></h6>
-		<input type="text" value="Email" /><button class="btn small">Add</button>
+		<!-- input type="text" value="Email" /><button class="btn small">Add</button-->
 	</div>
 		
 	<div class="usage">
