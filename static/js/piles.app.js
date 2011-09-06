@@ -19,6 +19,7 @@
 			mov:'mov_icon.png',
 			mp:'mp_icon.png',
 			mpeg2:'mpeg_icon.png',
+			mp3:'mp3_icon.png',
 			mp2:'mpeg_icon.png',
 			mpg:'mpg_icon.png',
 			mv:'mv_icon.png',
