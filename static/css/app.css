@@ -47,6 +47,7 @@
 		right: -10px;
 		top: 0;
 		width:24px;
+		visibility:hidden;
 	}
 	.file-view .world-icon {
 		display: none;
@@ -76,7 +77,10 @@
 	box-shadow: 0 0 5px rgba(0, 0, 255, 1);
 	/*height:auto;
 	width:auto;*/
-}	
+	}
+	.file-view:hover .info {
+		visibility:visible;
+	}	
 .file-view.working:hover {
 	background-color: transparent;
 	box-shadow: none;
