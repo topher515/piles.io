@@ -39,17 +39,17 @@ class validator(object):
 ## Feedback
 
 @route('/feedbacks', method="POST")
-@validator(types={'message':str,'type':str},)
+@validator(types={'message':unicode,'type':unicode,'email':unicode},)
 def feedback_post():
-	print request.validated
-	id_ = db.feedbacks.save(request.validated)
-	request.validated['_id'] = str(id_)
-	print request.validated
-	return m2j(request.validated)
+	#print request.validated
+	v = request.validated
+	v['datetime'] = datetime.datetime.now()
+	id_ = db.feedbacks.save(v)
+	v['_id'] = str(id_)
+	return m2j(v)
 	
 	
 @route('/feedbacks/:id', method="GET")
-@validator(types={'message':str,'type':str})
 def feedback_get(id):
 	feedback = db.feedbacks.find_one({'_id':id})
 	return m2j(feedback) if feedback else abort(404)

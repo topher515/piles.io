@@ -21,7 +21,7 @@ $(function() {
 			var tpl = _.template($('#feedback-tpl').html()),
 				raw = tpl({}),
 				$new_elem = $(raw);
-			$new_elem.find('.message').hide()
+			$new_elem.find('.feedback-more').hide()
 			$(this.el).html($new_elem)				
 			return this;
 		},
@@ -33,27 +33,29 @@ $(function() {
 		dodislike:function() {
 			var self = this,
 				$el = $(self.el);
+			$more = $el.find('.feedback-more').hide()
 			$el.find('.dislike input[type=radio]').attr('checked','checked')
-			$msg = $el.find('.message').hide()
+			$msg = $el.find('.message')
 			$msg.find('.help-block').html('Let us know what you don\'t like. Hopefully we can make it better. Something like: <em>"Piles.io? More like Pile-o-sh*t! Am-I-rite?!?"</em>... but maybe more constructive.')
-			$msg.show('fadeIn')
+			$more.show('fadeIn')
 		},
 		dobug:function() {
 			var self = this,
 				$el = $(self.el);
+			$more = $el.find('.feedback-more').hide()
 			$el.find('.bug input[type=radio]').attr('checked','checked')
-			$msg = $(self.el).find('.message').hide()
+			$msg = $(self.el).find('.message')
 			$msg.find('.help-block').html("Please try to leave a thorough description of what you were doing when you encountered the bug!")
-			$msg.show('fadeIn')
+			$more.show('fadeIn')
 		},
 		dolike:function() {
 			var self = this,
 				$el = $(self.el);
-				
+			$more = $el.find('.feedback-more').hide()
 			$el.find('.like input[type=radio]').attr('checked','checked')
-			$msg = $(self.el).find('.message').hide()
+			$msg = $(self.el).find('.message')
 			$msg.find('.help-block').html("We love positive feed back! Let us know what you like!")
-			$msg.show('fadeIn')
+			$more.show('fadeIn')
 		},
 		send:function() {
 			this.model.set({
@@ -139,10 +141,15 @@ $(function() {
 					</li>
 				</ul>
 		</div><!-- /clearfix -->
-		<div class="clearfix message">
-			<label for="textarea">Message</label>
+		<div class="clearfix feedback-more">
+			<label for="feedback-email">Email</label>
 			<div class="input">
-				<textarea class="large" name="message"></textarea> 
+				<input type="text" id="feedback-email" class="large" name="email"></input>
+				<span class="help-block">Optional</span>
+			</div>
+			<label for="feedback-message">Message</label>
+			<div class="message input">
+				<textarea class="large" id="feedback-message" name="message"></textarea> 
 				<span class="help-block">What's up? If you're reporting a bug, then please give a thorough description!</span>
 			</div>
 		</div><!-- /clearfix -->

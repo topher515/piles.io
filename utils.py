@@ -13,6 +13,11 @@ from settings import EMAIL_BOX_NAME, EMAIL_BOX_PWD, EMAIL_FROM_ADDR, EMAIL_SMTP_
 
 ### Utils ###
 
+def extra_json_serializers(python_object):                                             
+	if isinstance(python_object, datetime.datetime):                                
+		return str(python_object)
+	raise TypeError(repr(python_object) + ' is not JSON serializable')
+
 
 VALID_URL_CHARS = set(string.letters + string.digits + '+_-,!')
 def valid_chars(strn):
@@ -43,7 +48,7 @@ def human_size(num):
 def m2j(x):
 	x['id'] = x['_id']
 	del x['_id']
-	return json.dumps(x)
+	return json.dumps(x,default=extra_json_serializers)
 
 def ms2js(l):
 	ls = []
@@ -51,7 +56,7 @@ def ms2js(l):
 		x['id'] = x['_id']
 		del x['_id']
 		ls.append(x)
-	return json.dumps(ls)
+	return json.dumps(ls,default=extra_json_serializers)
 
 def j2m(j):
 	try:
