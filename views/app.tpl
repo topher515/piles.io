@@ -86,6 +86,8 @@
 			<a href="#" class="close">×</a>
 		</div>
 	<div class="modal-body">
+	
+		<img class="icon" src="<%= get_icon(ext) %>" />
 		<ul>
 			<li>Size: <%= size %></li>
 			<li>Type: <%= type %></li>
@@ -93,12 +95,15 @@
 		</ul>
 	</div>
 	<div class="modal-footer">
+		<a href="#" class="btn close">Close</a>
 		<a href="/piles/<%= pid %>/files/<%= id %>/content" class="btn primary">Download</a>
 	</div>
   </script>
 
 
   <div id="noscript" style="margin: 300px;">Bro, your javascript is off or broke!</div>
+
+  %include feedback
 
 %end
   

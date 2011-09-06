@@ -43,7 +43,7 @@
 	var rotate = function rotate(degree,plus,$elie) {        
         $elie.css({ WebkitTransform: 'rotate(' + degree + 'deg)'});  
         $elie.css({ '-moz-transform': 'rotate(' + degree + 'deg)'});
-        if (!$elie.get(0).stop_rotating) {
+        if (!$elie || !$elie.get(0).stop_rotating) {
    	     	timer = setTimeout(function() {
 	            rotate(degree+plus,plus,$elie);
 	        },5);
@@ -72,9 +72,9 @@
 	}
 	
 	var ModalFileView = window.ModalFileView = Backbone.View.extend({
-		className:'modal',
+		className:'modal modal-file-view',
 		events: {
-			'click .modal .close': "clear",
+			'click .modal-file-view .close': "clear",
 		},
 		initialize: function() {
 			var self = this;

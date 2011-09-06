@@ -1,3 +1,4 @@
+
 .alert-message {
 	position:fixed;
 	width: 80%;
@@ -13,7 +14,8 @@
 }
 .file-view {
 	width:70px;
-	max-width:110px;
+	
+	max-width:70px;
 	min-height:70px;
 	max-height:110px;
 	position:absolute;
@@ -92,6 +94,15 @@
 	}	
 	.file-view.pub .world-icon {
 		display:block;
+	}
+.modal-file-view {
+	
+	}
+	.modal-file-view li {
+		list-style:none;	
+	}
+	.modal-file-view .icon {
+		float:left;
 	}
 .pile-view {
 	position:relative;

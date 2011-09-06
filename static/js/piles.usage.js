@@ -4,7 +4,7 @@ $(function() {
 		defaults: {
 			
 		},
-	})
+	});
 	
 	var UsageView = Backbone.View.extend({
 		initialize: function() {

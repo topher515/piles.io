@@ -15,7 +15,45 @@ from beaker.middleware import SessionMiddleware
 from db import db
 
 
+class validator(object):
+	def __init__(self,types,empty_ok=False):
+		self.validators = types
+		self.empty_ok = empty_ok
+	def __call__(self,old_route):
+		def new_route(*args,**kwargs):
+			j = json.loads(request.body.read())
+			if not j and not self.empty_ok:
+				abort(400,"No JSON body found.")
+			#print "got json: %s" % j
+			request.validated = {}
+			for valid_key,validator in self.validators.items():
+				if j.get(valid_key):
+					request.validated[valid_key] = validator(j[valid_key])
+			#print "got validated: %s" % request.validated
+			return old_route(*args,**kwargs)
+		return new_route
+
+
 ### API ###
+
+## Feedback
+
+@route('/feedbacks', method="POST")
+@validator(types={'message':str,'type':str},)
+def feedback_post():
+	print request.validated
+	id_ = db.feedbacks.save(request.validated)
+	request.validated['_id'] = str(id_)
+	print request.validated
+	return m2j(request.validated)
+	
+	
+@route('/feedbacks/:id', method="GET")
+@validator(types={'message':str,'type':str})
+def feedback_get(id):
+	feedback = db.feedbacks.find_one({'_id':id})
+	return m2j(feedback) if feedback else abort(404)
+
 
 ## Piles
 
