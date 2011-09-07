@@ -61,9 +61,8 @@ def feedback_get(id):
 @auth_json
 def put_pile(pid):
 	data = request.body.read()
-	entity = json.loads(data)
-		
-	entity['_id'] = pid
+	entity = j2m(data)
+
 	if not entity.get('emails'):
 		abort(400, 'No emails associated with pile')
 	if not entity.get('name'):
@@ -71,12 +70,23 @@ def put_pile(pid):
 		
 	valid,badness = valid_chars(entity['name'])
 	if not valid:
-		abort(400, 'Not a valid name')
+		abort(400, "Not a valid name. You can't use the characters %s" % badness)
 		
 	try:
 		db.piles.save(entity)
 	except ValidationError as ve:
 		abort(400, str(ve))
+		
+	#print "The new pile entity being saved: %s" % entity
+	s = session(request)
+	#for i,p in enumerate(s['authenticated']['piles']):
+	#	if p['_id'] == pid:
+	#		s['authenticated']['piles'][i] = entity
+	#		s.save()
+	#print 'New auth piles: %s' % s['authenticated']['piles']
+	
+	do_login(request,s['authenticated']['user']) # <-- This is a pretty lame hack, but wtf? I cant figure this shit out
+		
 	return m2j(entity)
 
 

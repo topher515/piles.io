@@ -191,9 +191,11 @@ def pile(pilename):
 	
 	s = session(request)
 	if s.get('authenticated') and not request.GET.get('public'):
-		if pile['_id'] in [ p['_id'] for p in s['authenticated']['piles'] ]:
+		print s['authenticated']['piles']
+		authed_piles = [ p['_id'] for p in s['authenticated']['piles'] ]
+		if pile['_id'] in authed_piles:
 			files = db.files.find({'pid':pile['_id']})
-			return template('app',{'pile':m2j(pile),'files':ms2js(files)})
+			return template('app',{'pile':pile,'files':files})
 	
 	files = db.files.find({'pid':pile['_id'],'pub':True})
 	return template('app_public',pile=pile,files=list(files))

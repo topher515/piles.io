@@ -39,6 +39,7 @@ def auth_json(old_route):
 		s = session(request)
 		if s.get('authenticated'):
 			authed = s['authenticated']
+			print "Your authed piles: %s" % authed['piles']
 			authed_pids = [pile['_id'] for pile in authed['piles']]
 			if pid not in authed_pids:
 				abort(403,'You are not authorized to perform this action. You can only make changes to %s' % authed_pids)
