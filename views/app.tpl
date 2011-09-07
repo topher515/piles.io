@@ -1,5 +1,6 @@
 %import json
 %from s3piles import public_get_url
+%from utils import m2j, ms2js
 
 
 %def head():
@@ -12,8 +13,8 @@
 %def content():
   <script>
 	$(function() {
-		window.pile = new Pile({{pile}})
-		pile.files.reset({{files}})
+		window.pile = new Pile({{m2j(pile)}})
+		pile.files.reset({{ms2js(files)}})
 		pileview = new PileView({model:window.pile})
 		$('.container').append(pileview.el)
 		$('#noscript').remove()
@@ -107,4 +108,4 @@
 
 %end
   
-%rebase layout content=content, head=head
+%rebase layout content=content, head=head, meta={'title':pile["name"]}

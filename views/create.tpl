@@ -25,4 +25,4 @@
 </div>
 %end
 
-%rebase layout content=content, head=head
+%rebase layout content=content, head=head, meta={'title':'Create a Pile'}
