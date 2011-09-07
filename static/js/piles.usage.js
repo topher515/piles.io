@@ -18,7 +18,6 @@ $(function() {
 				}
 			}
 			step_pbar($pbar,0,to)
-		},
-		_do_step
+		}
 	});
 });

@@ -105,8 +105,9 @@ class S3LogProcessor(object):
 		l = self.db.log_processor.find_one({'_id':'last-successful-log'})
 		return l['key'] if l else None
 	def _set_last_successful_log(self,key):
-		logger.debug("Saving position in logs as... %s" % key)
-		self.db.log_processor.save({'_id':'last-successful-log','key':key})
+		if key:
+			logger.debug("Saving position in logs as... %s" % key)
+			self.db.log_processor.save({'_id':'last-successful-log','key':key})
 	last_successful_log = property(_get_last_successful_log, _set_last_successful_log)
 
 
@@ -128,8 +129,11 @@ class S3LogProcessor(object):
 		marker_key = self.last_successful_log
 		logger.debug("Starting log process at marker: %s " % marker_key)
 		plogline = None # We'll want to track this to save for later
+		count = 0
 		try:
 			for logline in self.log_grabber.logiter(marker_key):
+				
+				count+=1
 				
 				if not logline:
 					continue # Got a blank for some reason
@@ -142,13 +146,8 @@ class S3LogProcessor(object):
 					except ValueError:
 						#logger.debug("FAILED TO GET FROM %s" % plogline['key'])
 						continue # Don't bother it's not a customer's get
-					logger.debug("Save get log line %s" % plogline						)
-					pile = db.piles.find_one({'_id':plogline['pid']})
-					if not pile:
-						logger.debug("WARN: This Pile no longer exists... not updating its usage")
-						continue
-					
-					db.piles.update(pile,{'$inc':{'usage_get':plogline['bytes']}})
+					logger.debug("Save get log line %s" % plogline)
+					db.piles.update({'_id':plogline['pid']},{'$inc':{'usage_get':plogline['bytes']}})
 					db.usage_gets.save(plogline)
 					
 				
@@ -173,6 +172,7 @@ class S3LogProcessor(object):
 				#	db.logs.save(plogline)
 		finally:
 			self.last_successful_log = self.log_grabber.cur_marker_key
+			print "Processed %s log entries..." % count
 
 def test():
 	return S3LogProcessor(LOG_BUCKET, LOG_BUCKET_PREFIX, s3conn, db).process_new_logs()

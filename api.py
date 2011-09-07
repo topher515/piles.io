@@ -146,12 +146,13 @@ def delete_file(pid,fid):
 	db.files.remove(entity)
 	
 	# File was successfully deleted, so remove it from usage stats
-	authed = session(request)['authenticated']
-	pile = None
-	for pile in authed['piles']:
-		if pile['_id'] == pid: break
+	#authed = session(request)['authenticated']
+	#pile = None
+	#for pile in authed['piles']:
+	#	if pile['_id'] == pid: break
 	# Decrement storage usage 
-	db.piles.update(pile,{'$inc':{'usage_sto':-entity['size']}})
+	print "Decrementing usage by %s" % entity['size']
+	db.piles.update({'_id':pid},{'$inc':{'usage_sto':-int(entity['size'])}})
 
 
 @route('/piles/:pid/files', method='GET')
@@ -178,14 +179,15 @@ def put_file_content(pid,fid):
 	s3put(data.file,f['path'])
 	
 	# The file has successfully uploaded so let's add this to their usage
-	authed = session(request)['authenticated']
-	pile = None
-	for pile in authed['piles']:
-		if pile['_id'] == pid: break
+	#authed = session(request)['authenticated']
+	#pile = None
+	#for pile in authed['piles']:
+	#	if pile['_id'] == pid: break
 	
 	#if not pile.get('usage_sto'):
 	#	pile.update({'usage_sto':0,'usage_up':0,'usage_down':0})
-	db.piles.update(pile,{'$inc':{'usage_sto':f['size'], 'usage_put':f['size']}})
+	print "Incrementing usage by %s" % f['size']
+	db.piles.update({'_id':pid},{'$inc':{'usage_sto':int(f['size']), 'usage_put':int(f['size'])}})
 
 # Public!
 @route('/~:pid-:fid')
@@ -199,7 +201,7 @@ def get_file_content(pid,fid):
 	f = db.files.find_one({'_id':fid,'pid':pid})
 	#return json.dumps(f)
 	#name,ext = s3name(pid,fid,f)
-	authed_url = authed_get_url(BUCKET_NAME,f['path'])
+	authed_url = authed_get_url(f['path'])
 	#print authed_url
 	return redirect(authed_url)
 

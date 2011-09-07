@@ -5,7 +5,7 @@
 %def head():
   <link rel="stylesheet" href="/static/css/app.css">
   <script src="/static/js/piles.app.js" type="text/javascript"></script>
-  <script src="/static/js/piles.usage.js" type="text/javascript"></script>
+  <!-- script src="/static/js/piles.usage.js" type="text/javascript"></script -->
 %end
 
 
@@ -46,9 +46,9 @@
 	</div>
 		
 	<div class="usage">
-		Up: <span class="usage-up"><%= human_size(usage.up) %></span> 
-		| Down: <span class="usage-down"><<%= human_size(usage.down) %></span> 
-		| Storage: <span class="usage-sto"><%= human_size(usage.sto) %></span>
+		Up: <span class="usage-up"><%= human_size(usage_put) %></span> 
+		| Down: <span class="usage-down"><<%= human_size(usage_get) %></span> 
+		| Storage: <span class="usage-sto"><%= human_size(usage_sto) %></span>
 	</div>
 		
 	<div class="file-collection">
@@ -89,7 +89,7 @@
 	
 		<img class="icon" src="<%= get_icon(ext) %>" />
 		<ul>
-			<li>Size: <%= size %></li>
+			<li>Size: <%= human_size(size) %></li>
 			<li>Type: <%= type %></li>
 			<li>Public URL: <% if (pub) {%><a href="http://piles.io/~<%= pid %>-<%= id %>">http://localhost:8080/~<%= pid %>-<%= id %></a><% } else { %>None<% } %></li>
 		</ul>

@@ -237,6 +237,7 @@
 		
 			if (this.model.get('pub')) $el.addClass('pub')
 			
+			/* Hover animations */
 			$el.hover(
 				function() {
 					if ($el.hasClass('working')) return
@@ -245,7 +246,7 @@
 						$el.prev_width = $el.width()
 					}
 					if (!$el.auto_height) {
-						$el.css({height:'auto',width:'auto'})
+						$el.css({height:'auto'}) // ,width:'auto'})  <--- Let's not set the width as an experiment
 						$el.auto_height = $el.height()
 						$el.auto_width = $el.width()
 						$el.css({height:$el.prev_height,width:$el.prev_width})
@@ -389,7 +390,9 @@
 			/* Check for usage change on remove */
 			self.model.files.bind('remove',function() {self.model.fetch() })
 			/* Handle usage changes */
-			this.model.bind('change:usage',this.updateusage,this)
+			this.model.bind('change:usage_put',this.updateusage,this)
+			this.model.bind('change:usage_get',this.updateusage,this)
+			this.model.bind('change:usage_sto',this.updateusage,this)
 			
 			// Setup fileuploader
 			$el.fileupload({
@@ -476,11 +479,10 @@
 		},
 		
 		updateusage: function() {
-			var usage = this.model.get('usage'),
-				$el = $(this.el)
-			$el.find('.usage .usage-up').html(human_size(usage.up))
-			$el.find('.usage .usage-down').html(human_size(usage.down))
-			$el.find('.usage .usage-sto').html(human_size(usage.sto))
+			var $el = $(this.el)
+			$el.find('.usage .usage-up').html(human_size(this.model.get('usage_put')))
+			$el.find('.usage .usage-down').html(human_size(this.model.get('usage_get')))
+			$el.find('.usage .usage-sto').html(human_size(this.model.get('usage_sto')))
 		},
 		
 		dorename: function() {

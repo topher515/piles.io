@@ -8,7 +8,7 @@ from StringIO import StringIO
 import logging
 logger = logging.getLogger()
 
-from settings import DIRNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME
+from settings import DIRNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, APP_BUCKET
 
 ## S3
 
@@ -33,9 +33,10 @@ def build_auth_sig(http_verb,path,expiration,secret_key,content_type='',content_
 	return urlquote(b64sig,safe='')
 	
 def public_get_url(path):
-	return 'http://%s.s3.amazonaws.com/%s' % (BUCKET_NAME,path)
+	return 'http://%s.s3.amazonaws.com/%s' % (APP_BUCKET,path)
 
-def authed_get_url(bucket,path,expires=None):
+def _authed_get_url(path,expires=None):
+	bucket = APP_BUCKET
 	path = path.strip('/')
 	if not expires:
 		expires = datetime.datetime.now() + datetime.timedelta(0,60*10) # In 10 min
@@ -50,6 +51,14 @@ def authed_get_url(bucket,path,expires=None):
 			'Signature=',sig_str,'&',
 			'Expires=',expires_epoch_str]
 	return ''.join(url)
+
+def authed_get_url(path):	
+	path = path.strip('/')
+	#if not expires:
+	#	expires = datetime.datetime.now() + datetime.timedelta(0,60*10) # In 10 min
+	auth_gen = S3.QueryStringAuthGenerator(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY) #PP_BUCKET)
+	#auth_gen.set_expires(expires)
+	return auth_gen.get(APP_BUCKET,path)
 	
 def get_stor_data(request):
 	now = datetime.datetime.now()
@@ -71,7 +80,7 @@ def s3conn():
 
 def s3put(fp,name):
 	conn = s3conn()
-	response = conn.put(BUCKET_NAME,name,S3.S3Object(fp)) #,headers={'x-amz-acl':'public-read'})
+	response = conn.put(APP_BUCKET,name,S3.S3Object(fp)) #,headers={'x-amz-acl':'public-read'})
 	status = response.http_response.status
 	if 200 > status < 300:
 		abort(500, 'AWS failure: ' +response.message)
@@ -80,7 +89,7 @@ def s3put(fp,name):
 
 def s3del(name):
 	conn = s3conn()
-	response = conn.delete(BUCKET_NAME,name) #,headers={'x-amz-acl':'public-read'})
+	response = conn.delete(APP_BUCKET,name) #,headers={'x-amz-acl':'public-read'})
 	status = response.http_response.status
 	if 200 > status < 300:
 		abort(500, 'AWS failure: ' + response.message)
@@ -89,7 +98,7 @@ def s3del(name):
 	
 def s3setpub(name):
 	conn = s3conn()
-	response = conn.put_acl(BUCKET_NAME,name,public_acp_xml)
+	response = conn.put_acl(APP_BUCKET,name,public_acp_xml)
 	#s3put(public_acp_xml,name+'?acl')
 	status = response.http_response.status
 	print response.http_response.status
@@ -100,7 +109,7 @@ def s3setpub(name):
 
 def s3setpriv(name):
 	conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
-	response = conn.put_acl(BUCKET_NAME,name,private_acp_xml)
+	response = conn.put_acl(APP_BUCKET,name,private_acp_xml)
 	#s3put(private_acp_xml,name+'?acl')
 	status = response.http_response.status
 	print response.http_response.status

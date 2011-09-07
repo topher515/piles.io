@@ -1,5 +1,6 @@
 import json
 import datetime, base64, hmac, time, os
+import itertools
 from urllib import quote as urlquote
 from hashlib import sha1
 from bottle import request, abort
@@ -26,18 +27,24 @@ def do_login(request,user_ent,piles=[]):
 		s['authenticated'].update({'piles':list(db.piles.find({'emails':user_ent['email']}))})
 	s.save()
 	
+	
 def do_logout(request):
 	s = session(request)
 	s['authenticated'] = {}
 	s.save()
 	
+	
 def auth_json(old_route):
 	def new_route(pid,*args,**kwargs):
 		s = session(request)
 		if s.get('authenticated'):
+			authed = s['authenticated']
+			authed_pids = [pile['_id'] for pile in authed['piles']]
+			if pid not in authed_pids:
+				abort(403,'You are not authorized to perform this action. You can only make changes to %s' % authed_pids)
 			return old_route(pid,*args,**kwargs)
 		else:
-			abort(403,'You must be logged in to perform this action')
+			abort(403,'You must be logged in to perform this action.')
 	return new_route
 
 
