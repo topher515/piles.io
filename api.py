@@ -150,9 +150,8 @@ def delete_file(pid,fid):
 	pile = None
 	for pile in authed['piles']:
 		if pile['_id'] == pid: break
-	pile['usage']['up'] -= entity['size']
-	pile['usage']['sto'] -= entity['size']
-	db.piles.save(pile)
+	# Decrement storage usage 
+	db.piles.update(pile,{'$inc':{'usage_sto':-entity['size']}})
 
 
 @route('/piles/:pid/files', method='GET')
@@ -184,14 +183,9 @@ def put_file_content(pid,fid):
 	for pile in authed['piles']:
 		if pile['_id'] == pid: break
 	
-	if not pile.get('usage'):
-		pile['usage'] = {'sto':0,'down':0,'up':0}
-	print pile
-	pile['usage']['up'] += f['size']
-	pile['usage']['sto'] += f['size']
-	print pile
-	db.piles.save(pile)
-	
+	#if not pile.get('usage_sto'):
+	#	pile.update({'usage_sto':0,'usage_up':0,'usage_down':0})
+	db.piles.update(pile,{'$inc':{'usage_sto':f['size'], 'usage_put':f['size']}})
 
 # Public!
 @route('/~:pid-:fid')
