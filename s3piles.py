@@ -13,12 +13,16 @@ from settings import DIRNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, APP_BUCK
 ## S3
 
 class MyStringIO(StringIO):
+	def __init__(self,string,*args,**kwargs):
+		self._str_len = len(string)
+		return StringIO.__init__(self,string,*args,**kwargs)
+	
 	def __len__(self):
-		return len(self.getvalue())
+		return self._str_len
 
 			
-public_acp_xml = MyStringIO(open(os.path.join(DIRNAME,'resources/public-acp.xml')).read())
-private_acp_xml = MyStringIO(open(os.path.join(DIRNAME,'resources/private-acp.xml')).read())
+public_acp_xml = open(os.path.join(DIRNAME,'resources/public-acp.xml')).read()
+private_acp_xml = open(os.path.join(DIRNAME,'resources/private-acp.xml')).read()
 
 	
 def build_auth_sig(http_verb,path,expiration,secret_key,content_type='',content_md5='',canonical_amz_headers=''):
@@ -98,7 +102,7 @@ def s3del(name):
 	
 def s3setpub(name):
 	conn = s3conn()
-	response = conn.put_acl(APP_BUCKET,name,public_acp_xml)
+	response = conn.put_acl(APP_BUCKET,name,MyStringIO(public_acp_xml))
 	#s3put(public_acp_xml,name+'?acl')
 	status = response.http_response.status
 	print response.http_response.status
@@ -108,8 +112,9 @@ def s3setpub(name):
 	return response
 
 def s3setpriv(name):
-	conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
-	response = conn.put_acl(APP_BUCKET,name,private_acp_xml)
+	
+	conn = s3conn()
+	response = conn.put_acl(APP_BUCKET,name,MyStringIO(private_acp_xml))
 	#s3put(private_acp_xml,name+'?acl')
 	status = response.http_response.status
 	print response.http_response.status
