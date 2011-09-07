@@ -197,9 +197,14 @@
 			var self = this;
 			this.bind('change',function(model) {
 				var new_name = model.hasChanged('name')
-				model.save({},{success: function() {
-					if (new_name) self.trigger('renamesuccess')
-				}});
+				model.save({},{
+					success: function() {
+						if (new_name) self.trigger('renamesuccess')
+					},
+					error: function(data) {
+						if (new_name) self.trigger('renamefailure','Rename error: Not a valid name!')
+					}
+				});
 			});
 		},
 		validate: function(attrs) {
@@ -387,6 +392,7 @@
 			
 			/* Handle renames */
 			this.model.bind('renamesuccess', this.renamedone, this);
+			this.model.bind('renamefailure', function(err) { notify('error',err)}, this);
 			/* Check for usage change on remove */
 			self.model.files.bind('remove',function() {self.model.fetch() })
 			/* Handle usage changes */

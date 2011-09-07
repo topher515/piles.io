@@ -48,7 +48,7 @@
 		
 	<div class="usage">
 		Up: <span class="usage-up"><%= human_size(usage_put) %></span> 
-		| Down: <span class="usage-down"><<%= human_size(usage_get) %></span> 
+		| Down: <span class="usage-down"><%= human_size(usage_get) %></span> 
 		| Storage: <span class="usage-sto"><%= human_size(usage_sto) %></span>
 	</div>
 		
