@@ -12,9 +12,9 @@
 %def content():
   <script>
 	$(function() {
-		window.pile = new Pile({{m2j(pile)}})
+		window.pile = new PilesIO.Pile({{m2j(pile)}})
 		pile.files.reset({{ms2js(files)}})
-		pileview = new PileView({model:window.pile})
+		pileview = new PilesIO.PileView({model:window.pile})
 		$('body').append(pileview.render().el)
 		$('#noscript').remove()
 	})
@@ -38,7 +38,9 @@
   </script>
 
   <script type="text/template" id="pile-tpl">
-	<h1 class="pile-name"><img src="/static/img/pile_32.png"  /> <span><%= name %></span> <button class="btn small rename">Rename</button></h1>
+	
+	<img class="watermark" src="/static/img/pile_256.png" />
+	<h1 class="pile-name"><span><%= name %></span> <button class="btn small rename">Rename</button></h1>
 	
 	<div class="emails">
 		<h6 class="current"><%= emails %></h6>
@@ -46,9 +48,22 @@
 	</div>
 		
 	<div class="usage">
-		Up: <span class="usage-up"><%= human_size(usage_put) %></span> 
-		| Down: <span class="usage-down"><%= human_size(usage_get) %></span> 
-		| Storage: <span class="usage-sto"><%= human_size(usage_sto) %></span>
+		<a href="/<%= name %>/usage">
+		<span class="usage-item extras">
+			Up: <span class="usage-put"><%= human_size(usage_put) %></span>
+		</span>
+		<span class="usage-item extras">
+		 	Down: <span class="usage-get"><%= human_size(usage_get) %></span>
+		</span>
+		<span class="usage-item">
+			Storage: <span class="usage-sto"><%= human_size(usage_sto) %></span>
+		</span>
+		</a>
+		
+		<div class="twipsy below extras" style="top: 20px; left: 213px; ">
+			<div class="twipsy-arrow"></div>
+			<div class="twipsy-inner">Click for usage statistics</div>
+		</div>
 	</div>
 		
 	<div class="file-collection">

@@ -1,5 +1,7 @@
 (function($) {
 	
+	window.PilesIO ? console.log('PilesIO already in global scope') : window.PilesIO = {}
+	
 	var get_icon = window.get_icon = function(ext) {
 		var img_icons = {
 			aac:'aac_icon.png',
@@ -72,7 +74,7 @@
 		$('.container').prepend((new NotifyView({model:{level:level,message:msg}})).render().el)
 	}
 	
-	var ModalFileView = window.ModalFileView = Backbone.View.extend({
+	var ModalFileView = PilesIO.ModalFileView = Backbone.View.extend({
 		className:'modal modal-file-view',
 		events: {
 			'click .modal-file-view .close': "clear",
@@ -101,7 +103,7 @@
 	});
 
 
-	var NotifyView = window.NotifyView = Backbone.View.extend({
+	var NotifyView = PilesIO.NotifyView = Backbone.View.extend({
 		
 		className:'alert-message',
 		
@@ -126,7 +128,7 @@
 	
 	
 	/* Models */
-	var File = window.File = Backbone.Model.extend({
+	var File = PilesIO.File = Backbone.Model.extend({
 		defaults: {
 			size:0,
 			pid:null,
@@ -182,11 +184,11 @@
 		},
 	});
 	
-	var FileCollection = window.FileCollection = Backbone.Collection.extend({
+	var FileCollection = PilesIO.FileCollection = Backbone.Collection.extend({
 		model: File,
 	})
 	
-	var Pile = window.Pile = Backbone.Model.extend({
+	var Pile = PilesIO.Pile = Backbone.Model.extend({
 		urlRoot: '/piles',
 		defaults:{
 			welcome:false,
@@ -215,7 +217,7 @@
 	});
 
 	/* Views */
-	var FileView = window.FileView = Backbone.View.extend({
+	var FileView = PilesIO.FileView = Backbone.View.extend({
 		
 		events: {
 			'dblclick .file-view .icon-display': "download",
@@ -359,7 +361,7 @@
 	});
 	
 
-	var PileView = window.PileView = Backbone.View.extend({
+	var PileView = PilesIO.PileView = Backbone.View.extend({
 			
 		className:'pile-view',
 		
@@ -403,14 +405,17 @@
 			this.model.bind('renamefailure', function(err) { notify('error',err)}, this);
 			/* Check for usage change on remove */
 			self.model.files.bind('remove',function() {self.model.fetch() })
+			
 			/* Handle usage changes */
 			this.model.bind('change:usage_put',this.updateusage,this)
 			this.model.bind('change:usage_get',this.updateusage,this)
 			this.model.bind('change:usage_sto',this.updateusage,this)
 			
+			
 			// Setup fileuploader
 			$el.fileupload({
 				add:function(e, data) {
+				    var count = 0;
 					_.each(data.files, function (file) {
 						var filename = file.name || file.fileName;
 						var namearray = filename.split('.'),
@@ -419,13 +424,14 @@
 							y = e.pageY - $el.find(file_collection_selector).offset().top
 						
 						f = new File({
-							x:x,
-							y:y,
+							x:x+(15*count),
+							y:y+(-3*count),
 							name:filename,
 							size:file.size,
 							type:file.type,
 							ext:ext
 						});
+						count+=1
 						data.associated_file_model = f
 						f.content_to_upload = data
 						self.add(f);
@@ -518,8 +524,8 @@
 		
 		updateusage: function() {
 			var $el = $(this.el)
-			$el.find('.usage .usage-up').html(human_size(this.model.get('usage_put')))
-			$el.find('.usage .usage-down').html(human_size(this.model.get('usage_get')))
+			$el.find('.usage .usage-put').html(human_size(this.model.get('usage_put')))
+			$el.find('.usage .usage-get').html(human_size(this.model.get('usage_get')))
 			$el.find('.usage .usage-sto').html(human_size(this.model.get('usage_sto')))
 		},
 		

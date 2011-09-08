@@ -181,11 +181,22 @@ def password_do():
 	do_login(request,user)
 	return redirect('/')
 
-@route('/usage', method="GET")
+
+@route('/:pilename/usage', method="GET")
 @auth_w_redirect
-def usage():
-	
-	return template('usage')
+def usage(pilename):
+	pile = db.piles.find_one({'name':pilename})
+	if not pile:
+		abort(404,'That Pile does not exist.')
+		
+	s = session(request)
+	if s.get('authenticated') and not request.GET.get('public'):
+		authed_piles = [ p['_id'] for p in s['authenticated']['piles'] ]
+		if pile['_id'] in authed_piles:
+			files = db.files.find({'pid':pile['_id']})
+			return template('usage',{'pile':pile,'files':files})
+		
+	return redirect('/'+pilename)
 	
 
 @route('/:pilename')
@@ -197,7 +208,6 @@ def pile(pilename):
 	
 	s = session(request)
 	if s.get('authenticated') and not request.GET.get('public'):
-		print s['authenticated']['piles']
 		authed_piles = [ p['_id'] for p in s['authenticated']['piles'] ]
 		if pile['_id'] in authed_piles:
 			files = db.files.find({'pid':pile['_id']})

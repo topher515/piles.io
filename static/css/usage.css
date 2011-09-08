@@ -1,21 +1,19 @@
 .usage-diagram {
-	width: 800px;
 	position:relative;
 	}
-	.usage-diagram > div.comp {
-		position:absolute;
-		left:0;
-		top:400px;
+	.usage-diagram div.comp {
+	    position:relative;
 		}
-		.usage-diagram > div.comp img.graphic {
-			width: 200px;
+		.usage-diagram div.comp img.graphic {
+			width: 128px;
 		}
-		.usage-diagram > div.comp .arrow {
+		.usage-diagram div.comp .arrow {
 			position: absolute;
-			top:-35px;
-			left:40px;
+			top:-25px;
+			left:28px;
+			height:80px;
 		}
-		.usage-diagram > div.comp h2 {
+		.usage-diagram div.comp h2 {
 			position:absolute;
 			bottom:95px;
 			left: 18px;
@@ -25,40 +23,33 @@
 			text-align:center;
 			line-height:1em;
 		}
-		.usage-diagram > div.comp .help-block {
-			width: 150px;
+	.usage-diagram div.pile {
+	    position:relative;
+	    }
+        .usage-diagram div.pile img {
+	        width:128px;
+	    }
+	    #sto-chart {
+	        max-height:128px;
+	        position:relative;
+	        top:-40px;
+	    }
+	.usage-diagram div.world {
+	    
+		}
+		.usage-diagram div.world img.graphic {
+			width:128px;
+		}
+		.usage-diagram div.world .arrow {
 			position:absolute;
-			bottom:85px;
-			right:-150px;
+			top:0px;
+			left:35px;
+			height:80px;
 		}
-	.usage-diagram > div.pile {
-		position:absolute;
-		top:0;
-		left:35%;
-	}
-	.usage-diagram > div.world {
-		position:absolute;
-		right: 0;
-		top:400px;
-		}
-		.usage-diagram > div.world img.graphic {
-			width:180px;
-		}
-		.usage-diagram > div.world .arrow {
-			position:absolute;
-			top:-65px;
-			left:30px;
-		}
-		.usage-diagram > div.world h2 {
+		.usage-diagram div.world h2 {
 			position:absolute;
 			top:65px;
 			left: 25px;
 			color:white;
 			text-shadow:2px 2px #000;
-		}
-		.usage-diagram > div.world .help-block {
-			width: 150px;
-			position:absolute;
-			bottom:25px;
-			right:-150px;
 		}

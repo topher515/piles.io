@@ -12,8 +12,10 @@ $(function() {
 
 %def content():
 <div class="container">
-<div class="content">
-	<h1 style="margin: 25px inherit 0px inherit"><img src="/static/img/pile_64.png" /> {{pile['name']}}</h1>
+<div class="content" style="position:relative;">
+	
+	<img style="position:absolute; top:-100px; right:0; opacity:.1;" src="/static/img/pile_256.png"  />
+	<h1 style="margin: 25px inherit 0px inherit">{{pile['name']}}</h1>
 	<h6>These are the files that this Pile's users have shared with the public.</h6>
 	%if len(files) == 0:
 	<div>
