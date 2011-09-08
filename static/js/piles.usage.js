@@ -7,6 +7,9 @@ $(function() {
 	});
 	
 	var UsageView = Backbone.View.extend({
+		
+		className: '',
+		
 		initialize: function() {
 			
 		},
@@ -18,6 +21,10 @@ $(function() {
 				}
 			}
 			step_pbar($pbar,0,to)
+		},
+		render:function() {
+			$(this.el).html($('#usage-tpl').html(),this.model.toJSON())
+			return this
 		}
 	});
 });
