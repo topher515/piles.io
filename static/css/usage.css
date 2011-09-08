@@ -1,0 +1,64 @@
+.usage-diagram {
+	width: 800px;
+	position:relative;
+	}
+	.usage-diagram > div.comp {
+		position:absolute;
+		left:0;
+		top:400px;
+		}
+		.usage-diagram > div.comp img.graphic {
+			width: 200px;
+		}
+		.usage-diagram > div.comp .arrow {
+			position: absolute;
+			top:-35px;
+			left:40px;
+		}
+		.usage-diagram > div.comp h2 {
+			position:absolute;
+			bottom:95px;
+			left: 18px;
+			width: 170px;
+			color:white;
+			text-shadow:2px 2px #000;
+			text-align:center;
+			line-height:1em;
+		}
+		.usage-diagram > div.comp .help-block {
+			width: 150px;
+			position:absolute;
+			bottom:85px;
+			right:-150px;
+		}
+	.usage-diagram > div.pile {
+		position:absolute;
+		top:0;
+		left:35%;
+	}
+	.usage-diagram > div.world {
+		position:absolute;
+		right: 0;
+		top:400px;
+		}
+		.usage-diagram > div.world img.graphic {
+			width:180px;
+		}
+		.usage-diagram > div.world .arrow {
+			position:absolute;
+			top:-65px;
+			left:30px;
+		}
+		.usage-diagram > div.world h2 {
+			position:absolute;
+			top:65px;
+			left: 25px;
+			color:white;
+			text-shadow:2px 2px #000;
+		}
+		.usage-diagram > div.world .help-block {
+			width: 150px;
+			position:absolute;
+			bottom:25px;
+			right:-150px;
+		}
