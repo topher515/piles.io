@@ -81,6 +81,12 @@ $(function() {
                     width:600,
                     height:180,
                 },
+                legend: {
+                    enabled:true,
+                    labelFormatter: function() {
+                        return 'fdgdsfs'
+                    }
+                },
                 title: {
                     text: 'Storage Used',
                     

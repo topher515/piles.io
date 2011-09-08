@@ -40,7 +40,6 @@
   <script type="text/template" id="pile-tpl">
 	
 	<img class="watermark" src="/static/img/pile_256.png" />
-	<h1 class="pile-name"><span><%= name %></span> <button class="btn small rename">Rename</button></h1>
 	
 	<div class="emails">
 		<h6 class="current"><%= emails %></h6>
@@ -68,7 +67,9 @@
 		
 	<div class="file-collection">
 		<div class="private well">
-			<h1 class="pile-title">Private</h1>
+			<!-- h1 class="pile-title">Private</h1 -->
+			<h1 class="pile-title pile-name"><span><%= name %></span> <button class="btn small rename">Rename</button></h1>
+			
 			<div class="popover left help">
 				<div class="arrow"></div>
 				<div class="inner">
