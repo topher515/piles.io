@@ -450,10 +450,6 @@
 				}
 			})
 			
-			this.render();
-			
-			this.rebinddroppables()
-			
 			if (this.model.get('welcome')) {
 				notify('info','<strong>Hi! Welcome to Piles</strong>—Where our philosophy is, "Put on some pants for god sakes."')
 				this.model.set({'welcome':false})

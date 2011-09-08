@@ -15,7 +15,7 @@
 		window.pile = new Pile({{m2j(pile)}})
 		pile.files.reset({{ms2js(files)}})
 		pileview = new PileView({model:window.pile})
-		$('body').append(pileview.el)
+		$('body').append(pileview.render().el)
 		$('#noscript').remove()
 	})
   </script>

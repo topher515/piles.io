@@ -210,6 +210,7 @@
 		position:absolute;
 		right: 0px;
 		bottom: 0px;
+		z-index:300;
 	}
 	.pile-view .trash h1 {
 		position:absolute;
