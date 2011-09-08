@@ -52,13 +52,12 @@
 </head>
 <body>
 
-	<div class="container">
-		<div class="top-right">
-			<a href="/logout">Logout</a>
-		</div>
+<div class="top-right">
+	<a href="/logout">Logout</a>
+</div>
+
 	%content()
-	</div>
-	<!-- div style="position:fixed; top:0; left:50%; color:white; box-shadow: 2px 2px 2px #888; background-color:#CCD; padding:5px 8px; border-radius: 0 0 5px 5px;">Feedback & Support
-	</div -->
+	
+	
 </body>
 </html>

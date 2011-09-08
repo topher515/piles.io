@@ -50,7 +50,7 @@ def auth_json(old_route):
 
 
 def auth_w_redirect(old_route):
-	def new_route(*args,**kargs):
+	def new_route(*args,**kwargs):
 		if session(request).get('authenticated'):
 			return old_route(*args,**kwargs)
 		else:

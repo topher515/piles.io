@@ -6,7 +6,6 @@
 %def head():
   <link rel="stylesheet" href="/static/css/app.css">
   <script src="/static/js/piles.app.js" type="text/javascript"></script>
-  <!-- script src="/static/js/piles.usage.js" type="text/javascript"></script -->
 %end
 
 
@@ -16,7 +15,7 @@
 		window.pile = new Pile({{m2j(pile)}})
 		pile.files.reset({{ms2js(files)}})
 		pileview = new PileView({model:window.pile})
-		$('.container').append(pileview.el)
+		$('body').append(pileview.el)
 		$('#noscript').remove()
 	})
   </script>
@@ -65,14 +64,20 @@
 				</div>
 			</div>
 		</div>
-		<div class="bottom-container">
-			<div class="public well">
-				<h1 class="pile-title">Public</h1>
+		<div class="public well">
+			<h1 class="pile-title">Public</h1>
+			<div class="warning">
+				<img src="/static/img/warning_48.png" />
+				<p>Anyone can view and download the files you put here! <a href="/{{pile['name']}}?public=Yes">Check out your Pile's<!--'--> public view!</a></p>
 			</div>
-			<div class="trash well">
+			
+			<div class="trash">
 				<h1 class="pile-title">Trash</h1>
+				<img src="/static/img/trash.png" />
 			</div>
+			
 		</div>
+
 	</div>
   </script>
 

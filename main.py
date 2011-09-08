@@ -9,7 +9,7 @@ logger = logging.getLogger('piles_io.api')
 from utils import *
 from s3piles import *
 from api import *
-from auth import hash_password, session, do_login, do_logout, auth_json
+from auth import hash_password, session, do_login, do_logout, auth_json, auth_w_redirect
 
 from beaker.middleware import SessionMiddleware
 
@@ -180,7 +180,13 @@ def password_do():
 	db.users.save(user)
 	do_login(request,user)
 	return redirect('/')
-		
+
+@route('/usage', method="GET")
+@auth_w_redirect
+def usage():
+	
+	return template('usage')
+	
 
 @route('/:pilename')
 def pile(pilename):

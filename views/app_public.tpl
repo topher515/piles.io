@@ -11,6 +11,7 @@ $(function() {
 %end
 
 %def content():
+<div class="container">
 <div class="content">
 	<h1 style="margin: 25px inherit 0px inherit"><img src="/static/img/pile_64.png" /> {{pile['name']}}</h1>
 	<h6>These are the files that this Pile's users have shared with the public.</h6>
@@ -37,6 +38,7 @@ $(function() {
 		%end
 	</table>
 	%end
+</div>
 </div>
 %end
 

@@ -233,8 +233,10 @@
 			
 			// Bind the view elem for draggability
 			$el.draggable({
-				containment: 'parent', 
+				containment: '.file-collection', 
 				opacity: .75,
+				appendTo:'.file-collection',
+				zIndex:999,
 				start: function(e,ui) {
 					$el.animate({width:$el.prev_width, height:$el.prev_height})
 				}
@@ -329,10 +331,10 @@
 		doremove: function() {
 			$this_el = $(this.el)
 			var self = this
-			rotate(0,10,$this_el)
+			//rotate(0,10,$this_el)
 			$this_el.hide("scale", {}, 1000, function() {
 				//console.log('hidden')
-				stop_rotate($this_el)
+				//stop_rotate($this_el)
 				self.remove()
 				notify('info','File deleted!')
 			});
@@ -372,6 +374,12 @@
 			var $el = $(this.el),
 				file_collection_selector = '.file-collection',
 				self = this;
+				$win = $(window)
+				
+			$el.height($win.height()-25)
+			$win.resize(function() {
+				$el.height($win.height()-25)
+			})
 			
 			/* Handle EMPTY */
 			if (this.model.files.models.length == 0) {
@@ -408,7 +416,7 @@
 						var namearray = filename.split('.'),
 						 	ext = namearray.length>1 ? _.last(namearray) : '';
 							x = e.pageX - $el.find(file_collection_selector).offset().left
-							y = e.pageY = $el.find(file_collection_selector).offset().top
+							y = e.pageY - $el.find(file_collection_selector).offset().top
 						
 						f = new File({
 							x:x,
@@ -453,9 +461,13 @@
 		},
 		
 		rebinddroppables:function() {
-			console.log('rebind-droppables')
-			$el = $(this.el)
-			$el.find('.trash').droppable({
+			
+			var $el = $(this.el),
+				$priv = $el.find('.private'),
+				$pub = $el.find('.public'),
+				$trash = $el.find('.trash');
+				
+			$trash.droppable({
 				drop:function(e,ui) {
 					ui.draggable[0].view.dodelete() // Thats kinda hacky...
 					//ui.draggable[0].view.model.set({x:ui.position.left, y:ui.position.top})
@@ -464,19 +476,43 @@
 				hoverClass:'drophover',
 				greedy:true,
 			});
-			$el.find('.private').droppable({
+			
+			/* Private well */
+			$priv.droppable({
 				drop:function(e,ui) {
 					elem = ui.draggable[0]
-					elem.view.model.set({pub:false, x:ui.position.left, y:ui.position.top})
+					$elem = $(elem)
+					elem_offset = $elem.offset()
+					container_offset = $priv.offset()
+					calc_left = elem_offset.left-container_offset.left
+					calc_top = elem_offset.top-container_offset.top
+					$elem.appendTo($priv)
+					$elem.css({
+						left:calc_left,
+						top:calc_top
+					})
+					elem.view.model.set({pub:false, x:calc_left, y:calc_top})
 				},
 				tolerance:'intersect',
 				hoverClass:'drophover',
 				greedy:true,
 			});
-			$el.find('.public').droppable({
+			
+			/* Public Well */
+			$pub.droppable({
 				drop:function(e,ui) {
 					elem = ui.draggable[0]
-					elem.view.model.set({pub:true, x:ui.position.left, y:ui.position.top})
+					$elem = $(elem)
+					elem_offset = $elem.offset()
+					container_offset = $pub.offset()
+					calc_left = elem_offset.left-container_offset.left
+					calc_top = elem_offset.top-container_offset.top
+					$elem.appendTo($pub)
+					$elem.css({
+						left:calc_left,
+						top:calc_top
+					})
+					elem.view.model.set({pub:true, x:calc_left, y:calc_top})
 				},
 				tolerance:'intersect',
 				hoverClass:'drophover',
@@ -506,12 +542,20 @@
 			var $pile_elems = $(_.template($('#pile-tpl').html(), this.model.toJSON()))
 			// Build fileviews
 			$this_el.html($pile_elems)
-			var $collection = $this_el.find('.file-collection')
-			var fileviews = _.map(this.model.files.models,function(m) {
+			//var $collection = $('.file-collection')
+			var $priv = $this_el.find('.private')
+			var $pub = $this_el.find('.public')
+			/*var fileviews = _.map(this.model.files.models,function(m) {
 				return new FileView({model:m})
-			})
-			_.each(fileviews,function(fileview) {
-				$collection.append(fileview.render().el)
+			})*/
+			_.each(this.model.files.models,function(m) {
+				if (m.get('pub')) {
+					$pub.append((new FileView({model:m}).render().el));
+				} else {
+					$priv.append((new FileView({model:m}).render().el));
+				}
+				
+				//$collection.append(fileview.render().el)
 			})
 			
 			this.rebinddroppables()
