@@ -164,10 +164,10 @@
 		initialize: function() {
 		    
 		    // Reset to sane values
-		    if (this.get('x') > 100) { this.set({'x':100}) }
+		    if (this.get('x') > 100) { this.set({'x':95}) }
 		    else if (this.get('x') < 0) { this.set({'x':0}) }
 		    
-		    if (this.get('y') > 100) { this.set({'y':100}) }
+		    if (this.get('y') > 100) { this.set({'y':90}) }
 		    else if (this.get('y') < 0) { this.set({'y':0}) }
 		    
 		    // Bind to file changes 
