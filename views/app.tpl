@@ -30,7 +30,7 @@
 		<img class="info" src="/static/img/info.png">
 	</div>
 	<div class="progressbar"></div>
-	<span class="file-name"><%= name %></span>
+	<span class="file-name" name="<%= name.toLowerCase() %>"><%= PilesIO.insert_spacers(name) %></span>
   </script>
 
   <script type="text/template" id="email-tpl">
@@ -45,24 +45,28 @@
 		<h6 class="current"><%= emails %></h6>
 		<!-- input type="text" value="Email" /><button class="btn small">Add</button-->
 	</div>
+	
+	<div class="searcher">
+	    <form action="#">
+	        <input class="input xlarge" type="text" value="Search Files" />
+	    </form>
+	</div>
 		
 	<div class="usage">
 		<a href="/<%= name %>/usage">
 		<span class="usage-item extras">
-			Up: <span class="usage-put"><%= human_size(usage_put) %></span>
+			<img src="/static/img/arrow_up_xsmall.png" />
+			<span class="usage-put"><%= human_size(usage_put) %></span>
 		</span>
 		<span class="usage-item extras">
-		 	Down: <span class="usage-get"><%= human_size(usage_get) %></span>
+			<img src="/static/img/arrow_down_xsmall.png" />
+		 	<span class="usage-get"><%= human_size(usage_get) %></span>
 		</span>
 		<span class="usage-item">
-			Storage: <span class="usage-sto"><%= human_size(usage_sto) %></span>
+			<span class="usage-sto"><%= human_size(usage_sto) %></span>
 		</span>
 		</a>
 		
-		<div class="twipsy below extras" style="top: 20px; left: 213px; ">
-			<div class="twipsy-arrow"></div>
-			<div class="twipsy-inner">Click for usage statistics</div>
-		</div>
 	</div>
 		
 	<div class="file-collection">
@@ -97,30 +101,35 @@
 	</div>
   </script>
 
-  <script type="text/template" id="notify-tpl">
+	<script type="text/template" id="notify-tpl">
 		<a class="close" href="#">×</a>
 		<p><%= message %></p>
-  </script>
+	</script>
 
-  <script type="text/template" id="modal-tpl">
-	<div class="modal-header">
-		<h3><%= name %></h3>
-			<a href="#" class="close">×</a>
-		</div>
-	<div class="modal-body">
+	<script type="text/template" id="modal-tpl">
+		<div class="modal-header">
+			<h3><%= name %></h3>
+				<a href="#" class="close">×</a>
+			</div>
+		<div class="modal-body">
 	
-		<img class="icon" src="<%= get_icon(ext) %>" />
-		<ul>
-			<li>Size: <%= human_size(size) %></li>
-			<li>Type: <%= type %></li>
-			<li>Public URL: <% if (pub) {%><a href="http://piles.io/~<%= pid %>-<%= id %>">http://localhost:8080/~<%= pid %>-<%= id %></a><% } else { %>None<% } %></li>
-		</ul>
-	</div>
-	<div class="modal-footer">
-		<a href="#" class="btn close">Close</a>
-		<a href="/piles/<%= pid %>/files/<%= id %>/content" class="btn primary">Download</a>
-	</div>
-  </script>
+			<img class="icon" src="<%= get_icon(ext) %>" />
+			<ul>
+				<li>Size: <%= human_size(size) %></li>
+				<li>Type: <%= type %></li>
+				<li>Public URL: <% if (pub) {%><a href="http://piles.io/~<%= pid %>-<%= id %>">http://localhost:8080/~<%= pid %>-<%= id %></a><% } else { %>None<% } %></li>
+			</ul>
+		</div>
+		<div class="modal-footer">
+			<a href="#" class="btn close">Close</a>
+			<a href="/piles/<%= pid %>/files/<%= id %>/content" class="btn primary">Download</a>
+		</div>
+	</script>
+
+    <script type="text/template" id="twipsy-tpl">
+        <div class="twipsy-arrow"></div>
+        <div class="twipsy-inner"><%= tip %></div>
+    </script>
 
 
   <div id="noscript" style="margin: 300px;">Bro, your javascript is off or broke!</div>

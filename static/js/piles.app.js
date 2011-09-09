@@ -59,7 +59,7 @@
         $elie.css({ '-moz-transform': 'rotate(0 deg)'});
 	}
 	
-	window.human_size = function human_size(num) {
+	window.human_size = PilesIO.human_size = function(num) {
 		var sizes = ['bytes','KB','MB','GB','TB']
 		for (x in sizes) {
 			if (num < 1024.0) {
@@ -68,6 +68,30 @@
 			num = num/ 1024.0 
 		}
 	}
+	
+	window.insert_spacers = PilesIO.insert_spacers = function(string,len) {
+	    if (!len) len = 10
+	    cursor = 0
+	    new_string = []
+	    since_last_spacer = 0
+	    while (cursor < string.length) {
+	        c = string[cursor] 
+	        if (c != ' ' && c != '\n' && c != '\t' && c != '-') {
+	            since_last_spacer++;
+	        } else {
+	            since_last_spacer = 0
+	        }   
+	        new_string.push(c)
+	        if (since_last_spacer > len) {
+                new_string.push(' ')
+                since_last_spacer = 0
+            }
+	        cursor++
+	    }
+	    n = new_string.join('')
+	    return n;
+	}
+	
 	
 	/* Global Helpers */
 	var notify = function notify(level,msg) {
@@ -192,6 +216,9 @@
 		urlRoot: '/piles',
 		defaults:{
 			welcome:false,
+			cost_get:0.140,
+			cost_put:0.020,
+			cost_sto:0.160
 		},
 		initialize: function() {
 			this.files = new FileCollection
@@ -360,6 +387,22 @@
 		}
 	});
 	
+	
+	var TwipsyView = PilesIO.TwipsyView = Backbone.View.extend({
+	    initialize:function() {
+	        var $el = $(this.el)
+	        this.$el = $el
+	    },
+	    className:'twipsy below',
+	    render:function() {
+	        this.$el.html(_.template($('#twipsy-tpl').html(),this.model.toJSON()));
+	        return this;
+	    },
+	    tip:function(tip) {
+	        this.$el.find('.twipsy-inner').html(tip)
+	    }
+	});
+
 
 	var PileView = PilesIO.PileView = Backbone.View.extend({
 			
@@ -377,6 +420,7 @@
 				file_collection_selector = '.file-collection',
 				self = this;
 				$win = $(window)
+			this.$el = $el;
 				
 			$el.height($win.height()-25)
 			$win.resize(function() {
@@ -400,6 +444,23 @@
 				}
 			});
 			
+			/* Setup searcher */
+			this.$el.find('.searcher input').live('keyup', function(e) {
+			    self.filefilter($(this).val())
+			}).live('blur', function(e) {
+			    if ($(this).val() == '') {
+			        $(this).val('Search Files')
+			    }
+			}).live('focus', function(e) {
+			    if ($(this).val() == 'Search Files') {
+			        $(this).val('')
+			    }
+			})
+			
+            /* Setup tooltip thingy */
+			this.twipsy = new TwipsyView({model:new Backbone.Model({tip:''})})
+			this.twipsy.$el.hide()
+			
 			/* Handle renames */
 			this.model.bind('renamesuccess', this.renamedone, this);
 			this.model.bind('renamefailure', function(err) { notify('error',err)}, this);
@@ -410,8 +471,7 @@
 			this.model.bind('change:usage_put',this.updateusage,this)
 			this.model.bind('change:usage_get',this.updateusage,this)
 			this.model.bind('change:usage_sto',this.updateusage,this)
-			
-			
+						
 			// Setup fileuploader
 			$el.fileupload({
 				add:function(e, data) {
@@ -464,7 +524,7 @@
 		
 		rebinddroppables:function() {
 			
-			var $el = $(this.el),
+			var $el = this.$el,
 				$priv = $el.find('.private'),
 				$pub = $el.find('.public'),
 				$trash = $el.find('.trash');
@@ -522,8 +582,25 @@
 			});
 		},
 		
+		filefilter: function(string) {
+		    var self = this;
+		    this.$el.queue('filefilter',function() {
+		        string = string.toLowerCase()
+    		    self.$el.find('.file-view')
+    	            .removeClass('deemphasized')
+    	            .draggable( "option", "disabled", false )
+    		    if (string && string != '') {
+        		    self.$el.find('.file-name').not('[name*="'+string+'"]').closest('.file-view')
+        		        .addClass('deemphasized')
+        		        .draggable( "option", "disabled", true )
+    		    }
+    		    self.$el.dequeue('filefilter')
+		    })
+		    this.$el.dequeue('filefilter')
+		},
+		
 		updateusage: function() {
-			var $el = $(this.el)
+			var $el = this.$el
 			$el.find('.usage .usage-put').html(human_size(this.model.get('usage_put')))
 			$el.find('.usage .usage-get').html(human_size(this.model.get('usage_get')))
 			$el.find('.usage .usage-sto').html(human_size(this.model.get('usage_sto')))
@@ -539,7 +616,7 @@
 		},
 		
 		render: function() {
-			$this_el = $(this.el)
+			$this_el = this.$el
 			$this_el.html('')
 			var $pile_elems = $(_.template($('#pile-tpl').html(), this.model.toJSON()))
 			// Build fileviews
@@ -560,9 +637,29 @@
 				//$collection.append(fileview.render().el)
 			})
 			
-			this.rebinddroppables()
+			this.$el.append(this.twipsy.render().el)
+			this.tooltip(this.$el.find('.usage'),'Click to view usage statistics.')
+			this.tooltip(this.$el.find('.searcher'), 'Click to search for files.')
 			
+			this.rebinddroppables()
 			return this;
+		},
+		
+		tooltip: function($hover_elem,tip) {
+		    var self = this
+		    $hover_elem.mousemove(function(ev){
+		        self.twipsy.tip(tip)
+                self.twipsy.$el.position({
+                        my: "top center",
+                        of: ev,
+                        offset: "0 35",
+                        collision: "fit"
+                    });
+            }).mouseout(function() {
+                self.twipsy.$el.hide()
+            }).mouseover(function() {
+                self.twipsy.$el.show()
+            })
 		},
 		
 		add: function(file_model) {

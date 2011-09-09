@@ -2,6 +2,10 @@ $(function() {
     
 	window.PilesIO ? console.log('PilesIO already in global scope') : (function() {throw "Missing PilesIO library"})()
     
+    
+    
+    
+    /* Utilities */
     var text_shortener = PilesIO.text_shortener = function(str,max_len)  {
         if (str.length > max_len) {
             spot = str.length*.75
@@ -12,6 +16,13 @@ $(function() {
         return str
     }
     
+    var cost_calculator = PilesIO.cost_calculator = function(cost_per_gb,total_bytes) {
+        total_gbs = total_bytes / (1024*1024*1024)
+        return total_gbs * cost_per_gb 
+    }
+    
+    
+    /* Models */
     var FileCollection = PilesIO.FileCollection = Backbone.Collection.extend({
 		model: PilesIO.File,
 		comparator:function(file) {
@@ -20,15 +31,20 @@ $(function() {
 	})
     
     var Usage = PilesIO.Usage = Backbone.Model.extend({
-        defaults:function() {
-            sto_total_bytes:0
+        defaults: {
+            sto_total_bytes:0,
+            put_total_bytes:0,
+            get_total_bytes:0,
+            cost_sto:0.160,
+            cost_get:0.140,
+            cost_put:0.020,
         },
         initialize:function() {
     		this.files = new FileCollection	
-    			
         },
     });
     
+    /* Views */
     var UsageView = PilesIO.UsageView = Backbone.View.extend({
         
         className: 'usage-diagram',
