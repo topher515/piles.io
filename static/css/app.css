@@ -1,16 +1,14 @@
 
 .alert-message {
-	position:fixed;
+	position:absolute;
 	width: 80%;
+	margin: 0 auto;
 	border-top-left-radius:0;
 	border-top-right-radius:0;
-}
-.grayout {
-	background-color:#666;
+	z-index:700;
 	opacity:.5;
-	width:100%;
-	height:100%;
-	position:absolute;
+	top:36px;
+	left:10%;
 }
 .file-view {
 	width:70px;
@@ -20,12 +18,12 @@
 	position:absolute;
 	display:block;
 	line-height: 1em;
-	overflow:hidden;
+	/*overflow:hidden;*/
 	padding:3px;
 	text-align:center;
 	border-radius:4px;
 	cursor:pointer;
-	z-index:50;
+	z-index:1000;
 	}
 	.file-view.ui-draggable-dragging {
 	}
@@ -74,7 +72,7 @@
 			font-size: 1.9em;
 		}
 .file-view:hover {
-	box-shadow: 0 0 5px rgba(0, 0, 255, 1);
+	box-shadow: 0 0 5px rgba(0, 0, 255, .5);
 	overflow:visible;
 	/*height:auto;
 	width:auto;*/
@@ -121,13 +119,14 @@
 	}
 .pile-view {
 	position:relative;
-	margin: 10px auto;
-	min-width:800px;
-	width:97%;
+	margin: 0;
+	min-width:600px;
+	width:100%;
+	border:none;
 	}
 	.pile-view .searcher {
 	    position:absolute;
-	    top:0px;
+	    top:4px;
 	    left: 350px;
 	    z-index:200;
 	}
@@ -151,6 +150,10 @@
 		right:0;
 		bottom:0px;
 		z-index:500;
+		margin:0;
+	}
+	.pile-view .file-collection .file-view {
+	    z-index:10000;
 	}
 	.pile-view .private {
 		min-height:150px;
@@ -189,23 +192,22 @@
 		position:absolute;
 		bottom:0;
 		left:0;
-		width:100%;
+		right:0;
 		z-index: 40;
 		
-		background: -moz-linear-gradient(top, rgba(229,216,151,1) 0%, rgba(229,216,151,0) 99%, rgba(229,216,151,0) 100%); /* FF3.6+ */
-		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(229,216,151,1)), color-stop(99%,rgba(229,216,151,0)), color-stop(100%,rgba(229,216,151,0))); /* Chrome,Safari4+ */
-		background: -webkit-linear-gradient(top, rgba(229,216,151,1) 0%,rgba(229,216,151,0) 99%,rgba(229,216,151,0) 100%); /* Chrome10+,Safari5.1+ */
-		background: -o-linear-gradient(top, rgba(229,216,151,1) 0%,rgba(229,216,151,0) 99%,rgba(229,216,151,0) 100%); /* Opera11.10+ */
-		background: -ms-linear-gradient(top, rgba(229,216,151,1) 0%,rgba(229,216,151,0) 99%,rgba(229,216,151,0) 100%); /* IE10+ */
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e5d897', endColorstr='#00e5d897',GradientType=0 ); /* IE6-9 */
-		background: linear-gradient(top, rgba(229,216,151,1) 0%,rgba(229,216,151,0) 99%,rgba(229,216,151,0) 100%); /* W3C */
-		}
+	    background: -moz-linear-gradient(top, rgba(242,232,198,0.65) 0%, rgba(242,232,198,0) 100%); /* FF3.6+ */
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(242,232,198,0.65)), color-stop(100%,rgba(242,232,198,0))); /* Chrome,Safari4+ */
+        background: -webkit-linear-gradient(top, rgba(242,232,198,0.65) 0%,rgba(242,232,198,0) 100%); /* Chrome10+,Safari5.1+ */
+        background: -o-linear-gradient(top, rgba(242,232,198,0.65) 0%,rgba(242,232,198,0) 100%); /* Opera11.10+ */
+        background: -ms-linear-gradient(top, rgba(242,232,198,0.65) 0%,rgba(242,232,198,0) 100%); /* IE10+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6f2e8c6', endColorstr='#00f2e8c6',GradientType=0 ); /* IE6-9 */
+        background: linear-gradient(top, rgba(242,232,198,0.65) 0%,rgba(242,232,198,0) 100%); /* W3C */
+        }
 		.pile-view .public .warning {
 			opacity: .5;
 			position:absolute;
-			left: 10px;
-			bottom:0px;
-			visibility:hidden;
+			left: 110px;
+			top:10px;
 			}
 			.pile-view .public .warning img {
 				float:left;
@@ -214,9 +216,6 @@
 			.pile-view .public .warning p {
 				width: 300px;
 			}
-	.pile-view .public:hover .warning {
-		visibility:visible;
-	}
 	.pile-view .public.drophover {
 		background: -moz-linear-gradient(top, rgba(226,205,108,1) 0%, rgba(229,216,151,0) 99%, rgba(229,216,151,0) 100%); /* FF3.6+ */
 		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(226,205,108,1)), color-stop(99%,rgba(229,216,151,0)), color-stop(100%,rgba(229,216,151,0))); /* Chrome,Safari4+ */
@@ -246,7 +245,7 @@
 		color:black;
 	}
 	.pile-view .trash img {
-		opacity:.8;
+		opacity:.6;
 	}
 	.pile-view .trash.drophover img {
 		opacity:1;
@@ -281,7 +280,7 @@
 		z-index:30;
 		position:absolute;
 		top:0px;
-		left:0;
+		left:10px;
 	}
 		
 	.pile-view .usage-container {

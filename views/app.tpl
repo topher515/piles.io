@@ -87,12 +87,10 @@
 		<div class="public well">
 			<h1 class="pile-title">Public</h1>
 			<div class="warning">
-				<img src="/static/img/warning_48.png" />
 				<p>Anyone can view and download the files you put here! <a href="/{{pile['name']}}?public=Yes">Check out your Pile's<!--'--> public view!</a></p>
 			</div>
 			
 			<div class="trash">
-				<h1 class="pile-title">Trash</h1>
 				<img src="/static/img/trash.png" />
 			</div>
 			

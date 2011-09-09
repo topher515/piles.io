@@ -36,8 +36,9 @@
   <style>
 	.top-right {
 		position: absolute;
-		top:20px;
-		right:20px;
+		top:10px;
+		right:10px;
+		z-index:1000;
 	}
 	.small-center {
 		width:400px;

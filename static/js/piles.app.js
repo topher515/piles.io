@@ -38,7 +38,7 @@
 			wmv:'wmv_icon.png',
 			zip:'zip_icon.png',
 		}
-		if (img_icons[ext]) return '/static/img/icons/' + img_icons[ext]
+		if (img_icons[ext]) return '/static/img/icons/' + img_icons[ext.toLowerCase()]
 		return '/static/img/file.png'
 	}
 	
@@ -94,8 +94,8 @@
 	
 	
 	/* Global Helpers */
-	var notify = function notify(level,msg) {
-		$('.container').prepend((new NotifyView({model:{level:level,message:msg}})).render().el)
+	window.notify = function notify(level,msg) {
+		$('body').prepend((new NotifyView({model:{level:level,message:msg}})).render().el)
 	}
 	
 	var ModalFileView = PilesIO.ModalFileView = Backbone.View.extend({
@@ -162,10 +162,20 @@
 			pub:false,
 		},
 		initialize: function() {
+		    
+		    // Reset to sane values
+		    if (this.get('x') > 100) { this.set({'x':100}) }
+		    else if (this.get('x') < 0) { this.set({'x':0}) }
+		    
+		    if (this.get('y') > 100) { this.set({'y':100}) }
+		    else if (this.get('y') < 0) { this.set({'y':0}) }
+		    
+		    // Bind to file changes 
 			this.bind('change', function(model,collection) {
 				var prevattrs = model.previousAttributes(),
 					self = this,
 					attrs = model.attributes
+					
 				console.log('Saving File model: '+this.id)
 				self.trigger('startworking')
 				model.save({},{
@@ -192,6 +202,7 @@
 						}
 						self._previousAttributes = prevattrs
 						// ENDHACK
+						//self.set(prevattrs,{silent:true})
 					}
 				});
 				
@@ -259,22 +270,25 @@
 				$el = $(this.el),
 				self = this;
 			this.el.view = this; // Add a reference to this view to this element
+			this.$el = $el;
 			
 			// Bind the view elem for draggability
+			
 			$el.draggable({
+			    distance:15,
 				containment: '.file-collection', 
 				opacity: .75,
-				appendTo:'.file-collection',
-				zIndex:999,
-				start: function(e,ui) {
-					$el.animate({width:$el.prev_width, height:$el.prev_height})
-				}
+				helper:'clone',
+				zIndex:600,
+				appendTo: '.file-collection',
+				start: function() { $(this).toggle() },
+				stop: function() { $(this).toggle() }
 			});
 		
 			if (this.model.get('pub')) $el.addClass('pub')
 			
 			/* Hover animations */
-			$el.hover(
+			/*$el.hover(
 				function() {
 					if ($el.hasClass('working')) return
 					if (!$el.prev_height) {
@@ -293,7 +307,7 @@
 					if ($el.hasClass('working')) return
 					$el.animate({height:$el.prev_height,width:$el.prev_width})
 				}
-			)
+			)*/
 			
 			this.model.bind('destroy', this.doremove, this)
 			this.model.bind('uploadprogress', this.updateprogress, this)
@@ -324,7 +338,7 @@
 		savesuccess:function(attrs) {
 			var $el = $(this.el);
 			attrs.pub ? $el.addClass('pub') : $el.removeClass('pub');
-			$el.effect("shake", { times:2, direction:'up', distance:4}, 100);
+			$el.effect("shake", { times:2, direction:'up', distance:10}, 100);
 		},
 		
 		saveerror:function(prevattrs) {
@@ -334,12 +348,12 @@
 			notify('error','There was an error saving your changes!')
 			$(this.el).effect("shake", { times:2, direction:'left', distance:5}, 100)
 				.fadeOut()
-				.animate({left:prevattrs.x,top:prevattrs.y}, 80)
+				.animate({left:prevattrs.x+'%',top:prevattrs.y+'%'}, 80)
 				.fadeIn()
 		},
 		
 		updateprogress: function(percent) {
-			console.log('Upload progress: '+ percent)
+			//console.log('Upload progress: '+ percent)
 			$pbar = $(this.el).find('.progressbar')
 			if (percent <= 100) {
 				$pbar.progressbar({value:percent})
@@ -353,20 +367,15 @@
 		},
 		
 		download: function() {
-			console.log('Download!')
+			//console.log('Download!')
 			window.open(this.model.download_url())
 		},
 		
 		doremove: function() {
-			$this_el = $(this.el)
-			var self = this
-			//rotate(0,10,$this_el)
-			$this_el.hide("scale", {}, 1000, function() {
-				//console.log('hidden')
-				//stop_rotate($this_el)
-				self.remove()
-				notify('info','File deleted!')
-			});
+		    var self = this;
+		    this.$el.hide("shrink",function() {
+			    self.remove()
+			})
 		},
 		
 		dodelete: function() {
@@ -377,8 +386,8 @@
 			c = _.template($('#file-tpl').html())
 			var $el = $(this.el)
 			$el.css('position','absolute')
-			$el.css('left',this.model.get('x'))
-			$el.css('top',this.model.get('y'))
+			$el.css('left',this.model.get('x')+'%')
+			$el.css('top',this.model.get('y')+'%')
 			tpl_vals = this.model.toJSON()
 			tpl_vals.ext || (tpl_vals.ext = '')
 			$el.html(c(tpl_vals))
@@ -414,17 +423,15 @@
 			
 		initialize: function() {
 			this.counter = 0;
-			//this.model.files.bind('add', this.rebinddroppables, this);
-			//this.model.files.bind('all', console.log, this);
 			var $el = $(this.el),
 				file_collection_selector = '.file-collection',
 				self = this;
 				$win = $(window)
 			this.$el = $el;
 				
-			$el.height($win.height()-25)
+			$el.height($win.height())
 			$win.resize(function() {
-				$el.height($win.height()-25)
+				$el.height($win.height())
 			})
 			
 			/* Handle EMPTY */
@@ -435,8 +442,9 @@
 			}
 			
 			/* Setup bindings */
-			this.model.files.bind('add', function() {
+			this.model.files.bind('add', function(model,collection) {
 				$el.removeClass('empty')
+				self._render_file(model)
 			});
 			this.model.files.bind('remove', function() {
 				if (self.model.files.models.length == 0) {
@@ -476,26 +484,42 @@
 			$el.fileupload({
 				add:function(e, data) {
 				    var count = 0;
-					_.each(data.files, function (file) {
-						var filename = file.name || file.fileName;
-						var namearray = filename.split('.'),
-						 	ext = namearray.length>1 ? _.last(namearray) : '';
-							x = e.pageX - $el.find(file_collection_selector).offset().left
-							y = e.pageY - $el.find(file_collection_selector).offset().top
+					_.each(data.files, function (fileobj) {
+					    
+					        // Figure out some name stuff
+						var filename = fileobj.name || fileobj.fileName,
+						    namearray = filename.split('.'),
+						 	ext = namearray.length>1 ? _.last(namearray) : '',
+						 	
+						 	// Figure out which elem this was dropped on
+							$landed_elem = $(e.srcElement),
+							
+							// Calculate percent position of file elem
+						    //x = (e.offsetX-$landed_elem.offset().left)/$landed_elem.width()*100,
+						    //y = (e.offsetY-$landed_elem.offset().top)/$landed_elem.height()*100;
+						    x = (e.offsetX-25)/$landed_elem.width()*100, // Subtract 15px so its more at center of mouse
+						    y = (e.offsetY-25)/$landed_elem.height()*100;
+						    
+						    // Build the file model
+						    filemodel = new File({
+			    				x:x + (count*4),
+    							y:y,
+    							name:filename,
+    							size:fileobj.size,
+    							type:fileobj.type,
+    							ext:ext,
+    							pub:$landed_elem.hasClass('public')
+    						});
+    						
+						// Model and upload data need references to each other
+						data.associated_file_model = filemodel
+						filemodel.content_to_upload = data
 						
-						f = new File({
-							x:x+(15*count),
-							y:y+(-3*count),
-							name:filename,
-							size:file.size,
-							type:file.type,
-							ext:ext
-						});
+						// Add to the files list which triggers rendering
+						self.model.files.add(filemodel)
+						filemodel.save()
+						
 						count+=1
-						data.associated_file_model = f
-						f.content_to_upload = data
-						self.add(f);
-						f.save()
 					});
 				},
 				progress: function(e, data) {
@@ -516,10 +540,23 @@
 				}
 			})
 			
-			if (this.model.get('welcome')) {
+			/*if (this.model.get('welcome')) {
 				notify('info','<strong>Hi! Welcome to Piles</strong>—Where our philosophy is, "Put on some pants for god sakes."')
 				this.model.set({'welcome':false})
-			}
+			}*/
+		},
+		
+		_do_percent_calculation: function($container,$elem,elem_offset) {
+		    var container_offset = $container.offset(),
+			    calc_left = (elem_offset.left-container_offset.left)/$container.width()*100,
+			    calc_top = (elem_offset.top-container_offset.top)/$container.height()*100;
+			return [calc_left,calc_top]
+		},	
+		_do_percent_positioning: function($container,$elem,elem_offset) {
+            var calced = this._do_percent_calculation($container,$elem,elem_offset)
+			$elem.appendTo($container)
+		    $elem.css({left:calced[0]+'%', top:calced[1]+'%'})
+			return calced
 		},
 		
 		rebinddroppables:function() {
@@ -527,33 +564,31 @@
 			var $el = this.$el,
 				$priv = $el.find('.private'),
 				$pub = $el.find('.public'),
-				$trash = $el.find('.trash');
+				$trash = $el.find('.trash'),
+				self = this;
 				
+			/* Trash droppable */
 			$trash.droppable({
 				drop:function(e,ui) {
+					var elem = ui.draggable[0],
+					    $elem = $(elem),
+					    calced = self._do_percent_positioning($trash,$elem,ui.offset);
+					// elem.view.model.set({x:calced[0], y:calced[1]}) <-- No need to save! We're deleting the file!
 					ui.draggable[0].view.dodelete() // Thats kinda hacky...
-					//ui.draggable[0].view.model.set({x:ui.position.left, y:ui.position.top})
 				},
-				tolerance:'fit',
+				tolerance:'intersect',
 				hoverClass:'drophover',
 				greedy:true,
 			});
 			
+
 			/* Private well */
 			$priv.droppable({
 				drop:function(e,ui) {
-					elem = ui.draggable[0]
-					$elem = $(elem)
-					elem_offset = $elem.offset()
-					container_offset = $priv.offset()
-					calc_left = elem_offset.left-container_offset.left
-					calc_top = elem_offset.top-container_offset.top
-					$elem.appendTo($priv)
-					$elem.css({
-						left:calc_left,
-						top:calc_top
-					})
-					elem.view.model.set({pub:false, x:calc_left, y:calc_top})
+					var elem = ui.draggable[0],
+					    $elem = $(elem),
+					    calced = self._do_percent_positioning($priv,$elem,ui.offset);
+					elem.view.model.set({pub:false, x:calced[0], y:calced[1]})
 				},
 				tolerance:'intersect',
 				hoverClass:'drophover',
@@ -563,18 +598,10 @@
 			/* Public Well */
 			$pub.droppable({
 				drop:function(e,ui) {
-					elem = ui.draggable[0]
-					$elem = $(elem)
-					elem_offset = $elem.offset()
-					container_offset = $pub.offset()
-					calc_left = elem_offset.left-container_offset.left
-					calc_top = elem_offset.top-container_offset.top
-					$elem.appendTo($pub)
-					$elem.css({
-						left:calc_left,
-						top:calc_top
-					})
-					elem.view.model.set({pub:true, x:calc_left, y:calc_top})
+					var elem = ui.draggable[0],
+					    $elem = $(elem),
+					    calced = self._do_percent_positioning($pub,$elem,ui.offset);
+					elem.view.model.set({pub:true, x:calced[0], y:calced[1]})
 				},
 				tolerance:'intersect',
 				hoverClass:'drophover',
@@ -584,19 +611,21 @@
 		
 		filefilter: function(string) {
 		    var self = this;
-		    this.$el.queue('filefilter',function() {
-		        string = string.toLowerCase()
-    		    self.$el.find('.file-view')
-    	            .removeClass('deemphasized')
-    	            .draggable( "option", "disabled", false )
-    		    if (string && string != '') {
-        		    self.$el.find('.file-name').not('[name*="'+string+'"]').closest('.file-view')
-        		        .addClass('deemphasized')
-        		        .draggable( "option", "disabled", true )
-    		    }
-    		    self.$el.dequeue('filefilter')
-		    })
-		    this.$el.dequeue('filefilter')
+		        deemphasizer = function() {
+    		        string = string.toLowerCase()
+        		    self.$el.find('.file-view')
+        	            .removeClass('deemphasized')
+        	            .draggable( "option", "disabled", false )
+        		    if (string && string != '') {
+            		    self.$el.find('.file-name').not('[name*="'+string+'"]').closest('.file-view')
+            		        .addClass('deemphasized')
+            		        .draggable( "option", "disabled", true )
+        		    }
+        		    self.$el.dequeue('filefilter')
+    		    };
+		    //this.$el.queue('filefilter',deemphasizer)
+		    //this.$el.dequeue('filefilter')
+		    deemphasizer()
 		},
 		
 		updateusage: function() {
@@ -615,31 +644,33 @@
 			//$(this.el).find('.pile-name span').html(this.model.get('name'))
 		},
 		
+		
+		
+		_render_file: function(m) {
+			if (m.get('pub')) {
+				this.$pub.append((new FileView({model:m}).render().el));
+			} else {
+				this.$priv.append((new FileView({model:m}).render().el));
+			}
+			return this;
+		},
+		
 		render: function() {
-			$this_el = this.$el
-			$this_el.html('')
-			var $pile_elems = $(_.template($('#pile-tpl').html(), this.model.toJSON()))
-			// Build fileviews
-			$this_el.html($pile_elems)
-			//var $collection = $('.file-collection')
-			var $priv = $this_el.find('.private')
-			var $pub = $this_el.find('.public')
-			/*var fileviews = _.map(this.model.files.models,function(m) {
-				return new FileView({model:m})
-			})*/
-			_.each(this.model.files.models,function(m) {
-				if (m.get('pub')) {
-					$pub.append((new FileView({model:m}).render().el));
-				} else {
-					$priv.append((new FileView({model:m}).render().el));
-				}
-				
-				//$collection.append(fileview.render().el)
+		    var self = this;
+			this.$el.html($(_.template($('#pile-tpl').html(), this.model.toJSON())))
+
+    	    this.$priv = this.$el.find('.private')
+			this.$pub = this.$el.find('.public')
+
+           	_.each(this.model.files.models,function(m) {
+                self._render_file(m)
 			})
 			
 			this.$el.append(this.twipsy.render().el)
 			this.tooltip(this.$el.find('.usage-container'),'Click to view usage statistics.')
 			this.tooltip(this.$el.find('.searcher'), 'Click to search for files.')
+			
+			$('form').submit(function() {return false})
 			
 			this.rebinddroppables()
 			return this;
@@ -662,11 +693,11 @@
             })
 		},
 		
-		add: function(file_model) {
+		/*add: function(file_model) {
 			this.counter += 1;
 			this.model.files.add(file_model)
 			this.render();
-		},
+		},*/
 		
 	});
 	
