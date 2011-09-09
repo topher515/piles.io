@@ -324,7 +324,7 @@
 		savesuccess:function(attrs) {
 			var $el = $(this.el);
 			attrs.pub ? $el.addClass('pub') : $el.removeClass('pub');
-			$el.effect("shake", { times:2, direction:'up', distance:5}, 100);
+			$el.effect("shake", { times:2, direction:'up', distance:4}, 100);
 		},
 		
 		saveerror:function(prevattrs) {
