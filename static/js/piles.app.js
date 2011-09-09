@@ -638,7 +638,7 @@
 			})
 			
 			this.$el.append(this.twipsy.render().el)
-			this.tooltip(this.$el.find('.usage'),'Click to view usage statistics.')
+			this.tooltip(this.$el.find('.usage-container'),'Click to view usage statistics.')
 			this.tooltip(this.$el.find('.searcher'), 'Click to search for files.')
 			
 			this.rebinddroppables()

@@ -52,21 +52,21 @@
 	    </form>
 	</div>
 		
-	<div class="usage">
-		<a href="/<%= name %>/usage">
-		<span class="usage-item extras">
-			<img src="/static/img/arrow_up_xsmall.png" />
-			<span class="usage-put"><%= human_size(usage_put) %></span>
-		</span>
-		<span class="usage-item extras">
-			<img src="/static/img/arrow_down_xsmall.png" />
-		 	<span class="usage-get"><%= human_size(usage_get) %></span>
-		</span>
-		<span class="usage-item">
-			<span class="usage-sto"><%= human_size(usage_sto) %></span>
-		</span>
-		</a>
+	<div class="usage-container">
+    	<div class="usage-small">
+    		<span class="usage-sto"><%= human_size(usage_sto) %></span>
+    	</div>
+    	<div class="usage-big good">
+    		<a href="/<%= name %>/usage">
+    		    <img src="/static/img/box_xsmall.png" />
+    			<span class="usage-sto"><%= human_size(usage_sto) %></span><br>
+        		<img src="/static/img/arrow_up_xsmall.png" />
+        		<span class="usage-put"><%= human_size(usage_put) %></span><br>
+        		<img src="/static/img/arrow_down_xsmall.png" />
+        		<span class="usage-get"><%= human_size(usage_get) %></span>
+             </a>
 		
+    	</div>
 	</div>
 		
 	<div class="file-collection">
