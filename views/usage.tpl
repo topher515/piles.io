@@ -117,7 +117,9 @@ $(function() {
 	<div class="content" style="position:relative">
 		
 	<img style="position:absolute; top:0; right:0; opacity:.1; z-index:200;" src="/static/img/pile_256.png" />
-	<h1 style="margin: 25px inherit 0px inherit; z-index: 250;"><a href="/{{pile['name']}}">{{pile['name']}}</a> Usage Statistics</h1>
+	<h1 style="margin: 25px inherit 0px inherit; z-index: 250;">
+        <a class="btn" href="/{{pile['name']}}">&lt; Back</a>
+        {{pile['name']}} | Usage Statistics</h1>
 
 	<div id="noscript" style="margin: 300px;">Bro, your javascript is off or broke!</div>
 

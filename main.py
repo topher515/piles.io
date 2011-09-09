@@ -214,7 +214,7 @@ def pile(pilename):
 			return template('app',{'pile':pile,'files':files})
 	
 	files = db.files.find({'pid':pile['_id'],'pub':True})
-	return template('app_public',pile=pile,files=list(files))
+	return template('app_public',pile=pile,files=list(files),authenticated=s.get('authenticated',{}))
 
 
 def getapp():

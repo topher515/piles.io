@@ -15,7 +15,15 @@ $(function() {
 <div class="content" style="position:relative;">
 	
 	<img style="position:absolute; top:-90px; right:-30px; opacity:.1;" src="/static/img/pile_256.png"  />
-	<h1 style="margin: 25px inherit 0px inherit">{{pile['name']}}</h1>
+	<h1 style="margin: 25px inherit 0px inherit">
+	    %if authenticated:
+	    <a class="btn" href="/{{pile['name']}}">&lt; Back</a>
+	    %end
+	    {{pile['name']}} 
+	    %if authenticated:
+	        | Public Files
+	    %end
+	</h1>
 	<h6>These are the files that this Pile's users have shared with the public.</h6>
 	%if len(files) == 0:
 	<div>
