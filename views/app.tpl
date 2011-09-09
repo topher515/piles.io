@@ -132,7 +132,6 @@
 
   <div id="noscript" style="margin: 300px;">Bro, your javascript is off or broke!</div>
 
-  %include feedback
 
 %end
   

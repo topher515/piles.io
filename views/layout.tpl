@@ -58,6 +58,7 @@
 
 	%content()
 	
+    %include feedback
 	
 </body>
 </html>

@@ -5,13 +5,13 @@
 <script src="/static/js/jquery.tablesorter.js"></script>
 <script>
 $(function() {
-	$('table#pub-files').tablesorter({ sortList: [[1,0]] });
+	$('table#pub-files').tablesorter();
 });
 </script>
 %end
 
 %def content():
-<div class="container">
+<div class="container" style="z-index:600;">
 <div class="content" style="position:relative;">
 	
 	<img style="position:absolute; top:-90px; right:-30px; opacity:.1;" src="/static/img/pile_256.png"  />
@@ -30,10 +30,10 @@ $(function() {
 		<p>The users of this pile haven't shared any files.</p>
 	</div>
 	%else:
-	<table id="pub-files" class="zebra-striped">
+	<table id="pub-files" class="tablesorter zebra-striped">
 		<thead>
 			<tr>
-				<td>Name</td><td>Size</td><td>Download</td><td>Torrent</td>
+				<th>Name</th><th>Size</th><th>Download</th><th>Torrent</th>
 			</tr>
 		</thead>
 		%for file in files:

@@ -82,7 +82,7 @@ $(function() {
 	position:fixed;
 	left:0;
 	top:45%;
-	z-index:600;
+	z-index:1000;
 }
 
 .feedback-widget {
