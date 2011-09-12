@@ -92,66 +92,138 @@
 	    return n;
 	}
 	
+	// Helper function to get a URL from a Model or Collection as a property
+    // or as a function. // From Backbone.js
+    var getUrl = function(object) {
+      if (!(object && object.url)) return null;
+      return _.isFunction(object.url) ? object.url() : object.url;
+    };
+
+    // Throw an error when a URL is needed, and none is supplied. // From Backbone.js
+    var urlError = function() {
+      throw new Error('A "url" property or function must be specified');
+    };
 	
 	/* Global Helpers */
 	window.notify = function notify(level,msg) {
 		$('body').prepend((new NotifyView({model:{level:level,message:msg}})).render().el)
 	}
 	
-	var ModalFileView = PilesIO.ModalFileView = Backbone.View.extend({
-		className:'modal modal-file-view',
-		events: {
-			'click .modal-file-view .close': "clear",
-		},
-		initialize: function() {
-			var self = this;
-			$('.blockUI').click(self.clear)
-		},
-		render:function() {
-			var $el = $(this.el),
-				tpl = _.template($('#modal-tpl').html()),
-				attrs = this.model.toJSON()
-			$el.html(tpl(attrs))
-			//$el.dialog({modal:true})
-			return this
-		},
-		countdown:function() {
-			var self = this
-			setTimeout(function() {self.clear()},5000)
-		},
-		clear:function() {
-			var self = this;
-			$.unblockUI()
-			$(this.el).fadeOut(self.remove)
-		}
-	});
+	PilesIO.App = {
+	    AWS_BUCKET:'',
+        AWS_POST_DOMAIN:'',
+        AWS_ACCESS_KEY_ID:'',
+        APP_DOMAIN:'',
+    }
+    
+    /***************
+     * Backbone overrides
+     ***************/
+     Backbone.sync = function(method, model, options) {
+         var type = {
+            'create': 'POST',
+            'update': 'PUT',
+            'delete': 'DELETE',
+            'read'  : 'GET'
+          }[method];
 
+         // Default JSON-request options.
+         var params = _.extend({
+           type:         type,
+           dataType:     'jsonp'
+         }, options);
 
-	var NotifyView = PilesIO.NotifyView = Backbone.View.extend({
-		
-		className:'alert-message',
-		
-		events: {
-			'click .alert-message .close': "clear",
-		},
-		render:function() {
-			$el = $(this.el).addClass(this.model.level)
-			$el.html(_.template($('#notify-tpl').html(),this.model))
-			this.countdown()
-			return this
-		},
-		countdown:function() {
-			var self = this
-			setTimeout(function() {self.clear()},5000)
-		},
-		clear:function() {
-			var self = this;
-			$(this.el).fadeOut(self.remove)
-		}
-	})
+         // Ensure that we have a URL.
+         if (!params.url) {
+           params.url = getUrl(model) || urlError();
+         }
+
+         if (type != 'DELETE') {
+             params.data = {model: JSON.stringify(model.toJSON())}
+         } else {
+             params.data = {}
+         }
+    
+         // For JSONp emulate HTTP by mimicking the HTTP method with `_method`
+         // And an `X-HTTP-Method-Override` header.
+         if (type === 'PUT' || type === 'DELETE' || type === 'POST') {
+             params.data._method = type;
+             params.type = 'GET';
+             params.beforeSend = function(xhr) {
+               xhr.setRequestHeader('X-HTTP-Method-Override', type);
+             };
+         }
+
+         // Make the request.
+         return $.ajax(params);
+    };
+    
+    
+    /*************
+     * Controllers 
+     **************/
+     /// FYI Currently most M<-->V communication is direct; only the complex fileupload functionality has a controller.
+
+    var FileUploadController = function() {
+        var file_queue = [],
+            filemodel_;
+        
+        
+        this.get_form_data = function() {
+            fdata = {
+                AWSAccessKeyId: PilesIO.App.AWS_ACCESS_KEY_ID,
+    		    acl: PilesIO.App.APP_BUCKET_ACL,
+    		    key: filemodel_.get('path'),
+    		    signature: filemodel_.get('signature'),
+    		    policy: filemodel_.get('policy')
+            }
+            newfdata = []
+            for (key in fdata) {
+                newfdata.push({
+                    name:key,
+                    value:fdata[key]
+                })
+            }
+            return newfdata;
+        },
+        
+        this.setup_upload = function($fileuploader, filemodel, filedata) {
+            
+            filemodel_ = filemodel;
+            
+            // On fileuploader progress event
+            $fileuploader.bind('fileuploadprogress',function(e, data) {
+                filemodel.trigger('uploadprogress',parseInt(data.loaded / data.total * 100))
+                
+            })
+            
+            // On fileuploader done event
+            $fileuploader.bind('fileuploaddone', function(e, data) {
+				notify('info','File upload successful!')
+				filemodel.trigger('uploadsuccess')
+				filemodel.trigger('stopworking')
+			})
+			
+			$fileuploader.bind('fileuploadfail', function(e, data) {
+			    filemodel.trigger('uploaderror', data)
+			})
+            
+            filemodel.bind('savesuccess',function(model) { 
+                                
+                filemodel.trigger('startworking')
+                filedata.url = 'http://'+PilesIO.App.AWS_POST_DOMAIN
+                filedata.submit()
+            })
+        }
+    }
+    var file_upload_controller = new FileUploadController()
 	
-	
-	/* Models */
+
+	/*************
+	 *
+	 * Models
+	 *
+	 **************/
 	var File = PilesIO.File = Backbone.Model.extend({
 		defaults: {
 			size:0,
@@ -180,16 +252,16 @@
 				self.trigger('startworking')
 				model.save({},{
 					success:function(model,response) {
-						if (self.content_to_upload) {
+						/*if (self.content_to_upload) {
 							self.content_to_upload.url = model.url()+'/content'
 							self.content_to_upload.submit()
 							self.trigger('startworking')
 							console.log('Uploading file data!')
 							self.content_to_upload = null;
-						} else {
-							self.trigger('stopworking')
-							self.trigger('savesuccess',attrs)
-						}
+						} else {*/
+						self.trigger('stopworking')
+						self.trigger('savesuccess',model)
+						//}
 					},
 					error:function(model,response) {
 						self.trigger('stopworking')
@@ -224,7 +296,7 @@
 	})
 	
 	var Pile = PilesIO.Pile = Backbone.Model.extend({
-		urlRoot: '/piles',
+		urlRoot: 'http://api.piles.io/piles',
 		defaults:{
 			welcome:false,
 			cost_get:0.140,
@@ -233,7 +305,7 @@
 		},
 		initialize: function() {
 			this.files = new FileCollection
-			this.files.url = '/piles/'+this.id+'/files'
+			this.files.url = 'http://api.piles.io/piles/'+this.id+'/files'
 			var self = this;
 			this.bind('change',function(model) {
 				var new_name = model.hasChanged('name')
@@ -246,6 +318,11 @@
 					}
 				});
 			});
+			this.files.bind('add',function(model,collection) {
+			    model.bind('uploadsuccess',function() {
+			        self.fetch() // This is to refresh usage statistics
+			    })
+			})
 		},
 		validate: function(attrs) {
 			if (attrs.name == '') {
@@ -254,7 +331,11 @@
 		},
 	});
 
-	/* Views */
+
+
+	/*************
+	 * Views 
+	 **************/
 	var FileView = PilesIO.FileView = Backbone.View.extend({
 		
 		events: {
@@ -312,6 +393,7 @@
 			this.model.bind('destroy', this.doremove, this)
 			this.model.bind('uploadprogress', this.updateprogress, this)
 			this.model.bind('uploadsuccess', this.uploadsuccess, this)
+			this.model.bind('uploaderror', this.uploaderror, this)
 			this.model.bind('startworking', this.startworking, this)
 			this.model.bind('stopworking', this.stopworking, this)
 			this.model.bind('savesuccess', this.savesuccess, this)
@@ -335,9 +417,9 @@
 			$(this.el).removeClass('working').draggable('option','disabled',false)
 		},
 		
-		savesuccess:function(attrs) {
+		savesuccess:function(model) {
 			var $el = $(this.el);
-			attrs.pub ? $el.addClass('pub') : $el.removeClass('pub');
+			model.get('pub') ? $el.addClass('pub') : $el.removeClass('pub');
 			$el.effect("shake", { times:2, direction:'up', distance:10}, 100);
 		},
 		
@@ -364,6 +446,10 @@
 		uploadsuccess: function() {
 			$pbar = $(this.el).find('.progressbar').hide('slide',{direction:"right"})
 			this.stopworking()
+		},
+		
+		uploaderror: function(errdata) {
+		    notify('error','Failed to upload file!')
 		},
 		
 		download: function() {
@@ -470,22 +556,22 @@
 			this.twipsy.$el.hide()
 			
 			/* Handle renames */
-			this.model.bind('renamesuccess', this.renamedone, this);
+			//this.model.bind('renamesuccess', this.renamedone, this);
 			this.model.bind('renamefailure', function(err) { notify('error',err)}, this);
 			/* Check for usage change on remove */
-			self.model.files.bind('remove',function() {self.model.fetch() })
+			//self.model.files.bind('remove',function() { self.model.fetch() })
 			
 			/* Handle usage changes */
 			this.model.bind('change:usage_put',this.updateusage,this)
 			this.model.bind('change:usage_get',this.updateusage,this)
 			this.model.bind('change:usage_sto',this.updateusage,this)
 						
+
 			// Setup fileuploader
 			$el.fileupload({
 				add:function(e, data) {
 				    var count = 0;
 					_.each(data.files, function (fileobj) {
-					    
 					        // Figure out some name stuff
 						var filename = fileobj.name || fileobj.fileName,
 						    namearray = filename.split('.'),
@@ -495,10 +581,8 @@
 							$landed_elem = $(e.srcElement),
 							
 							// Calculate percent position of file elem
-						    //x = (e.offsetX-$landed_elem.offset().left)/$landed_elem.width()*100,
-						    //y = (e.offsetY-$landed_elem.offset().top)/$landed_elem.height()*100;
 						    x = (e.offsetX-25)/$landed_elem.width()*100, // Subtract 15px so its more at center of mouse
-						    y = (e.offsetY-25)/$landed_elem.height()*100;
+						    y = (e.offsetY-25)/$landed_elem.height()*100,
 						    
 						    // Build the file model
 						    filemodel = new File({
@@ -511,9 +595,10 @@
     							pub:$landed_elem.hasClass('public')
     						});
     						
-						// Model and upload data need references to each other
-						data.associated_file_model = filemodel
-						filemodel.content_to_upload = data
+                                          
+    						
+						
+						file_upload_controller.setup_upload($el,filemodel,data)
 						
 						// Add to the files list which triggers rendering
 						self.model.files.add(filemodel)
@@ -521,29 +606,13 @@
 						
 						count+=1
 					});
-				},
-				progress: function(e, data) {
-					data.associated_file_model.trigger('uploadprogress',parseInt(data.loaded / data.total * 100))
-				},
-				url:"BAD_URL",//this.model.files.url,
-				type:'PUT',
-				//dropZone:$el, <--- So actually we probably want to do the whole document
-				send:function(e, data) {
-				},
-				start:function(e) {
-				},
-				done:function(e, data) {
-					notify('info','File upload successful!')
-					data.associated_file_model.trigger('uploadsuccess')
-					// Grab new usage stats
-					self.model.fetch()
-				}
+				},    
+			    formData: file_upload_controller.get_form_data,
+                multipart:true,
+				paramName:'file',
+				type:'POST',
+				//forceIframeTransport:true,
 			})
-			
-			/*if (this.model.get('welcome')) {
-				notify('info','<strong>Hi! Welcome to Piles</strong>—Where our philosophy is, "Put on some pants for god sakes."')
-				this.model.set({'welcome':false})
-			}*/
 		},
 		
 		_do_percent_calculation: function($container,$elem,elem_offset) {
@@ -657,6 +726,9 @@
 		
 		render: function() {
 		    var self = this;
+		    
+		    console.log(this.model.toJSON())
+		    
 			this.$el.html($(_.template($('#pile-tpl').html(), this.model.toJSON())))
 
     	    this.$priv = this.$el.find('.private')
@@ -701,5 +773,61 @@
 		
 	});
 	
+	
+	var ModalFileView = PilesIO.ModalFileView = Backbone.View.extend({
+		className:'modal modal-file-view',
+		events: {
+			'click .modal-file-view .close': "clear",
+		},
+		initialize: function() {
+			var self = this;
+			$('.blockUI').click(self.clear)
+		},
+		render:function() {
+			var $el = $(this.el),
+				tpl = _.template($('#modal-tpl').html()),
+				attrs = this.model.toJSON()
+			$el.html(tpl(attrs))
+			//$el.dialog({modal:true})
+			return this
+		},
+		countdown:function() {
+			var self = this
+			setTimeout(function() {self.clear()},5000)
+		},
+		clear:function() {
+			var self = this;
+			$.unblockUI()
+			$(this.el).fadeOut(self.remove)
+		}
+	});
+
+
+	var NotifyView = PilesIO.NotifyView = Backbone.View.extend({
+		
+		className:'alert-message',
+		
+		events: {
+			'click .alert-message .close': "clear",
+		},
+		render:function() {
+			$el = $(this.el).addClass(this.model.level)
+			$el.html(_.template($('#notify-tpl').html(),this.model))
+			this.countdown()
+			return this
+		},
+		countdown:function() {
+			var self = this
+			setTimeout(function() {self.clear()},5000)
+		},
+		clear:function() {
+			var self = this;
+			$(this.el).fadeOut(self.remove)
+		}
+	})
+	
+	PilesIO.initialize = function() {
+	    
+	}
 	
 })(jQuery)

@@ -1,9 +1,12 @@
 import os
 
+
+APP_DOMAIN = 'piles.io'
 CHARGIFY_API_KEY = 'xxXPsiW-FGTHA6STZ6P0'
 AWS_ACCESS_KEY_ID = '0Z67F08VD9JMM1WKRDR2'
 AWS_SECRET_ACCESS_KEY = 'g6o8NjU3ClIYJmaGurL+sKctlQrpEUF6irQyrpPX'
 APP_BUCKET = 'piles-dev' # An AWS account can only have 100 buckets, so everybody is gonna share this bucket!
+APP_BUCKET_ACL = 'private' #'bucket-owner-full-control'
 LOG_BUCKET = 'piles-dev-logging'
 LOG_BUCKET_PREFIX = 'piles-dev-access-log-'
 MONGO_HOST = 'localhost'

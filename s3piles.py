@@ -8,7 +8,7 @@ from StringIO import StringIO
 import logging
 logger = logging.getLogger()
 
-from settings import DIRNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, APP_BUCKET
+from settings import DIRNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, APP_BUCKET, APP_BUCKET_ACL
 
 ## S3
 
@@ -24,6 +24,28 @@ class MyStringIO(StringIO):
 public_acp_xml = open(os.path.join(DIRNAME,'resources/public-acp.xml')).read()
 private_acp_xml = open(os.path.join(DIRNAME,'resources/private-acp.xml')).read()
 
+	
+def build_policy_doc(key):
+    policy = {
+        'expiration':(datetime.datetime.now()+datetime.timedelta(1)).strftime('%Y-%m-%dT%H:%M:%S.000Z'), # Valid for one day. This means the user MUST refresh the page once a day to do uploads
+        'conditions': [
+            {'acl':APP_BUCKET_ACL},
+            {'bucket':APP_BUCKET},
+            {'key': key},
+            # <hack> This is a hack to allow SWF based uploads to the bucket as described here: 
+            #        https://forums.aws.amazon.com/thread.jspa?messageID=77198
+            # Basically flash adds a...    
+            #        Content-Disposition: form-data; name="Filename"
+            # ...to the end of everything it posts! 
+            # Thanks Adobe! </sarcasm>
+            # </hack>
+            [ "starts-with", "$filename", "" ]
+        ]
+    }
+    policy_doc = base64.b64encode(json.dumps(policy))
+    sig = base64.b64encode(hmac.new(AWS_SECRET_ACCESS_KEY,policy_doc,sha1).digest())
+    return policy_doc,sig
+    
 	
 def build_auth_sig(http_verb,path,expiration,secret_key,content_type='',content_md5='',canonical_amz_headers=''):
 	to_sign = [http_verb,'\n',
@@ -63,20 +85,6 @@ def authed_get_url(path):
 	auth_gen = S3.QueryStringAuthGenerator(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY) #PP_BUCKET)
 	#auth_gen.set_expires(expires)
 	return auth_gen.get(APP_BUCKET,path)
-	
-def get_stor_data(request):
-	now = datetime.datetime.now()
-	data = request.files.get('data')
-	try:
-		entity = json.loads(request.body.read())
-	except ValueError:
-		abort(400,"Invalid JSON")
-
-	if entity.get('name'):
-		name = entity['name']
-	else:		
-		name = data.filename or now.strftime("%Y-%m-%d %H:%M:%S")
-	return now,name,entity
 
 
 def s3conn():

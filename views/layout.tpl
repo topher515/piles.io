@@ -7,8 +7,8 @@
   <link rel="shortcut icon" href="/static/img/pile_32.png">
 
   <!-- link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap-1.1.1.min.css" -->
-  <link rel="stylesheet" href="/static/css/bootstrap-1.1.1.min.css">
-  <link rel="stylesheet" href="/static/css/jquery-ui-1.8.16.custom.css">
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-1.1.1.min.css">
+  <link rel="stylesheet" type="text/css" href="/static/css/jquery-ui-1.8.16.custom.css">
 
   <!-- script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
@@ -27,6 +27,8 @@
   <script src="/static/js/underscore.js" type="text/javascript"></script>
   <!-- script src="/static/js/backbone-min.js" type="text/javascript"></script-->
   <script src="/static/js/backbone.js"></script>
+  <script src="/static/js/swfupload.js" type="text/javascript"></script>
+  <script src="/static/js/jquery.swfupload.js" type="text/javascript" charset="utf-8"></script>
 
 </script>
 

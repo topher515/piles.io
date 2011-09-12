@@ -199,6 +199,11 @@ def usage(pilename):
 	return redirect('/'+pilename)
 	
 
+@route('/s3test/:key')
+def s3test(key):
+    policy,signature = build_policy_doc(key)
+    return template('s3test',key=key,policy=policy,signature=signature)
+
 @route('/:pilename')
 def pile(pilename):
 	
@@ -211,7 +216,7 @@ def pile(pilename):
 		authed_piles = [ p['_id'] for p in s['authenticated']['piles'] ]
 		if pile['_id'] in authed_piles:
 			files = db.files.find({'pid':pile['_id']})
-			return template('app',{'pile':pile,'files':files})
+			return template('app',{'pile':pile,'files':files,'app_meta':app_meta()})
 	
 	files = db.files.find({'pid':pile['_id'],'pub':True})
 	return template('app_public',pile=pile,files=list(files),authenticated=s.get('authenticated',{}))

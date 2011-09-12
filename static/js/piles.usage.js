@@ -2,9 +2,6 @@ $(function() {
     
 	window.PilesIO ? console.log('PilesIO already in global scope') : (function() {throw "Missing PilesIO library"})()
     
-    
-    
-    
     /* Utilities */
     var text_shortener = PilesIO.text_shortener = function(str,max_len)  {
         if (str.length > max_len) {

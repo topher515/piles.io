@@ -111,7 +111,7 @@ $(function() {
 	<div class="modal-header">
 		<h3>
 			Feedback &amp; Support
-		</h3><a href="#" class="close">×</a>
+		</h3><a href="#" class="close">&times;</a>
 	</div>
 	<div class="modal-body">
 	
