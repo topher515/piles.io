@@ -50,7 +50,7 @@ def jsonp(old_route):
                 wrapper = request.GET['callback']
                 return "%s(%s)" % (wrapper,resp)
             else:
-                return "%s(%s)" % (wrapper,old_route(*args,**kwargs))
+                return "%s(%s)" % (wrapper,old_route(*args,**kwargs) or '')
                 
         else:
             request.body_ = request.body
