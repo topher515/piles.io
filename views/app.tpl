@@ -22,7 +22,7 @@
 		    "AWS_POST_DOMAIN": "piles-dev.s3.amazonaws.com", 
 		    "AWS_ACCESS_KEY_ID": "0Z67F08VD9JMM1WKRDR2"
 		}*/
-		$.ajax('http://api.piles.io/piles?name='+location.hash.slice(1)+'&callback=?',{
+		$.ajax('http://'+PilesIO.App.APP_DOMAIN+'/piles?name='+location.hash.slice(1)+'&callback=?',{
 		    dataType:'jsonp',
 		    success: function(data) {
 		        window.pile = new PilesIO.Pile(data[0])

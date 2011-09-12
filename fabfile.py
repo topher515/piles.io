@@ -1,3 +1,7 @@
+from __future__ import with_statement
+from fabric.api import local, settings, abort, run, cd, env
+from fabric.contrib.console import confirm
+
 import bottle
 from bottle import template
 bottle.TEMPLATES.clear()
@@ -9,6 +13,8 @@ import datetime
 from settings import APP_BUCKET
 
 from utils import app_meta
+
+env.hosts = ['rlunch@rlunch.webfactional.com']
 
 
 class MyStringIO(StringIO.StringIO):
@@ -74,7 +80,8 @@ class S3Deployer(Deployer):
     
     def deploy(self):  # Make sure this is public
         s3conn = s3piles.s3conn()
-        
+        print "Checking for files to upload...",
+        count = 0
         try:
             for fp,key,content_type in self.gatherer.files:
                 
@@ -91,6 +98,7 @@ class S3Deployer(Deployer):
                     break
                 
                 print key + ' with content type ' + content_type + '...uploaded.'
+                count +=1
             
                 self.change_tracker[key] = (content_hash,datetime.datetime.now())
             
@@ -98,11 +106,19 @@ class S3Deployer(Deployer):
             raise
         finally:       
             pickle.dump(self.change_tracker,open('deploy_tracker.pickle','w'))
-            print "Saved change tracker"
-            
+            if count == 0:
+                print "No files uploaded."
+            else:
+                print "...Uploaded %s files." % count
             
 
-if __name__ == '__main__':
-    S3Deployer(FileGatherer()).deploy()
 
-    
+def wfdeploy(branch='master'):
+    code_dir = '~/webapps/piles_app/piles_io/'
+    with cd(code_dir):
+        run("git pull origin %s" % branch)
+        run("../apache2/bin/restart")
+
+
+def awsdeploy():
+     S3Deployer(FileGatherer()).deploy()
