@@ -111,7 +111,7 @@
 	
 	PilesIO.App = {
 	    AWS_BUCKET:'',
-        AWS_POST_DOMAIN:'',
+        FILE_POST_URL:'',
         AWS_ACCESS_KEY_ID:'',
         APP_DOMAIN:'',
     }
@@ -189,7 +189,9 @@
         
         this.setup_upload = function($fileuploader, filemodel, filedata) {
             
+            
             filemodel_ = filemodel;
+            
             
             // On fileuploader progress event
             $fileuploader.bind('fileuploadprogress',function(e, data) {
@@ -202,6 +204,10 @@
 				notify('info','File upload successful!')
 				filemodel.trigger('uploadsuccess')
 				filemodel.trigger('stopworking')
+				
+				filemodel.unbind('savesuccess')
+				filemodel.unbind('uploadprogress')
+				filemodel.unbind('uploaderror')
 			})
 			
 			$fileuploader.bind('fileuploadfail', function(e, data) {
@@ -211,7 +217,7 @@
             filemodel.bind('savesuccess',function(model) { 
                                 
                 filemodel.trigger('startworking')
-                filedata.url = 'http://'+PilesIO.App.AWS_POST_DOMAIN
+                filedata.url = PilesIO.App.FILE_POST_URL
                 filedata.submit()
             })
         }
@@ -220,9 +226,7 @@
 	
 
 	/*************
-	 *
 	 * Models
-	 *
 	 **************/
 	var File = PilesIO.File = Backbone.Model.extend({
 		defaults: {
@@ -286,8 +290,14 @@
 		delete: function() {
 			var self = this;
 			this.trigger('startworking')
-			var stopwork = function() { self.trigger('stopworking')}
-			this.destroy({success:stopwork,error:stopwork})
+			this.destroy({
+			    success:function() { 
+			        self.trigger('stopworking')
+			    },
+			    error:function() {
+			        notify('error','Failed to delete file.')
+			    }
+		    });
 		},
 	});
 	
@@ -296,7 +306,7 @@
 	})
 	
 	var Pile = PilesIO.Pile = Backbone.Model.extend({
-		urlRoot: 'http://api.piles.io/piles',
+		urlRoot: 'http://'+PilesIO.App.APP_DOMAIN+'/piles',
 		defaults:{
 			welcome:false,
 			cost_get:0.140,
@@ -305,7 +315,7 @@
 		},
 		initialize: function() {
 			this.files = new FileCollection
-			this.files.url = 'http://api.piles.io/piles/'+this.id+'/files'
+			this.files.url = 'http://'+PilesIO.App.APP_DOMAIN+'/piles/'+this.id+'/files'
 			var self = this;
 			this.bind('change',function(model) {
 				var new_name = model.hasChanged('name')

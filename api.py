@@ -218,13 +218,14 @@ def files_post(pid):
     
     
     entity = request.validated
+    name = request.validated.get('name')
     fid = ''.join([random.choice(string.letters + string.digits) for x in xrange(6)]) # hashlib.md5(str(now)).hexdigest()
     #sto_file(pid,fid,name,data)
     
     valid,invalid_char = valid_chars(name)
     entity['pid'] = pid
     entity['_id'] = fid
-    entity['path'] = '%s-%s-%s' % (pid,fid,name)
+    entity['path'] = '%s/%s/%s' % (pid,fid,name)
     db.files.save(entity)
     
     # Build policy and signature information 
@@ -351,6 +352,12 @@ def put_file_content(pid,fid):
 def short_file_content(pid,fid):
     f = db.files.find_one({'_id':fid,'pid':pid})
     return redirect(public_get_url(f['path']))
+
+
+@route('/testpost')
+def testpost():
+    return
+
 
 @route('/piles/:pid/files/:fid/content', method='GET')
 @auth_json

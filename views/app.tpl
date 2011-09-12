@@ -21,15 +21,30 @@
 		    "BUCKET_NAME": "piles-dev", 
 		    "AWS_POST_DOMAIN": "piles-dev.s3.amazonaws.com", 
 		    "AWS_ACCESS_KEY_ID": "0Z67F08VD9JMM1WKRDR2"
+		    FILE_POST_URL
 		}*/
-		$.ajax('http://'+PilesIO.App.APP_DOMAIN+'/piles?name='+location.hash.slice(1)+'&callback=?',{
+		var pilename = location.hash.slice(1)
+		
+		var error = function(data) {
+	        $('body').append('<h1>Not a valid pile: '+pilename+'</h1>')
+		}
+		
+		$.ajax('http://'+PilesIO.App.APP_DOMAIN+'/piles?name='+pilename+'&callback=?',{
 		    dataType:'jsonp',
 		    success: function(data) {
+		        if (!data) {
+		            error()
+		            return;
+		        }
 		        window.pile = new PilesIO.Pile(data[0])
-		        window.pileview = new PilesIO.PileView({model:window.pile})
-        		$('body').append(pileview.render().el)
-        		$('#noscript').remove()   
-		    }
+		        window.pile.files.fetch({success: function() {
+		            window.pileview = new PilesIO.PileView({model:window.pile})
+            		$('body').append(pileview.render().el)
+            		$('#noscript').remove()
+		            
+		        }})  
+		    },
+		    error: error,
 		})
 	})
   </script>

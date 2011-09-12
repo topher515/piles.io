@@ -35,7 +35,9 @@ class FileGatherer(object):
         self.app_html = MyStringIO(t)
         self.app_html
         static_paths = glob.glob('static/css/*.css')
-        static_paths += glob.glob('static/img/{*.png,*.gif,*.jpg}')
+        static_paths += glob.glob('static/img/*.png')
+        static_paths += glob.glob('static/img/*.gif')
+        static_paths += glob.glob('static/img/*.jpg')
         static_paths += glob.glob('static/img/icons/*')
         static_paths += glob.glob('static/css/images/*.png')
         static_paths += glob.glob('static/js/*.js')
@@ -114,6 +116,7 @@ class S3Deployer(Deployer):
 
 
 def wfdeploy(branch='master'):
+    local("git push origin %s" % branch)
     code_dir = '~/webapps/piles_app/piles_io/'
     with cd(code_dir):
         run("git pull origin %s" % branch)

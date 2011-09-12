@@ -39,7 +39,6 @@ def build_policy_doc(key):
             # ...to the end of everything it posts! 
             # Thanks Adobe! </sarcasm>
             # </hack>
-            [ "starts-with", "$filename", "" ]
         ]
     }
     policy_doc = base64.b64encode(json.dumps(policy))

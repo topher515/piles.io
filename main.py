@@ -204,6 +204,11 @@ def s3test(key):
     policy,signature = build_policy_doc(key)
     return template('s3test',key=key,policy=policy,signature=signature)
 
+@route('/app')
+def app():
+    return template('app',app_meta=app_meta())
+
+
 @route('/:pilename')
 def pile(pilename):
 	
