@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Piles Alpha | {{meta.get('title')}}</title>
+  <title>Piles | Alpha</title>
 
   <link rel="shortcut icon" href="/static/img/pile_32.png">
 

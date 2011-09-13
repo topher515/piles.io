@@ -13,19 +13,10 @@
   <script>
 	$(function() {
         // Set PilesIO defaults
-        
 		PilesIO.App = {{m2j(app_meta)}}
-		/*PilesIO.App = {
-		    "APP_BUCKET_ACL": "private", 
-		    "APP_DOMAIN": "piles.io", 
-		    "BUCKET_NAME": "piles-dev", 
-		    "AWS_POST_DOMAIN": "piles-dev.s3.amazonaws.com", 
-		    "AWS_ACCESS_KEY_ID": "0Z67F08VD9JMM1WKRDR2"
-		    FILE_POST_URL
-		}*/
 		var pilename = location.hash.slice(1)
-		
 		var error = function(data) {
+		    $('#noscript').remove()
 	        $('body').append('<h1>Not a valid pile: '+pilename+'</h1>')
 		}
 		

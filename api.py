@@ -2,7 +2,7 @@ import json, urllib
 import datetime, hashlib, random, string, os, StringIO
 import bottle
 import requests
-from bottle import route, run, request, abort, redirect, static_file, template
+from bottle import route, run, request, abort, redirect, static_file, template, response
 import logging
 logger = logging.getLogger('piles_io.main')
 from utils import *
@@ -42,6 +42,7 @@ class validator(object):
 def jsonp(old_route):
     def new_route(*args,**kwargs):
         if request.GET.get('callback'):
+            response.set_header('Content-Type','text/javascript; charset=UTF-8')
             wrapper = request.GET['callback']
             if request.GET.get('model'):
                 body = urllib.unquote(request.GET['model'])
