@@ -55,7 +55,7 @@
 <body>
 
 <div class="top-right">
-	<a href="/logout">Logout</a>
+	<a href="http://{{app_meta['APP_DOMAIN']}}/logout">Logout</a>
 </div>
 
 	%content()

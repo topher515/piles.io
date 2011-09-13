@@ -15,8 +15,11 @@
         // Set PilesIO defaults
 		PilesIO.App = {{m2j(app_meta)}}
 		var pilename = location.hash.slice(1)
+		
+		if (!pilename) window.location.href = "http://{{app_meta['APP_DOMAIN']}}/"
+		
 		var error = function(data) {
-		    $('#noscript').remove()
+		    $('#brokescript').remove()
 	        $('body').append('<h1>Not a valid pile: '+pilename+'</h1>')
 		}
 		
@@ -31,7 +34,7 @@
 		        window.pile.files.fetch({success: function() {
 		            window.pileview = new PilesIO.PileView({model:window.pile})
             		$('body').append(pileview.render().el)
-            		$('#noscript').remove()
+            		$('#brokescript').remove()
 		            
 		        }})  
 		    },
@@ -136,7 +139,7 @@
 				<li>Size: <%= human_size(size) %></li>
 				<li>Type: <%= type %></li>
 				<!-- --><% if (pub) {%>
-				    <li>Public URL: <a href="http:/<%= PilesIO.App.CONTENT_DOMAIN =>/<%= path %>">http://<%= PilesIO.App.CONTENT_DOMAIN =>/<%= path %></a></li>
+				    <li>Public URL: <a href="http:/<%= PilesIO.App.CONTENT_DOMAIN %>/<%= path %>">http://<%= PilesIO.App.CONTENT_DOMAIN %>/<%= path %></a></li>
 				<!-- --><% } %>
 			</ul>
 		</div>
@@ -152,9 +155,11 @@
     </script>
 
 
-  <div id="noscript" style="margin: 300px;">Bro, your javascript is off or broke!</div>
-
+  <div id="brokescript">
+  	<img class="watermark" src="/static/img/pile_256.png" />
+  </div>
+  <noscript>Piles only works when Javascript is turned on!</noscript>
 
 %end
   
-%rebase layout content=content, head=head, meta={'title':'Test'}
+%rebase layout content=content, head=head, meta={'title':'Test'}, app_meta=app_meta

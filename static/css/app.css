@@ -117,6 +117,12 @@
 	.modal-file-view .icon {
 		float:left;
 	}
+.watermark {
+    position:absolute;
+    opacity:.5;
+    top:25%;
+    left:35%;
+}
 .pile-view {
 	position:relative;
 	margin: 0;
