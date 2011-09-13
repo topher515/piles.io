@@ -26,4 +26,4 @@
 </div>
 %end
 
-%rebase layout content=content, head=head, meta={'title':'Login'}, app_meta=app_meta
+%rebase layout content=content, head=head, meta={'title':'Login'}
