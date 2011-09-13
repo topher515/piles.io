@@ -135,7 +135,9 @@
 			<ul>
 				<li>Size: <%= human_size(size) %></li>
 				<li>Type: <%= type %></li>
-				<li>Public URL: <% if (pub) {%><a href="http:/"+PilesIO.App.APP_DOMAIN+"/~<%= pid %>-<%= id %>">http://piles.io/~<%= pid %>-<%= id %></a><% } else { %>None<% } %></li>
+				<!-- --><% if (pub) {%>
+				    <li>Public URL: <a href="http:/<%= PilesIO.App.CONTENT_DOMAIN =>/<%= path %>">http://<%= PilesIO.App.CONTENT_DOMAIN =>/<%= path %></a></li>
+				<!-- --><% } %>
 			</ul>
 		</div>
 		<div class="modal-footer">
