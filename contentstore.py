@@ -87,7 +87,7 @@ class S3Store(object):
         path = path.strip('/')
         #if not expires:
         #   expires = datetime.datetime.now() + datetime.timedelta(0,60*10) # In 10 min
-        auth_gen = S3.QueryStringAuthGenerator(settings('AWS_ACCESS_KEY_ID'),settings('AWS_SECRET_ACCESS_KEY')) #PP_BUCKET)
+        auth_gen = S3.QueryStringAuthGenerator(settings('AWS_ACCESS_KEY_ID'),settings('AWS_SECRET_ACCESS_KEY'), is_secure=False) #PP_BUCKET)
         #auth_gen.set_expires(expires)
         return auth_gen.get(self.bucket,path)
 
