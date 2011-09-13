@@ -8,8 +8,8 @@
 	<form action="/login" method="post">
 		<div class="clearfix">
 			<h1>Piles Alpha</h1>
-			<input class="xlarge" name="email" size="30" type="text" value="{{ email }}">
-			<input class="xlarge" name="password" size="30" type="password" value="Password" >
+			<input class="xlarge" name="email" size="30" title="Email" type="text" value="{{ email }}">
+			<input class="xlarge" name="password" size="30" title="Password" type="password" value="Password" >
 			<input type="submit" class="go btn primary" value="Go!" />
 			<div class="clearfix" style="margin-top:25px">
 			<a href="/create">Do you have an invitation?</a>

@@ -41,7 +41,19 @@ $(function() {
         },
     });
     
+    var UsageEvent = PilesIO.UsageEvent = Backbone.Model.extend({})
+    var UsageEventCollection = PilesIO.UsageEventCollection = Backbone.Collection.extend({
+        model:UsageEvent,
+		comparator:function(uevent) {
+		    return uevent.get('datetime')
+		}
+    })
+    
     /* Views */
+    var UsageEventView = PilesIO.UsageEvent = Backbone.Model.extend({
+        
+    })
+    
     var UsageView = PilesIO.UsageView = Backbone.View.extend({
         
         className: 'usage-diagram',

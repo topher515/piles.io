@@ -3,6 +3,7 @@ from fabric.api import local, abort, run, cd, env
 from fabric.api import settings as fabsettings
 from fabric.contrib.console import confirm
 
+import os
 import bottle
 import settings
 from bottle import template
@@ -31,17 +32,25 @@ class Deployer(object):
 
 class FileGatherer(object):
     def __init__(self):
-        t = template('app',app_meta=app_meta())
-        self.app_html = MyStringIO(t)
-        self.app_html
-        static_paths = glob.glob('static/css/*.css')
+        """
+        static_paths = glob.glob('stagedstatic/css/*.css')
         static_paths += glob.glob('static/img/*.png')
         static_paths += glob.glob('static/img/*.gif')
         static_paths += glob.glob('static/img/*.jpg')
         static_paths += glob.glob('static/img/icons/*')
         static_paths += glob.glob('static/css/images/*.png')
         static_paths += glob.glob('static/js/*.js')
-        self.static_paths = static_paths
+        """
+        
+        prefix_len = len('staged/')
+        self.static_paths = []
+        path_search = glob.glob('staged/static/*')
+        for path in path_search:
+            if os.path.isdir(path):
+                path_search += glob.glob(path + '/*')
+            else:
+                self.static_paths.append((path,path[prefix_len:]))
+        
         
         
     content_types = {
@@ -57,16 +66,18 @@ class FileGatherer(object):
         
     @property
     def files(self):
-        yield self.app_html,'app','text/html'
-        for path in self.static_paths:
+        # The app
+        yield open('staged/app','r'),'app','text/html'
+        # All other static files
+        for path,name in self.static_paths:
             fp = open(path,'r')
             dot_index = path.rfind('.')
             ext = path[dot_index:]
             content_type = FileGatherer.content_types.get(ext)
             if not content_type:
                 content_type = 'binary/octet-stream'
-            yield fp,fp.name,content_type
-        
+            y = fp,name,content_type
+            yield y
         
         
         
@@ -91,6 +102,8 @@ class S3Deployer(Deployer):
         count = 0
         try:
             for fp,key,content_type in self.gatherer.files:
+                
+                #print fp,key,content_type
                 
                 content = fp.read()
                 content_hash = hash(self.bucket + content)

@@ -1,5 +1,5 @@
 from settings import MONGO_HOST, MONGO_PORT, MONGO_DB_NAME
-from pymongo import Connection
+from pymongo import Connection, ASCENDING, DESCENDING
 db = Connection(MONGO_HOST, MONGO_PORT)[MONGO_DB_NAME]
 print "Connected to %s:%s db:%s" % (MONGO_HOST, MONGO_PORT, MONGO_DB_NAME)
 

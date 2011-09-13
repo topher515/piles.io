@@ -15,8 +15,7 @@ from beaker.middleware import SessionMiddleware
 from settings import DIRNAME, TEMPLATE_PATHS, CONTENT_DOMAIN
 bottle.TEMPLATE_PATH = TEMPLATE_PATHS
 
-from db import db
-
+from db import db, DESCENDING, ASCENDING
 
 
 
@@ -180,13 +179,17 @@ def usage(pilename):
     pile = db.piles.find_one({'name':pilename})
     if not pile:
         abort(404,'That Pile does not exist.')
-        
+    
     s = session(request)
     if s.get('authenticated') and not request.GET.get('public'):
         authed_piles = [ p['_id'] for p in s['authenticated']['piles'] ]
         if pile['_id'] in authed_piles:
+            # Get the pile's usage
+            usage_puts = db.usage_puts.find({'pid':pile['_id']}, sort=[('datetime',DESCENDING)], limit=10)
+            usage_gets = db.usage_gets.find({'pid':pile['_id']}, sort=[('datetime',DESCENDING)], limit=10)
+            # Get the pile's files
             files = db.files.find({'pid':pile['_id']})
-            return template('usage',{'pile':pile,'files':files})
+            return template('usage',{'pile':pile,'files':files, 'usage_puts':list(usage_puts), 'usage_gets':list(usage_gets)})
         
     return redirect('/'+pilename)
     

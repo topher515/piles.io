@@ -14,6 +14,14 @@ from settings import APP_DOMAIN, AWS_ACCESS_KEY_ID, APP_BUCKET, APP_BUCKET_ACL, 
 
 ### Utils ###
 
+class FakeLogger(object):
+    def debug(self,msg):
+        print "DEBUG: %s" % msg
+    def info(self,msg):
+        print "INFO: %s" % msg
+    def warn(self,msg):
+        print "WARN: %s" % msg
+
 class MyStringIO(StringIO):
     def __init__(self,string,*args,**kwargs):
         self._str_len = len(string)

@@ -17,10 +17,13 @@ private_acp_xml = open(os.path.join(DIRNAME,'resources/private-acp.xml')).read()
 
 class S3Store(object):
     
-    def __init__(self,s3conn=None):
+    def __init__(self,s3conn=None,bucket=None):
         if not s3conn:
             s3conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
         self.s3conn = s3conn
+        if not bucket:
+            bucket = APP_BUCKET
+        self.bucket = bucket
     
     def add_storage_info(self,entity):
         policy,signature = self.build_policy_doc(entity['path'])
@@ -33,7 +36,7 @@ class S3Store(object):
             'expiration':(datetime.datetime.now()+datetime.timedelta(1)).strftime('%Y-%m-%dT%H:%M:%S.000Z'), # Valid for one day. This means the user MUST refresh the page once a day to do uploads
             'conditions': [
                 {'acl':APP_BUCKET_ACL},
-                {'bucket':APP_BUCKET},
+                {'bucket':self.bucket},
                 {'key': key},
                 # <hack> This is a hack to allow SWF based uploads to the bucket as described here: 
                 #        https://forums.aws.amazon.com/thread.jspa?messageID=77198
@@ -64,7 +67,7 @@ class S3Store(object):
         return 'http://%s/%s' % (CONTENT_DOMAIN,path)
 
     def _authed_get_url(self,path,expires=None):
-        bucket = APP_BUCKET
+        bucket = self.bucket
         path = path.strip('/')
         if not expires:
             expires = datetime.datetime.now() + datetime.timedelta(0,60*10) # In 10 min
@@ -86,12 +89,12 @@ class S3Store(object):
         #   expires = datetime.datetime.now() + datetime.timedelta(0,60*10) # In 10 min
         auth_gen = S3.QueryStringAuthGenerator(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY) #PP_BUCKET)
         #auth_gen.set_expires(expires)
-        return auth_gen.get(APP_BUCKET,path)
+        return auth_gen.get(self.bucket,path)
 
 
     def put(self,fp,name,options={}):
         conn = self.s3conn
-        response = conn.put(APP_BUCKET,name,S3.S3Object(fp),options) #,headers={'x-amz-acl':'public-read'})
+        response = conn.put(self.bucket,name,S3.S3Object(fp),options) #,headers={'x-amz-acl':'public-read'})
         status = response.http_response.status
         if 200 > status < 300:
             abort(500, 'AWS failure: ' +response.message)
@@ -101,7 +104,7 @@ class S3Store(object):
     def delete(self,name):
         print "Deleting %s" % name
         conn = self.s3conn
-        response = conn.delete(APP_BUCKET,name) #,headers={'x-amz-acl':'public-read'})
+        response = conn.delete(self.bucket,name) #,headers={'x-amz-acl':'public-read'})
         status = response.http_response.status
         print response.http_response.status
         print response.message
@@ -112,7 +115,7 @@ class S3Store(object):
     
     def setpub(self,name):
         conn = self.s3conn
-        response = conn.put_acl(APP_BUCKET,name,MyStringIO(public_acp_xml))
+        response = conn.put_acl(self.bucket,name,MyStringIO(public_acp_xml))
         #s3put(public_acp_xml,name+'?acl')
         status = response.http_response.status
         print response.http_response.status
@@ -123,8 +126,8 @@ class S3Store(object):
 
     def setpriv(self,name):
     
-        conn = self.s3conn()
-        response = conn.put_acl(APP_BUCKET,name,MyStringIO(private_acp_xml))
+        conn = self.s3conn
+        response = conn.put_acl(self.bucket,name,MyStringIO(private_acp_xml))
         #s3put(private_acp_xml,name+'?acl')
         status = response.http_response.status
         print response.http_response.status
@@ -132,6 +135,12 @@ class S3Store(object):
         if status < 200 or status > 299:
             abort(500, 'AWS failure:' + response.message)
         return response
+    
+    def list_bucket(self,*args,**kwargs):
+        return self.s3conn.list_bucket(self.bucket,*args,**kwargs)
+        
+    def get(self,*args,**kwargs):
+        return self.s3conn.get(self.bucket,*args,**kwargs)
     
 
 class FakeStore(object):

@@ -1,6 +1,7 @@
 %import json
 %from utils import m2j, ms2js
 %from settings import APP_DOMAIN
+%from api import Store
 
 
 %def head():
@@ -139,13 +140,13 @@
 				<li>Size: <%= human_size(size) %></li>
 				<li>Type: <%= type %></li>
 				<!-- --><% if (pub) {%>
-				    <li>Public URL: <a href="http:/<%= PilesIO.App.CONTENT_DOMAIN %>/<%= path %>">http://<%= PilesIO.App.CONTENT_DOMAIN %>/<%= path %></a></li>
+				    <li>Public URL: <a href="http://<%= PilesIO.App.CONTENT_DOMAIN %>/<%= path %>">http://<%= PilesIO.App.CONTENT_DOMAIN %>/<%= path %></a></li>
 				<!-- --><% } %>
 			</ul>
 		</div>
 		<div class="modal-footer">
 			<a href="#" class="btn close">Close</a>
-			<a href="/piles/<%= pid %>/files/<%= id %>/content" class="btn primary">Download</a>
+			<a href="http://<%= PilesIO.App.APP_DOMAIN %>/piles/<%= pid %>/files/<%= id %>/content" class="btn primary">Download</a>
 		</div>
 	</script>
 

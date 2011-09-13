@@ -31,7 +31,22 @@
   <script src="http://{{CONTENT_DOMAIN}}/static/js/backbone.js"></script>
   <script src="http://{{CONTENT_DOMAIN}}/static/js/swfupload.js" type="text/javascript"></script>
   <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery.swfupload.js" type="text/javascript" charset="utf-8"></script>
-
+  <script>
+$(function() {
+    // Handle input focus and blur
+    $(':input[title]').live('focus',function() {
+        var $this = $(this)
+        if($this.val() === $this.attr('title')) {
+          $this.val('');
+        }
+    }).live('blur',function() {
+        var $this = $(this)
+        if($this.val() === '') {
+          $this.val($this.attr('title'));
+        }
+    });
+})
+  </script>
 </script>
 
 
