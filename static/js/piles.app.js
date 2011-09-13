@@ -236,6 +236,7 @@
 			x:0,
 			y:0,
 			pub:false,
+			type:'Unknown File',
 		},
 		initialize: function() {
 		    
@@ -306,7 +307,6 @@
 	})
 	
 	var Pile = PilesIO.Pile = Backbone.Model.extend({
-		urlRoot: 'http://'+PilesIO.App.APP_DOMAIN+'/piles',
 		defaults:{
 			welcome:false,
 			cost_get:0.140,
@@ -314,6 +314,7 @@
 			cost_sto:0.160
 		},
 		initialize: function() {
+    		this.urlRoot = 'http://'+PilesIO.App.APP_DOMAIN+'/piles',
 			this.files = new FileCollection
 			this.files.url = 'http://'+PilesIO.App.APP_DOMAIN+'/piles/'+this.id+'/files'
 			var self = this;

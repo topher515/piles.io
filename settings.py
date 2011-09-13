@@ -36,6 +36,8 @@ EMAIL_BOX_PWD = ''
 EMAIL_SMTP_HOST = 'localhost'
 EMAIL_FROM_ADDR = 'robot@piles.io'
 
+DEPLOYED = False # This should be true in the `local_settings.py` file of the API server
+
 try:
 	from local_settings import *
 except ImportError:

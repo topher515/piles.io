@@ -14,6 +14,14 @@ from settings import APP_DOMAIN, AWS_ACCESS_KEY_ID, APP_BUCKET, APP_BUCKET_ACL, 
 
 ### Utils ###
 
+class MyStringIO(StringIO):
+    def __init__(self,string,*args,**kwargs):
+        self._str_len = len(string)
+        return StringIO.__init__(self,string,*args,**kwargs)
+    
+    def __len__(self):
+        return self._str_len
+
 def app_meta():
     return {
         'BUCKET_NAME':APP_BUCKET,

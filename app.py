@@ -4,10 +4,9 @@ import bottle
 import requests
 from bottle import route, run, request, abort, redirect, static_file, template
 import logging
-logger = logging.getLogger('piles_io.api')
+logger = logging.getLogger('piles_io.app')
 
 from utils import *
-from s3piles import *
 from api import *
 from auth import hash_password, session, do_login, do_logout, auth_json, auth_w_redirect
 
@@ -106,7 +105,7 @@ def create_do():
 
 @route('/login', method="GET")
 def login():
-    return template('login',email='Email',errors=[])
+    return template('login',email='Email',errors=[], app_meta=app_meta())
 
 @route('/login', method="POST")
 def login_do():
@@ -191,11 +190,6 @@ def usage(pilename):
         
     return redirect('/'+pilename)
     
-
-@route('/s3test/:key')
-def s3test(key):
-    policy,signature = build_policy_doc(key)
-    return template('s3test',key=key,policy=policy,signature=signature)
 
 
 @route('/:pilename')

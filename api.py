@@ -3,10 +3,16 @@ import datetime, hashlib, random, string, os, StringIO
 import bottle
 import requests
 from bottle import route, run, request, abort, redirect, static_file, template, response
+from settings import DEPLOYED
 import logging
-logger = logging.getLogger('piles_io.main')
+logger = logging.getLogger('piles_io.api')
 from utils import *
-from s3piles import *
+if DEPLOYED:
+    print "Importing real S3 content store."
+    from contentstore import S3Store as Store
+else:
+    print "Importing fake content store"
+    from contentstore import FakeStore as Store
 from auth import hash_password, session, do_login, do_logout, auth_json
 
 from beaker.middleware import SessionMiddleware
@@ -232,9 +238,7 @@ def files_post(pid):
     db.files.save(entity)
     
     # Build policy and signature information 
-    policy,signature = build_policy_doc(entity['path'])
-    entity['policy'] = policy
-    entity['signature'] = signature
+    Store().add_storage_info(entity)
     return m2j(entity)
 
 
@@ -269,11 +273,11 @@ def file_put(pid,fid):
     
     if new_entity['pub'] and not old_entity.get('pub'):
         # This entity changed to public
-        s3setpub(new_entity['path'])
+        Store().setpub(new_entity['path'])
         #pass
     elif not new_entity['pub'] and old_entity.get('pub'):
         # This entity changed to private
-        s3setpriv(new_entity['path'])
+        Store().setpriv(new_entity['path'])
         #pass
     
     # Save if the amazon change was successful
@@ -291,7 +295,7 @@ def file_put(pid,fid):
 def file_delete(pid,fid):
     
     entity = db.files.find_one({'pid':pid,'_id':fid})
-    s3del(entity['path'])
+    Store().delete(entity['path'])
     db.files.remove(entity)
     
     # File was successfully deleted, so remove it from usage stats
@@ -328,7 +332,8 @@ def file_(pid,fid):
         return file_delete(pid,fid)
     abort(405)
     
-
+    
+''''  <--- This is no longer necessary as users upload files directly
 @route('/piles/:pid/files/:fid/content', method=['PUT','POST'])
 @auth_json
 def put_file_content(pid,fid):
@@ -348,28 +353,21 @@ def put_file_content(pid,fid):
     #   pile.update({'usage_sto':0,'usage_up':0,'usage_down':0})
     print "Incrementing usage by %s" % f['size']
     db.piles.update({'_id':pid},{'$inc':{'usage_sto':int(f['size']), 'usage_put':int(f['size'])}})
+'''
 
 
 # Public!
 @route('/~:pid-:fid')
 def short_file_content(pid,fid):
     f = db.files.find_one({'_id':fid,'pid':pid})
-    return redirect(public_get_url(f['path']))
-
-
-@route('/testpost')
-def testpost():
-    return
+    return redirect(Store().public_get_url(f['path']))
 
 
 @route('/piles/:pid/files/:fid/content', method='GET')
 @auth_json
 def get_file_content(pid,fid):
     f = db.files.find_one({'_id':fid,'pid':pid})
-    #return json.dumps(f)
-    #name,ext = s3name(pid,fid,f)
-    authed_url = authed_get_url(f['path'])
-    #print authed_url
+    authed_url = Store().authed_get_url(f['path'])
     return redirect(authed_url)
 
 
@@ -377,6 +375,4 @@ def get_file_content(pid,fid):
 @auth_json
 def get_file_thumbail(pid,fid):
     f = db.files.find_one({'_id':fid,'pid':pid})
-    #return json.dumps(f)
-    # name = s3name(pid,fid,f)
     return redirect('http://%s.s3.amazonaws.com/%s' % (BUCKET_NAME,name))

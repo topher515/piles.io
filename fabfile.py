@@ -5,7 +5,7 @@ from fabric.contrib.console import confirm
 import bottle
 from bottle import template
 bottle.TEMPLATES.clear()
-import s3piles
+import contentstore
 import StringIO, glob
 import pickle
 import datetime
@@ -82,7 +82,7 @@ class S3Deployer(Deployer):
             self.change_tracker = {}
     
     def deploy(self):  # Make sure this is public
-        s3conn = s3piles.s3conn()
+        s3conn = contentstore.s3conn()
         print "Checking for files to upload to %s..." % self.bucket,
         count = 0
         try:
@@ -117,8 +117,8 @@ class S3Deployer(Deployer):
 
 
 def wfdeploy(branch='master'):
-    local('git add -p')
-    local('git commit')
+    if local('git add -p'):
+        local('git commit')
     local("git push origin %s" % branch)
     code_dir = '~/webapps/piles_app/piles_io/'
     with cd(code_dir):

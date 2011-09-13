@@ -18,10 +18,7 @@ bottle.TEMPLATE_PATH = TEMPLATE_PATHS
 @route('/', method='POST')
 def file_post():
     print "Simulated file post"
-    if not request.files.get('file'):
-        abort(400,"Your file post is missing the 'file' input")
-    print "File post data:"
-    print request.forms
+    print request.forms.items()
     print "Reading file with name %s..." % request.files['file'].filename,
     request.files['file'].file.read()
     print "...done reading."

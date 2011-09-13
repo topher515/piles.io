@@ -22,4 +22,4 @@
 </div>
 %end
 
-%rebase layout content=content, head=head, meta={'title':'Verify your Email'}
+%rebase layout content=content, head=head, meta={'title':'Verify your Email'}, app_meta=app_meta

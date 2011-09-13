@@ -1,4 +1,4 @@
-from s3piles import s3conn
+from contentstore import s3conn
 s3conn = s3conn()
 import pymongo
 from db import db

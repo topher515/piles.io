@@ -1,4 +1,4 @@
-%from s3piles import public_get_url
+%from api import Store #public_get_url
 %from utils import human_size
 
 %def head():
@@ -41,8 +41,8 @@ $(function() {
 			<tr>
 				<td>{{file['name']}}</td>
 				<td>{{human_size(file['size'])}}</td>
-				<td><a class="btn primary small" href="{{public_get_url(file['path'])}}">Download</a></td>
-				<td><a class="btn small" href="{{public_get_url(file['path'])}}?torrent">Torrent</a></td>
+				<td><a class="btn primary small" href="{{Store().public_get_url(file['path'])}}">Download</a></td>
+				<td><a class="btn small" href="{{Store().public_get_url(file['path'])}}?torrent">Torrent</a></td>
 			</tr>
 		</tbody>
 		%end

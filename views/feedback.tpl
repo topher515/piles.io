@@ -1,3 +1,5 @@
+%from settings import CONTENT_DOMAIN
+
 <script>
 $(function() {
 	
@@ -104,7 +106,7 @@ $(function() {
 </style>
 
 <div class="feedback-button">
-	<img src="/static/img/feedback.png" />
+	<img src="http://{{CONTENT_DOMAIN}}/static/img/feedback.png" />
 </div>
 
 <script type="text/template" id="feedback-tpl">
@@ -121,21 +123,21 @@ $(function() {
 				<ul class="feedback-type">
 					<li>
 							<div class="dislike">
-								<img src="/static/img/thumb_dislike_big.png">
+								<img src="http://{{CONTENT_DOMAIN}}/static/img/thumb_dislike_big.png">
 								<span>
 								<input type="radio" name="type" value="dislike"> This sucks!</span>
 							</div>
 					</li>
 					<li>
 							<div class="bug">
-								<img src="/static/img/bug_big.png">
+								<img src="http://{{CONTENT_DOMAIN}}/static/img/bug_big.png">
 								<span>
 								<input type="radio" name="type" value="bug"> Report a Bug</span>
 							</div>
 					</li>
 					<li>
 							<div class="like">
-								<img src="/static/img/thumb_like_big.png">
+								<img src="http://{{CONTENT_DOMAIN}}/static/img/thumb_like_big.png">
 								<span>
 								<input type="radio" name="type" value="like"> This is awesome!</span>
 							</div>
