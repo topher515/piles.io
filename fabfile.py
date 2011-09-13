@@ -117,6 +117,8 @@ class S3Deployer(Deployer):
 
 
 def wfdeploy(branch='master'):
+    local('git add -p')
+    local('git commit')
     local("git push origin %s" % branch)
     code_dir = '~/webapps/piles_app/piles_io/'
     with cd(code_dir):
