@@ -89,9 +89,9 @@ class S3Store(object):
         return auth_gen.get(APP_BUCKET,path)
 
 
-    def put(self,fp,name):
+    def put(self,fp,name,options={}):
         conn = self.s3conn
-        response = conn.put(APP_BUCKET,name,S3.S3Object(fp)) #,headers={'x-amz-acl':'public-read'})
+        response = conn.put(APP_BUCKET,name,S3.S3Object(fp),options) #,headers={'x-amz-acl':'public-read'})
         status = response.http_response.status
         if 200 > status < 300:
             abort(500, 'AWS failure: ' +response.message)

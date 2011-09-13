@@ -5,7 +5,7 @@ from fabric.contrib.console import confirm
 import bottle
 from bottle import template
 bottle.TEMPLATES.clear()
-import contentstore
+from contentstore import S3Store
 import StringIO, glob
 import pickle
 import datetime
@@ -75,6 +75,7 @@ class S3Deployer(Deployer):
     def __init__(self,gatherer,bucket=APP_BUCKET):
         self.bucket = bucket
         self.gatherer = gatherer
+        self.store = S3Store()
         try:
             f = open('deploy_tracker.pickle','r')
             self.change_tracker = pickle.load(f)
@@ -82,7 +83,7 @@ class S3Deployer(Deployer):
             self.change_tracker = {}
     
     def deploy(self):  # Make sure this is public
-        s3conn = contentstore.s3conn()
+        store = self.store
         print "Checking for files to upload to %s..." % self.bucket,
         count = 0
         try:
@@ -94,7 +95,7 @@ class S3Deployer(Deployer):
                     # print key + ' with content type ' + content_type + '...skipping.'
                     continue
             
-                resp = s3conn.put(self.bucket,key,MyStringIO(content),{"x-amz-acl":"public-read",'Content-Type':content_type})
+                resp = store.put(MyStringIO(content),key,{"x-amz-acl":"public-read",'Content-Type':content_type})
                 status = resp.http_response.status
                 if 200 > status < 300:
                     print "Deploy failed. Unable to upload '%s'" % fpath
