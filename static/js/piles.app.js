@@ -285,7 +285,7 @@
 			}, this);
 		},
 		download_url: function() {
-			return this.url() + '/content'
+			return 'http://' + PilesIO.App.CONTENT_DOMAIN + '/' + this.get('path')
 		},
 		delete: function() {
 			var self = this;

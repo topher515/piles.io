@@ -10,7 +10,7 @@ logger = logging.getLogger()
 from smtplib import SMTP
 
 from settings import EMAIL_BOX_NAME, EMAIL_BOX_PWD, EMAIL_FROM_ADDR, EMAIL_SMTP_HOST
-from settings import APP_DOMAIN, AWS_ACCESS_KEY_ID, APP_BUCKET, APP_BUCKET_ACL, FILE_POST_URL
+from settings import APP_DOMAIN, AWS_ACCESS_KEY_ID, APP_BUCKET, APP_BUCKET_ACL, FILE_POST_URL, CONTENT_DOMAIN
 
 ### Utils ###
 
@@ -22,6 +22,7 @@ def app_meta():
         'AWS_POST_DOMAIN':APP_BUCKET + '.s3.amazonaws.com',
         'FILE_POST_URL':FILE_POST_URL,
         'APP_BUCKET_ACL':APP_BUCKET_ACL,
+        'CONTENT_DOMAIN':CONTENT_DOMAIN,
     }
 
 def extra_json_serializers(python_object):                                             

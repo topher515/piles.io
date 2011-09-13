@@ -10,6 +10,7 @@ APP_BUCKET_ACL = 'private' #'bucket-owner-full-control'
 FILE_POST_URL = 'http://dev.piles.io'
 LOG_BUCKET = 'dev.piles.io-logging'
 LOG_BUCKET_PREFIX = 'dev.piles.io-access-log-'
+CONTENT_DOMAIN = 'dev.piles.io'
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
 MONGO_DB_NAME = 'piles-dev'
