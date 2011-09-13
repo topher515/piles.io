@@ -7,9 +7,8 @@ logger = logging.getLogger('piles_io.api')
 
 from utils import app_meta
 
-
-from settings import DIRNAME, TEMPLATE_PATHS # Override with local settings
-bottle.TEMPLATE_PATH = TEMPLATE_PATHS
+from settings import settings # Override with local settings
+bottle.TEMPLATE_PATH = settings('TEMPLATE_PATHS')
 
 
 
@@ -31,9 +30,9 @@ def server_static(path):
 
 def stage():
     '''Stage all the necessary static files!'''
-    staged_dir = os.path.join(DIRNAME,'staged')
+    staged_dir = os.path.join(settings('DIRNAME'),'staged')
     staged_static_dir = os.path.join(staged_dir,'static')
-    orig_static_dir = os.path.join(DIRNAME,'static')
+    orig_static_dir = os.path.join(settings('DIRNAME'),'static')
     
     # Stage the app
     if not os.path.isdir(staged_dir):

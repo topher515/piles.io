@@ -8,21 +8,21 @@ import S3
 import logging
 logger = logging.getLogger()
 
-from settings import DIRNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, APP_BUCKET, APP_BUCKET_ACL, CONTENT_DOMAIN
+from settings import settings #DIRNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, APP_BUCKET, APP_BUCKET_ACL, CONTENT_DOMAIN
 
 ## S3
-public_acp_xml = open(os.path.join(DIRNAME,'resources/public-acp.xml')).read()
-private_acp_xml = open(os.path.join(DIRNAME,'resources/private-acp.xml')).read()
+public_acp_xml = open(os.path.join(settings('DIRNAME'),'resources/public-acp.xml')).read()
+private_acp_xml = open(os.path.join(settings('DIRNAME'),'resources/private-acp.xml')).read()
 
 
 class S3Store(object):
     
     def __init__(self,s3conn=None,bucket=None):
         if not s3conn:
-            s3conn = S3.AWSAuthConnection(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY)
+            s3conn = S3.AWSAuthConnection(settings('AWS_ACCESS_KEY_ID'),settings('AWS_SECRET_ACCESS_KEY'))
         self.s3conn = s3conn
         if not bucket:
-            bucket = APP_BUCKET
+            bucket = settings('APP_BUCKET')
         self.bucket = bucket
     
     def add_storage_info(self,entity):
@@ -48,7 +48,7 @@ class S3Store(object):
             ]
         }
         policy_doc = base64.b64encode(json.dumps(policy))
-        sig = base64.b64encode(hmac.new(AWS_SECRET_ACCESS_KEY,policy_doc,sha1).digest())
+        sig = base64.b64encode(hmac.new(settings('AWS_SECRET_ACCESS_KEY'),policy_doc,sha1).digest())
         return policy_doc,sig
     
     
@@ -64,7 +64,7 @@ class S3Store(object):
         return urlquote(b64sig,safe='')
     
     def public_get_url(self,path):
-        return 'http://%s/%s' % (CONTENT_DOMAIN,path)
+        return 'http://%s/%s' % (settings('CONTENT_DOMAIN'),path)
 
     def _authed_get_url(self,path,expires=None):
         bucket = self.bucket
@@ -87,7 +87,7 @@ class S3Store(object):
         path = path.strip('/')
         #if not expires:
         #   expires = datetime.datetime.now() + datetime.timedelta(0,60*10) # In 10 min
-        auth_gen = S3.QueryStringAuthGenerator(AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY) #PP_BUCKET)
+        auth_gen = S3.QueryStringAuthGenerator(settings('AWS_ACCESS_KEY_ID'),settings('AWS_SECRET_ACCESS_KEY')) #PP_BUCKET)
         #auth_gen.set_expires(expires)
         return auth_gen.get(self.bucket,path)
 

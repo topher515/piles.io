@@ -3,11 +3,11 @@ import datetime, hashlib, random, string, os, StringIO
 import bottle
 import requests
 from bottle import route, run, request, abort, redirect, static_file, template, response
-from settings import DEPLOYED
+from settings import settings
 import logging
 logger = logging.getLogger('piles_io.api')
 from utils import *
-if DEPLOYED:
+if settings('DEPLOYED'):
     print "Importing real S3 content store."
     from contentstore import S3Store as Store
 else:

@@ -8,7 +8,7 @@ logger = logging.getLogger()
 from utils import FakeLogger
 logger = FakeLogger()
 
-from settings import LOG_BUCKET, LOG_BUCKET_PREFIX # AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+from settings import settings #LOG_BUCKET, LOG_BUCKET_PREFIX # AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 
 
 
@@ -182,11 +182,11 @@ class S3LogProcessor(object):
             print "Processed %s log entries..." % count
 
 def logiter():
-    log_grabber = S3LogGrabber(LOG_BUCKET, LOG_BUCKET_PREFIX)
+    log_grabber = S3LogGrabber(settings('LOG_BUCKET'), settings('LOG_BUCKET_PREFIX'))
     return log_grabber.logiter()
     
 def parsedlogiter():
-    log_grabber = S3LogGrabber(LOG_BUCKET, LOG_BUCKET_PREFIX)
+    log_grabber = S3LogGrabber(settings('LOG_BUCKET'), settings("LOG_BUCKET_PREFIX"))
     log_parser = S3LogParser()
     for logline in log_grabber.logiter():
         yield log_parser.parseline(logline)
@@ -203,7 +203,7 @@ def disp():
         
 
 def main():
-    return S3LogProcessor(LOG_BUCKET, LOG_BUCKET_PREFIX, db).process_new_logs()
+    return S3LogProcessor(settings('LOG_BUCKET'), settings('LOG_BUCKET_PREFIX'), db).process_new_logs()
 
 if __name__ == '__main__':
     main()

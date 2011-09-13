@@ -12,8 +12,8 @@ from auth import hash_password, session, do_login, do_logout, auth_json, auth_w_
 
 from beaker.middleware import SessionMiddleware
 
-from settings import DIRNAME, TEMPLATE_PATHS, CONTENT_DOMAIN
-bottle.TEMPLATE_PATH = TEMPLATE_PATHS
+from settings import settings 
+bottle.TEMPLATE_PATH = settings('TEMPLATE_PATHS')
 
 from db import db, DESCENDING, ASCENDING
 
@@ -37,7 +37,7 @@ def front():
     pile = authed['piles'][0]
     if not pile:
         return abort(404,'Your user account (%s) does not have a Pile associated with it. Please report this error!' % user_ent['email'])
-    return redirect('http://'+CONTENT_DOMAIN +'/app#'+pile['name'])
+    return redirect('http://'+settings('CONTENT_DOMAIN') +'/app#'+pile['name'])
 
 
 @route('/create', method="GET")
@@ -206,7 +206,7 @@ def pile(pilename):
     if s.get('authenticated') and not request.GET.get('public'):
         authed_piles = [ p['_id'] for p in s['authenticated']['piles'] ]
         if pile['_id'] in authed_piles:
-            return redirect('http://'+CONTENT_DOMAIN +'/app#'+pile['name'])
+            return redirect('http://'+settings('CONTENT_DOMAIN') +'/app#'+pile['name'])
             #files = db.files.find({'pid':pile['_id']})
             #return template('app',{'pile':pile,'files':files,'app_meta':app_meta()})
     
@@ -220,7 +220,7 @@ def getapp():
         "session.type": "file",
         'session.cookie_expires': True,
         'session.auto': True,
-        'session.data_dir': os.path.join(DIRNAME,"cache"),
+        'session.data_dir': os.path.join(settings("DIRNAME"),"cache"),
     }
     app = bottle.default_app()
     app = SessionMiddleware(app, session_opts)

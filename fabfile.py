@@ -5,13 +5,16 @@ from fabric.contrib.console import confirm
 
 import os
 import bottle
-import settings
+from settings import settings
+settings.require('global')
 from bottle import template
 bottle.TEMPLATES.clear()
 from contentstore import S3Store
 import StringIO, glob
 import pickle
 import datetime
+
+import stager
 
 from utils import app_meta
 
@@ -67,7 +70,9 @@ class FileGatherer(object):
     @property
     def files(self):
         # The app
-        yield open('staged/app','r'),'app','text/html'
+        app_html = template('app',app_meta=app_meta())
+        #print app_html
+        yield MyStringIO(app_html),'app','text/html'
         # All other static files
         for path,name in self.static_paths:
             fp = open(path,'r')
@@ -85,8 +90,7 @@ class FileGatherer(object):
 class S3Deployer(Deployer):
     def __init__(self,gatherer,bucket=None):
         if not bucket:
-            from settings import APP_BUCKET
-            bucket = APP_BUCKET
+            bucket = settings('APP_BUCKET')
         self.bucket = bucket
         self.gatherer = gatherer
         self.store = S3Store()
@@ -145,16 +149,6 @@ def wfdeploy(branch='master'):
 
 
 def awsdeploy():
-    # This is sketch-ballz, but its the simplest thing i can think of now
-    with fabsettings(warn_only=True):
-        local('rm local_settings.pyc')
-        local('mv local_settings.py local_settings-.py')
-    global settings
-    del settings
-    try:
-        S3Deployer(FileGatherer()).deploy()
-    except:
-        raise
-    finally:
-        local('mv local_settings-.py local_settings.py')
+    stager.stage()
+    S3Deployer(FileGatherer()).deploy()
         

@@ -9,8 +9,7 @@ import logging
 logger = logging.getLogger()
 from smtplib import SMTP
 
-from settings import EMAIL_BOX_NAME, EMAIL_BOX_PWD, EMAIL_FROM_ADDR, EMAIL_SMTP_HOST
-from settings import APP_DOMAIN, AWS_ACCESS_KEY_ID, APP_BUCKET, APP_BUCKET_ACL, FILE_POST_URL, CONTENT_DOMAIN
+from settings import settings
 
 ### Utils ###
 
@@ -32,13 +31,12 @@ class MyStringIO(StringIO):
 
 def app_meta():
     return {
-        'BUCKET_NAME':APP_BUCKET,
-        'AWS_ACCESS_KEY_ID':AWS_ACCESS_KEY_ID,
-        'APP_DOMAIN':APP_DOMAIN,
-        'AWS_POST_DOMAIN':APP_BUCKET + '.s3.amazonaws.com',
-        'FILE_POST_URL':FILE_POST_URL,
-        'APP_BUCKET_ACL':APP_BUCKET_ACL,
-        'CONTENT_DOMAIN':CONTENT_DOMAIN,
+        'BUCKET_NAME':settings('APP_BUCKET'),
+        'AWS_ACCESS_KEY_ID':settings('AWS_ACCESS_KEY_ID'),
+        'APP_DOMAIN':settings('APP_DOMAIN'),
+        'FILE_POST_URL':settings('FILE_POST_URL'),
+        'APP_BUCKET_ACL':settings('APP_BUCKET_ACL'),
+        'CONTENT_DOMAIN':settings('CONTENT_DOMAIN'),
     }
 
 def extra_json_serializers(python_object):                                             
@@ -90,7 +88,7 @@ def ms2js(l):
 def j2m(j):
     try:
         j = json.loads(j)
-    except ValueErro:
+    except ValueError:
         abort(400,'Invalid JSON')
     j['_id'] = j['id']
     del j['id']
