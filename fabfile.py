@@ -127,11 +127,11 @@ def wfdeploy(branch='master'):
 
 
 def awsdeploy():
-    local('mv local_settings.py -local_settings.py') # This is sketch-ballz, but its the simplest thing i can think of now
+    local('mv local_settings.py local_settings-.py') # This is sketch-ballz, but its the simplest thing i can think of now
     try:
         S3Deployer(FileGatherer()).deploy()
     except:
         raise
     finally:
-        local('mv -local_settings.py local_settings.py')
+        local('mv local_settings-.py local_settings.py')
         
