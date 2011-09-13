@@ -42,7 +42,9 @@ class validator(object):
 def jsonp(old_route):
     def new_route(*args,**kwargs):
         if request.GET.get('callback'):
-            response.set_header('Content-Type','text/javascript; charset=UTF-8')
+            #print response
+            #print dir(response)
+            response.headers['Content-Type'] = 'text/javascript; charset=UTF-8'
             wrapper = request.GET['callback']
             if request.GET.get('model'):
                 body = urllib.unquote(request.GET['model'])
@@ -196,8 +198,6 @@ def piles(pid):
 ##########################################################
 
 valid_file_attrs = {
-    'left':{'type':float},
-    'top':{'type':float},
     'size':{'type':float},
     'ext':{'type':unicode},
     'id':{'type':unicode}, #fid
@@ -208,6 +208,8 @@ valid_file_attrs = {
     'icon':{'type':unicode},
     'name':{'type':unicode},
     'path':{'type':unicode},  # aws s3 key
+    'x':{'type':float},
+    'y':{'type':float}
 }
 
 
