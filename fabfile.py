@@ -72,7 +72,8 @@ class FileGatherer(object):
         
             
 class S3Deployer(Deployer):
-    def __init__(self,gatherer):
+    def __init__(self,gatherer,bucket=APP_BUCKET):
+        self.bucket = bucket
         self.gatherer = gatherer
         try:
             f = open('deploy_tracker.pickle','r')
@@ -82,18 +83,18 @@ class S3Deployer(Deployer):
     
     def deploy(self):  # Make sure this is public
         s3conn = s3piles.s3conn()
-        print "Checking for files to upload...",
+        print "Checking for files to upload to %s..." % self.bucket,
         count = 0
         try:
             for fp,key,content_type in self.gatherer.files:
                 
                 content = fp.read()
-                content_hash = hash(content)
+                content_hash = hash(self.bucket + content)
                 if self.change_tracker.get(key) and self.change_tracker[key][0] == content_hash:
                     # print key + ' with content type ' + content_type + '...skipping.'
                     continue
             
-                resp = s3conn.put(APP_BUCKET,key,MyStringIO(content),{"x-amz-acl":"public-read",'Content-Type':content_type})
+                resp = s3conn.put(self.bucket,key,MyStringIO(content),{"x-amz-acl":"public-read",'Content-Type':content_type})
                 status = resp.http_response.status
                 if 200 > status < 300:
                     print "Deploy failed. Unable to upload '%s'" % fpath
