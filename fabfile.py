@@ -1,16 +1,16 @@
 from __future__ import with_statement
-from fabric.api import local, settings, abort, run, cd, env
+from fabric.api import local, abort, run, cd, env
+from fabric.api import settings as fabsettings
 from fabric.contrib.console import confirm
 
 import bottle
+import settings
 from bottle import template
 bottle.TEMPLATES.clear()
 from contentstore import S3Store
 import StringIO, glob
 import pickle
 import datetime
-
-from settings import APP_BUCKET
 
 from utils import app_meta
 
@@ -72,7 +72,10 @@ class FileGatherer(object):
         
             
 class S3Deployer(Deployer):
-    def __init__(self,gatherer,bucket=APP_BUCKET):
+    def __init__(self,gatherer,bucket=None):
+        if not bucket:
+            from settings import APP_BUCKET
+            bucket = APP_BUCKET
         self.bucket = bucket
         self.gatherer = gatherer
         self.store = S3Store()
@@ -119,7 +122,7 @@ class S3Deployer(Deployer):
 
 def wfdeploy(branch='master'):
     local('git add -p')
-    with settings(warn_only=True):
+    with fabsettings(warn_only=True):
         result = local('git commit')
     local("git push origin %s" % branch)
     code_dir = '~/webapps/piles_app/piles_io/'
@@ -129,7 +132,12 @@ def wfdeploy(branch='master'):
 
 
 def awsdeploy():
-    local('mv local_settings.py local_settings-.py') # This is sketch-ballz, but its the simplest thing i can think of now
+    # This is sketch-ballz, but its the simplest thing i can think of now
+    with fabsettings(warn_only=True):
+        local('rm local_settings.pyc')
+        local('mv local_settings.py local_settings-.py')
+    global settings
+    del settings
     try:
         S3Deployer(FileGatherer()).deploy()
     except:
