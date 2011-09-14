@@ -17,8 +17,8 @@ $(function() {
     window.pilehash = {{m2j(pile)}}
     window.usage = new PilesIO.Usage({
         sto_total_bytes: pilehash.usage_sto,
-        get_total_bytes: pilehash.usage_put,
-        put_total_bytes: pilehash.usage_get,
+        get_total_bytes: pilehash.usage_get,
+        put_total_bytes: pilehash.usage_put,
     });
     usage.files.reset({{ms2js(files)}})
     usage.usage_gets.reset({{ms2js(usage_gets)}})
@@ -31,7 +31,7 @@ $(function() {
 
 
 <script type="text/template" id="usage-event-tpl">
-    <td><%= datetime %></td><td><%= key.slice(12) %></td><td><%= human_size(bytes || objectsize) %></td>
+    <td><%= datetime %></td><td><%= key.slice(14) %></td><td><%= human_size(bytes || objectsize) %></td>
 </script>
 
 

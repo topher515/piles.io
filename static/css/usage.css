@@ -53,3 +53,6 @@
 			color:white;
 			text-shadow:2px 2px #000;
 		}
+	.usage-diagram .usage-event {
+	    font-size:.7em;
+	}

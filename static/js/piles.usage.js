@@ -56,6 +56,7 @@ $(function() {
     var UsageEventView = PilesIO.UsageEventView = Backbone.View.extend({
         
         tagName: 'tr',
+        className:'usage-event',
         
         initialize:function() {
             this.$el = $(this.el)
