@@ -26,11 +26,11 @@ class S3LogParser(object):
             '%{key}i':('key',None),
             '%{requesturi}i':('uri',None),
             '%{requestid}i':('_id',None),
-            '%{status}s':('status',None),
+            '%{status}s':('status',int),
             '%{error}i':('error',None),
             '%{bytes}b':('bytes',int),
             '%{versionid}i':('versionid',None),
-            '%{objectsize}i':('objectsize',None)
+            '%{objectsize}i':('objectsize',int)
         }
 
 
@@ -162,22 +162,23 @@ class S3LogProcessor(object):
                     db.usage_gets.save(plogline)
                     
                 
-                elif plogline['operation'] == 'REST.PUT.OBJECT':
+                elif plogline['operation'] == 'REST.POST.BUCKET' or plogline['operation'] == 'REST.PUT.OBJECT': # The put should never happen... but...
                     try:
                         plogline = extract_pid_fid(plogline)
                     except ValueError:
                         continue # Don't bother it's not a customer's get
                     logger.debug("Save PUT log line %s" % plogline)
-                    db.piles.update({'_id':plogline['pid']},{'$inc':{'usage_put':plogline['objectsize']}})
+                    db.piles.update({'_id':plogline['pid']},{'$inc':{'usage_put':plogline['objectsize'],'usage_sto':plogline['objectsize']}})
                     db.usage_puts.save(plogline)
                 
-                elif plogline['operation'] == 'REST.DELETE.OBJECT': 
+                elif plogline['operation'] == 'REST.DELETE.OBJECT':
                     try:
                         plogline = extract_pid_fid(plogline)
                     except ValueError:
                         continue # Don't bother it's not a customer's get
                     logger.debug("Save DEL log line %s" % plogline)
                     # We should have already recorded usage to the pile when it was deleted through the interface
+                    db.piles.update({'_id':plogline['pid']},{'$inc':{'usage_sto':-plogline['objectsize']}})
                     db.usage_dels.save(plogline)
                 #else:
                 #   db.logs.save(plogline)
