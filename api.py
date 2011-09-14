@@ -308,8 +308,8 @@ def file_delete(pid,fid):
     #for pile in authed['piles']:
     #   if pile['_id'] == pid: break
     # Decrement storage usage 
-    print "Decrementing usage by %s" % entity['size']
-    db.piles.update({'_id':pid},{'$inc':{'usage_sto':-int(entity['size'])}})
+    #print "Decrementing usage by %s" % entity['size']
+    #db.piles.update({'_id':pid},{'$inc':{'usage_sto':-int(entity['size'])}})
 
 
 # '/piles/:pid/files/:fid', method='GET'
