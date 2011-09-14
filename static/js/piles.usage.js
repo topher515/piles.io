@@ -53,7 +53,7 @@ $(function() {
     
     
     /* Views */
-    var UsageEventView = PilesIO.UsageEventView = Backbone.Model.extend({
+    var UsageEventView = PilesIO.UsageEventView = Backbone.View.extend({
         
         tagName: 'tr',
         
@@ -61,7 +61,7 @@ $(function() {
             this.$el = $(this.el)
         },
         render:function() {
-            this.$el.html(_.template($("#usage-event-tpl"),this.model.toJSON()))
+            this.$el.html(_.template($("#usage-event-tpl").html(),this.model.toJSON()))
         },
     })
     
@@ -107,10 +107,10 @@ $(function() {
             var $pes = $el.find('#put-events')
             
             _.each(this.model.usage_gets.models, function(m) {
-                $ges.append((new UsageEventView({model:m}).render().el))
+                $ges.append((new UsageEventView({model:m})).render().el)
             })
             _.each(this.model.usage_puts.models, function(m) {
-                $pes.append((new UsageEventView({model:m}).render().el))
+                $pes.append((new UsageEventView({model:m})).render().el)
             })
             
             // Render The Storage chart
