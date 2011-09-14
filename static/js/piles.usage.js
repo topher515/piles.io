@@ -53,16 +53,16 @@ $(function() {
     
     
     /* Views */
-    var UsageEventView = PilesIO.UsageEvent = Backbone.Model.extend({
+    var UsageEventView = PilesIO.UsageEventView = Backbone.Model.extend({
         
-        tagName: 'tr'
+        tagName: 'tr',
         
         initialize:function() {
             this.$el = $(this.el)
         },
         render:function() {
             this.$el.html(_.template($("#usage-event-tpl"),this.model.toJSON()))
-        }
+        },
     })
     
     var UsageView = PilesIO.UsageView = Backbone.View.extend({

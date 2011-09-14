@@ -14,8 +14,8 @@
 
 <script>
 $(function() {
-    var pilehash = {{m2j(pile)}}
-    var usage = new PilesIO.Usage({
+    window.pilehash = {{m2j(pile)}}
+    window.usage = new PilesIO.Usage({
         sto_total_bytes: pilehash.usage_sto,
         get_total_bytes: pilehash.usage_put,
         put_total_bytes: pilehash.usage_get,
@@ -31,7 +31,7 @@ $(function() {
 
 
 <script type="text/template" id="usage-event-tpl">
-    <td><%= datetime %></td><td><%= key %></td><td><%= size || objectsize %></td>
+    <td><%= datetime %></td><td><%= key %></td><td><%= human_size(size || objectsize) %></td>
 </script>
 
 
