@@ -27,6 +27,14 @@ $(function() {
 		}
 	})
     
+    var UsageEvent = PilesIO.UsageEvent = Backbone.Model.extend({})
+    var UsageEventCollection = PilesIO.UsageEventCollection = Backbone.Collection.extend({
+        model:UsageEvent,
+		comparator:function(uevent) {
+		    return uevent.get('datetime')
+		}
+    })
+    
     var Usage = PilesIO.Usage = Backbone.Model.extend({
         defaults: {
             sto_total_bytes:0,
@@ -37,21 +45,24 @@ $(function() {
             cost_put:0.020,
         },
         initialize:function() {
-    		this.files = new FileCollection	
+    		this.files = new FileCollection
+    		this.usage_gets = new UsageEventCollection
+    		this.usage_puts = new UsageEventCollection
         },
     });
     
-    var UsageEvent = PilesIO.UsageEvent = Backbone.Model.extend({})
-    var UsageEventCollection = PilesIO.UsageEventCollection = Backbone.Collection.extend({
-        model:UsageEvent,
-		comparator:function(uevent) {
-		    return uevent.get('datetime')
-		}
-    })
     
     /* Views */
     var UsageEventView = PilesIO.UsageEvent = Backbone.Model.extend({
         
+        tagName: 'tr'
+        
+        initialize:function() {
+            this.$el = $(this.el)
+        },
+        render:function() {
+            this.$el.html(_.template($("#usage-event-tpl"),this.model.toJSON()))
+        }
     })
     
     var UsageView = PilesIO.UsageView = Backbone.View.extend({
@@ -90,8 +101,20 @@ $(function() {
                 tpl = _.template($('#usage-tpl').html())
             $el.html(tpl(this.model.toJSON()))
             
-            var $usage_sto_chart = $el.find('#sto-chart')
             
+            // Render the most recent event lists
+            var $ges = $el.find('#get-events')
+            var $pes = $el.find('#put-events')
+            
+            _.each(this.model.usage_gets.models, function(m) {
+                $ges.append((new UsageEventView({model:m}).render().el))
+            })
+            _.each(this.model.usage_puts.models, function(m) {
+                $pes.append((new UsageEventView({model:m}).render().el))
+            })
+            
+            // Render The Storage chart
+            var $usage_sto_chart = $el.find('#sto-chart')
             var data = this._chart_files(this.model.get('sto_total_bytes'),this.model.files.models)
             
             var chart = new Highcharts.Chart({
