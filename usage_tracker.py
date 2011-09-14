@@ -125,6 +125,10 @@ class S3LogProcessor(object):
             s3key = plogline['key']
             index1 = s3key.index('/')
             pid = s3key[:index1]
+            
+            if pid == 'static':
+                raise ValueError # This is actually just a static-file request
+            
             remaining = s3key[index1+1:]
             index2 = remaining.index('/')
             fid = remaining[:index2]
