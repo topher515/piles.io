@@ -84,13 +84,6 @@ $(function() {
                 </td>
                 <td>
                     <table id="get-events">
-                        <thead>
-                            <tr>
-                                <td>Time</td><td>File</td><td>Size</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
                     </table>
                 </td>
                 <td></td>
@@ -109,13 +102,6 @@ $(function() {
                 </td>
                 <td>
                     <table id="put-events">
-                        <thead>
-                            <tr>
-                                <td>Time</td><td>File</td><td>Size</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
                     </table>
                 </td>
                 <td></td>

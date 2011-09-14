@@ -35,7 +35,7 @@
 	        top:-40px;
 	    }
 	.usage-diagram div.world {
-	    
+	    position:relative;
 		}
 		.usage-diagram div.world img.graphic {
 			width:128px;

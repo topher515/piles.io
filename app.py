@@ -185,8 +185,8 @@ def usage(pilename):
         authed_piles = [ p['_id'] for p in s['authenticated']['piles'] ]
         if pile['_id'] in authed_piles:
             # Get the pile's usage
-            usage_puts = db.usage_puts.find({'pid':pile['_id']}, sort=[('datetime',DESCENDING)], limit=10)
-            usage_gets = db.usage_gets.find({'pid':pile['_id']}, sort=[('datetime',DESCENDING)], limit=10)
+            usage_puts = db.usage_puts.find({'pid':pile['_id']}, sort=[('datetime',DESCENDING)], limit=7)
+            usage_gets = db.usage_gets.find({'pid':pile['_id']}, sort=[('datetime',DESCENDING)], limit=7)
             # Get the pile's files
             files = db.files.find({'pid':pile['_id']})
             return template('usage',{'pile':pile,'files':files, 'usage_puts':list(usage_puts), 'usage_gets':list(usage_gets)})

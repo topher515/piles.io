@@ -31,7 +31,7 @@ $(function() {
     var UsageEventCollection = PilesIO.UsageEventCollection = Backbone.Collection.extend({
         model:UsageEvent,
 		comparator:function(uevent) {
-		    return uevent.get('datetime')
+		    return -uevent.get('datetime')
 		}
     })
     
