@@ -54,7 +54,7 @@ settings.add_conf({
 
 'FILE_POST_URL': 'http://dev.piles.io',
 # The domain on which the application logic and API lives
-'APP_DOMAIN': 'api.dev.piles.io',
+'APP_DOMAIN': 'piles.io',
 # The domain on which the application and user content lives
 'CONTENT_DOMAIN': 'dev.piles.io',
 

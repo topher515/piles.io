@@ -165,11 +165,10 @@
      /// FYI Currently most M<-->V communication is direct; only the complex fileupload functionality has a controller.
 
     var FileUploadController = function() {
-        var file_queue = [],
-            filemodel_;
-        
+        var filemodel_stack = [];
         
         this.get_form_data = function() {
+            var filemodel_ = _.last(filemodel_stack)
             fdata = {
                 AWSAccessKeyId: PilesIO.App.AWS_ACCESS_KEY_ID,
     		    acl: PilesIO.App.APP_BUCKET_ACL,
@@ -189,37 +188,42 @@
         
         this.setup_upload = function($fileuploader, filemodel, filedata) {
             
+            //filemodel.filedata = filedata;
+            //filedata.filemodel = filemodel;
             
-            filemodel_ = filemodel;
-            
-            
-            // On fileuploader progress event
-            $fileuploader.bind('fileuploadprogress',function(e, data) {
-                filemodel.trigger('uploadprogress',parseInt(data.loaded / data.total * 100))
-                
-            })
-            
-            // On fileuploader done event
-            $fileuploader.bind('fileuploaddone', function(e, data) {
-				notify('info','File upload successful!')
-				filemodel.trigger('uploadsuccess')
-				filemodel.trigger('stopworking')
-				
-				filemodel.unbind('savesuccess')
-				filemodel.unbind('uploadprogress')
-				filemodel.unbind('uploaderror')
-			})
-			
-			$fileuploader.bind('fileuploadfail', function(e, data) {
-			    filemodel.trigger('uploaderror', data)
-			})
-            
-            filemodel.bind('savesuccess',function(model) { 
-                                
+            var savesuccesscallback = function(filemodel) {
+                // Unbind this function so its not called when we save the file again in the future
+                // e.g., when we move it around the pile
+				filemodel.unbind('savesuccess',savesuccesscallback)
+				// Start the file upload
                 filemodel.trigger('startworking')
                 filedata.url = PilesIO.App.FILE_POST_URL
+                filedata.filemodel = filemodel
+                filemodel_stack.push(filemodel)
                 filedata.submit()
-            })
+                filemodel_stack.pop()
+            }
+            
+            var fileuploaddonecallback = function(e, data) {
+                $fileuploader.unbind('fileuploaddone',fileuploaddonecallback)
+				notify('info','File upload successful!')
+				// Unbind model
+				data.filemodel.trigger('uploadsuccess')
+				data.filemodel.trigger('stopworking')
+			}
+			
+			var fileuploadprogresscallback = function(e, data) {
+                data.filemodel.trigger('uploadprogress',parseInt(data.loaded / data.total * 100))
+            }
+            
+            var fileuploadfailcallback = function(e, data) {
+			    data.filemodel.trigger('uploaderror', data)
+			}
+            
+            $fileuploader.bind('fileuploadprogress',fileuploadprogresscallback)
+            $fileuploader.bind('fileuploaddone', fileuploaddonecallback)
+			$fileuploader.bind('fileuploadfail', fileuploadfailcallback)
+			filemodel.bind('savesuccess',savesuccesscallback)
         }
     }
     var file_upload_controller = new FileUploadController()
@@ -581,42 +585,38 @@
 			// Setup fileuploader
 			$el.fileupload({
 				add:function(e, data) {
-				    var count = 0;
-					_.each(data.files, function (fileobj) {
-					        // Figure out some name stuff
-						var filename = fileobj.name || fileobj.fileName,
-						    namearray = filename.split('.'),
-						 	ext = namearray.length>1 ? _.last(namearray) : '',
-						 	
-						 	// Figure out which elem this was dropped on
-							$landed_elem = $(e.srcElement),
-							
-							// Calculate percent position of file elem
-						    x = (e.offsetX-25)/$landed_elem.width()*100, // Subtract 15px so its more at center of mouse
-						    y = (e.offsetY-25)/$landed_elem.height()*100,
-						    
-						    // Build the file model
-						    filemodel = new File({
-			    				x:x + (count*4),
-    							y:y,
-    							name:filename,
-    							size:fileobj.size,
-    							type:fileobj.type,
-    							ext:ext,
-    							pub:$landed_elem.hasClass('public')
-    						});
-    						
-                                          
-    						
+				    
+				    if (data.files.length != 1) {
+				        console.log('WARNING! Somehow got more than one file in add file');
+			        }
+				    
+				    var fileobj = data.files[0],
+				        filename = fileobj.name || fileobj.fileName,
+					    namearray = filename.split('.'),
+					 	ext = namearray.length>1 ? _.last(namearray) : '',
+					 	
+					 	// Figure out which elem this was dropped on
+						$landed_elem = $(e.srcElement),
 						
-						file_upload_controller.setup_upload($el,filemodel,data)
-						
-						// Add to the files list which triggers rendering
-						self.model.files.add(filemodel)
-						filemodel.save()
-						
-						count+=1
-					});
+						// Calculate percent position of file elem
+					    x = (e.offsetX-25)/$landed_elem.width()*100, // Subtract 15px so its more at center of mouse
+					    y = (e.offsetY-25)/$landed_elem.height()*100,
+					    
+					    // Build the file model
+					    filemodel = new File({
+		    				x:x,
+							y:y,
+							name:filename,
+							size:fileobj.size,
+							type:fileobj.type,
+							ext:ext,
+							pub:$landed_elem.hasClass('public')
+						});
+    					
+					file_upload_controller.setup_upload($el,filemodel,data)
+                    
+					self.model.files.add(filemodel)
+					filemodel.save()
 				},    
 			    formData: file_upload_controller.get_form_data,
                 multipart:true,

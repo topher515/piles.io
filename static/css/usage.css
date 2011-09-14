@@ -42,8 +42,8 @@
 		}
 		.usage-diagram div.world .arrow {
 			position:absolute;
-			top:0px;
-			left:35px;
+			top:-25px;
+			left:28px;
 			height:80px;
 		}
 		.usage-diagram div.world h2 {
