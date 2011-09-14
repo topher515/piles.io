@@ -62,6 +62,7 @@ $(function() {
         },
         render:function() {
             this.$el.html(_.template($("#usage-event-tpl").html(),this.model.toJSON()))
+            return this
         },
     })
     

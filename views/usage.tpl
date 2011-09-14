@@ -31,7 +31,7 @@ $(function() {
 
 
 <script type="text/template" id="usage-event-tpl">
-    <td><%= datetime %></td><td><%= key %></td><td><%= human_size(bytes || objectsize) %></td>
+    <td><%= datetime %></td><td><%= key.splice(12) %></td><td><%= human_size(bytes || objectsize) %></td>
 </script>
 
 
