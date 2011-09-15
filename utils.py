@@ -80,8 +80,9 @@ def m2j(x):
 def ms2js(l):
     ls = []
     for x in l:
-        x['id'] = x['_id']
-        del x['_id']
+        if x.get('_id'):
+            x['id'] = x['_id']
+            del x['_id']
         ls.append(x)
     return json.dumps(ls,default=extra_json_serializers)
 

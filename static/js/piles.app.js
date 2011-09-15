@@ -218,6 +218,7 @@
             
             var fileuploadfailcallback = function(e, data) {
 			    data.filemodel.trigger('uploaderror', data)
+			    data.filemodel.delete()
 			}
             
             $fileuploader.bind('fileuploadprogress',fileuploadprogresscallback)
@@ -750,8 +751,9 @@
 			})
 			
 			this.$el.append(this.twipsy.render().el)
-			this.tooltip(this.$el.find('.usage-container'),'Click to view usage statistics.')
+			this.tooltip(this.$el.find('.usage-container'),'Click to view usage statistics.<br>(Statistics can be up to 30 mins delayed).')
 			this.tooltip(this.$el.find('.searcher'), 'Click to search for files.')
+			this.tooltip(this.$el.find('.trash'), 'Drag files here to delete them.')
 			
 			$('form').submit(function() {return false})
 			
@@ -766,7 +768,7 @@
                 self.twipsy.$el.position({
                         my: "top center",
                         of: ev,
-                        offset: "0 35",
+                        offset: "0 " + self.twipsy.$el.height(),
                         collision: "fit"
                     });
             }).mouseout(function() {

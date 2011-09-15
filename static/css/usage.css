@@ -29,11 +29,6 @@
         .usage-diagram div.pile img {
 	        width:128px;
 	    }
-	    #sto-chart {
-	        max-height:128px;
-	        position:relative;
-	        top:-40px;
-	    }
 	.usage-diagram div.world {
 	    position:relative;
 		}

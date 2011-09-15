@@ -4,7 +4,7 @@
 $(function() {
 	
 	var Feedback = Backbone.Model.extend({
-		urlRoot:'feedbacks'
+		urlRoot:'http://{{settings("APP_DOMAIN")}}/feedbacks'
 	});
 	
 	var FeedbackView = Backbone.View.extend({

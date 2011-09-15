@@ -19,7 +19,9 @@ $(function() {
     }
     
     
-    /* Models */
+    //
+    // Models
+    //
     var FileCollection = PilesIO.FileCollection = Backbone.Collection.extend({
 		model: PilesIO.File,
 		comparator:function(file) {
@@ -31,28 +33,39 @@ $(function() {
     var UsageEventCollection = PilesIO.UsageEventCollection = Backbone.Collection.extend({
         model:UsageEvent,
 		comparator:function(uevent) {
-		    return -uevent.get('datetime')
+		    return -uevent.get('date')
 		}
+    })
+    
+    var Daily = PilesIO.StorageDaily = Backbone.Model.extend({
+        initialize:function() {
+            this.attributes['date'] = new Date(this.get('date'))
+        }
+    })
+    var Dailies = PilesIO.StorageDailies = Backbone.Collection.extend({
+        model:Daily,
+        comparator:function(daily) {
+            return daily.get('date')
+        },
     })
     
     var Usage = PilesIO.Usage = Backbone.Model.extend({
         defaults: {
-            sto_total_bytes:0,
-            put_total_bytes:0,
-            get_total_bytes:0,
             cost_sto:0.160,
             cost_get:0.140,
             cost_put:0.020,
         },
         initialize:function() {
-    		this.files = new FileCollection
-    		this.usage_gets = new UsageEventCollection
-    		this.usage_puts = new UsageEventCollection
+    		this.files = new FileCollection;
+    		this.daily_puts = new Dailies;
+    		this.daily_gets = new Dailies;
+    		this.daily_sto = new Dailies;
         },
     });
     
-    
-    /* Views */
+    //
+    // Views
+    //
     var UsageEventView = PilesIO.UsageEventView = Backbone.View.extend({
         
         tagName: 'tr',
@@ -98,30 +111,73 @@ $(function() {
             }
             step_pbar($pbar,0,to)
         },
-        render:function() {
-            var $el = $(this.el),
-                tpl = _.template($('#usage-tpl').html())
-            $el.html(tpl(this.model.toJSON()))
+        
+        _construct_usage_chart: function(custom) {
             
-            
-            // Render the most recent event lists
-            var $ges = $el.find('#get-events')
-            var $pes = $el.find('#put-events')
-            
-            _.each(this.model.usage_gets.models, function(m) {
-                $ges.append((new UsageEventView({model:m})).render().el)
-            })
-            _.each(this.model.usage_puts.models, function(m) {
-                $pes.append((new UsageEventView({model:m})).render().el)
+            var data = _.map(custom.sequence,function(m) {
+                return [m.date.getTime(), m.size]
+                //return [m.get('date').getTime(), m.get('size')]
             })
             
-            // Render The Storage chart
-            var $usage_sto_chart = $el.find('#sto-chart')
+            var chart = new Highcharts.Chart({
+                chart: {
+                    renderTo: $(custom.elem).get(0),
+                    type: 'spline',
+                    backgroundColor: 'transparent',
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    style:{
+                     fontFamily:$('body').css('font-family'),
+                    },
+                    width:custom.width || 600,
+                    height:custom.height || 200,
+                },
+                plotOptions: {
+                    area: {
+                        fillColor: {
+                            linearGradient: [0, 0, 0, (custom.height || 200)/1.5],
+                            stops: [
+                                [0, Highcharts.getOptions().colors[0]],
+                                [1, 'rgba(2,0,0,0)']
+                            ]
+                        }
+                    },
+                },
+                title: {
+                    text: custom.title
+                },
+                xAxis: {
+                    type: 'datetime',
+                },
+                legend: {
+                    enabled:false
+                },
+                yAxis: {
+                    title: {
+                        text:null
+                    }
+                },
+                tooltip: {
+                    formatter: function() {
+                           return '<b>'+ this.series.name +'</b><br/>'+
+                       Highcharts.dateFormat('%b %e', this.x) +': '+ PilesIO.human_size(this.y);
+                }
+                },
+                series:[{
+                    type: 'area',
+                    name: custom.title,
+                    data:data
+                }]
+          })
+        
+        },
+        _construct_storage_pie: function() {
+            var $usage_sto_pie = this.$el.find('#sto-pie')
             var data = this._chart_files(this.model.get('sto_total_bytes'),this.model.files.models)
             
             var chart = new Highcharts.Chart({
                 chart: {
-                    renderTo: $usage_sto_chart.get(0),
+                    renderTo: $usage_sto_pie.get(0),
                     backgroundColor: 'transparent',
                     plotBorderWidth: null,
                     plotShadow: false,
@@ -130,12 +186,6 @@ $(function() {
                     },
                     width:600,
                     height:180,
-                },
-                legend: {
-                    enabled:true,
-                    labelFormatter: function() {
-                        return 'fdgdsfs'
-                    }
                 },
                 title: {
                     text: 'Storage Used',
@@ -183,6 +233,53 @@ $(function() {
                     data: data,
                 }]
             });
+        },
+        
+        render:function() {
+            var $el = $(this.el),
+                tpl = _.template($('#usage-tpl').html())
+            this.$el = $el
+            $el.html(tpl(this.model.toJSON()))
+            
+            
+            /* Render the most recent event lists
+            var $ges = $el.find('#get-events')
+            var $pes = $el.find('#put-events')
+            _.each(this.model.usage_gets.models, function(m) {
+                $ges.append((new UsageEventView({model:m})).render().el)
+            })
+            _.each(this.model.usage_puts.models, function(m) {
+                $pes.append((new UsageEventView({model:m})).render().el)
+            })*/
+
+            
+            // Render the PUT chart
+            this._construct_usage_chart({
+                title: 'Uploads',
+                sequence: _.map(this.model.daily_puts.models,function(m) { return {date:m.get('date'),size:m.get('size') }}),
+                elem:this.$el.find('#put-chart'),
+            });
+            // Render the GET chart
+            this._construct_usage_chart({
+                title: 'Downloads',
+                sequence: _.map(this.model.daily_gets.models,function(m) { return {date:m.get('date'),size:m.get('size') }}),
+                elem:this.$el.find('#get-chart'),
+            });
+            
+            var sum = 0
+            var seq = _.map(this.model.daily_sto.models,function(m) {
+                sum += m.get('size')
+                return {'date':m.get('date'), 'size':sum}
+            })
+            
+            // Render the STO chart
+            this._construct_usage_chart({
+                title: 'Storage',
+                sequence: seq,
+                elem:this.$el.find('#sto-chart'),
+            });
+            // Render The Storage chart
+            this._construct_storage_pie();
             
             return this
         }
