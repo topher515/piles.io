@@ -97,7 +97,7 @@ class S3Store(object):
         # We actually want to `unquote` the `/` char to allow for prettier key URLs
         i = uri.index('?')
         lside = uri[:i].replace('%2F','/')
-        risde = uri[i:]
+        rside = uri[i:]
         return lside + rside
 
 
