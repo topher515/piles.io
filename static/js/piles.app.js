@@ -417,25 +417,15 @@
 		},
 		
 		domodal:function() {
-		    var self = this;
-		    
+		    var self = this,
+		        newmodal = new ModalFileView({model:this.model});
 		    // Display modal using blockUI thingy
 			$.blockUI({
-				message: new ModalFileView({model:this.model}).render().el,
+				message: newmodal.render().el,
 				css: {cursor:'auto'}
 			})
-			
-			// Setup circle player
-    	    var myCirclePlayer = new CirclePlayer("#jquery_jplayer",
-        	{
-        		mp3: "http://" + PilesIO.App.APP_DOMAIN + "/piles/" + self.model.get('pid') + "/files/" + self.model.get('id') + "/content",
-        	}, {
-        		cssSelectorAncestor: "#cp_container",
-        		supplied: 'mp3, m4a, oga',
-    			swfPath: PilesIO.App.CONTENT_DOMAIN + '/static/js/Jplayer.swf',
-        	});
-			//$(".blockMsg").hide() // Hack
-			//$('.container').append()
+			newmodal.postrender();
+        
 		},
 		
 		startworking:function() {
@@ -812,10 +802,23 @@
 		render:function() {
 			var $el = $(this.el),
 				tpl = _.template($('#modal-tpl').html()),
-				attrs = this.model.toJSON()
+				attrs = this.model.toJSON(),
+			    self = this;
 			$el.html(tpl(attrs))
-			//$el.dialog({modal:true})
 			return this
+		},
+		postrender:function() {
+			// Setup circle player
+			var self = this;
+    	    this.myCirclePlayer = new CirclePlayer("#jquery_jplayer",
+    	    {
+                mp3: "http://" + PilesIO.App.APP_DOMAIN + "/piles/" + self.model.get('pid') + "/files/" + self.model.get('id') + "/content"
+            },
+        	{
+        		cssSelectorAncestor: "#cp_container",
+        		supplied: 'mp3, m4a, oga',
+    			swfPath: PilesIO.App.CONTENT_DOMAIN + '/static/js/Jplayer.swf',
+        	});
 		},
 		countdown:function() {
 			var self = this
@@ -823,6 +826,7 @@
 		},
 		clear:function() {
 			var self = this;
+			this.myCirclePlayer.destroy()
 			$.unblockUI()
 			$(this.el).fadeOut(self.remove)
 		}

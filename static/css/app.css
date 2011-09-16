@@ -116,6 +116,13 @@
 	.modal-file-view .icon {
 		float:left;
 	}
+	.modal-body {
+	    position:relative;
+	    min-height:114px;
+	}
+	.modal-file-view .cp-container {
+	    float:right;
+	}
 .watermark {
     position:absolute;
     opacity:.5;
