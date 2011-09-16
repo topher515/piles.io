@@ -95,9 +95,9 @@ class S3Store(object):
         uri = auth_gen.get(self.bucket,path)
         
         # We actually want to `unquote` the `/` char to allow for prettier key URLs
-        i = uri.index('?')
-        lside = uri[:i].replace('%2F','/')
-        rside = uri[i:]
+        #i = uri.index('?')
+        #lside = uri[:i].replace('%2F','/')
+        #rside = uri[i:]
         return lside + rside
 
 
