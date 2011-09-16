@@ -365,7 +365,9 @@ def put_file_content(pid,fid):
 @route('/~:pid-:fid')
 def short_file_content(pid,fid):
     f = db.files.find_one({'_id':fid,'pid':pid})
-    return redirect(Store().public_get_url(f['path']))
+    uri = Store().public_get_url(f['path'])
+    print uri
+    return redirect(uri)
 
 
 @route('/piles/:pid/files/:fid/content', method='GET')
