@@ -417,10 +417,23 @@
 		},
 		
 		domodal:function() {
+		    var self = this;
+		    
+		    // Display modal using blockUI thingy
 			$.blockUI({
 				message: new ModalFileView({model:this.model}).render().el,
 				css: {cursor:'auto'}
 			})
+			
+			// Setup circle player
+    	    var myCirclePlayer = new CirclePlayer("#jquery_jplayer",
+        	{
+        		mp3: "http://" + PilesIO.App.APP_DOMAIN + "/piles/" + self.model.get('pid') + "/files/" + self.model.get('id') + "/content",
+        	}, {
+        		cssSelectorAncestor: "#cp_container",
+        		supplied: 'mp3, m4a, oga',
+    			swfPath: PilesIO.App.CONTENT_DOMAIN + '/static/js/Jplayer.swf',
+        	});
 			//$(".blockMsg").hide() // Hack
 			//$('.container').append()
 		},

@@ -4,8 +4,14 @@
 
 
 %def head():
-  <link rel="stylesheet" type="text/css" href="/static/css/app.css">
-  <script src="/static/js/piles.app.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/app.css">
+	<link rel="stylesheet" href="/static/css/circle.skin/circle.player.css">
+    <script type="text/javascript" src="/static/js/jquery.transform.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.grab.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.jplayer.js"></script>
+    <script type="text/javascript" src="/static/js/mod.csstransforms.min.js"></script>
+    <script type="text/javascript" src="/static/js/circle.player.js"></script>
+    <script type="text/javascript" src="/static/js/piles.app.js" ></script>
 %end
 
 
@@ -128,6 +134,7 @@
 	</script>
 
 	<script type="text/template" id="modal-tpl">
+	
 		<div class="modal-header">
 			<h3><%= name %></h3>
 				<a href="#" class="close">&times;</a>
@@ -138,10 +145,27 @@
 			<ul>
 				<li>Size: <%= human_size(size) %></li>
 				<li>Type: <%= type %></li>
-				<!-- --><% if (pub) {%>
+<!-- -->        <% if (pub) {%>
 				    <li>Public URL: <a href="http://<%= PilesIO.App.CONTENT_DOMAIN %>/<%= path %>">http://<%= PilesIO.App.CONTENT_DOMAIN %>/<%= path %></a></li>
-				<!-- --><% } %>
+<!-- -->        <% } %>
 			</ul>
+<!-- -->	<% if (type.slice(0,5) == 'audio') { %>
+			    <div id="cp_container" class="cp-container">
+    				<div class="cp-buffer-holder"> <!-- .cp-gt50 only needed when buffer is > than 50% -->
+    					<div class="cp-buffer-1"></div>
+    					<div class="cp-buffer-2"></div>
+    				</div>
+    				<div class="cp-progress-holder"> <!-- .cp-gt50 only needed when progress is > than 50% -->
+    					<div class="cp-progress-1"></div>
+    					<div class="cp-progress-2"></div>
+    				</div>
+    				<div class="cp-circle-control"></div>
+    				<ul class="cp-controls">
+    					<li><a href="#" class="cp-play" tabindex="1">play</a></li>
+    					<li><a href="#" class="cp-pause" style="display:none;" tabindex="1">pause</a></li> <!-- Needs the inline style here, or jQuery.show() uses display:inline instead of display:block -->
+    				</ul>
+    			</div>
+<!-- -->	<% } %>
 		</div>
 		<div class="modal-footer">
 			<a href="#" class="btn close">Close</a>
@@ -158,6 +182,8 @@
   <div id="brokescript">
   	<img class="watermark" src="/static/img/pile_256.png" />
   </div>
+  <!-- The jPlayer div must not be hidden. Keep it at the root of the body element to avoid any such problems. -->
+  <div id="jquery_jplayer" class="cp-jplayer"></div>
   <noscript>Piles only works when Javascript is turned on!</noscript>
 
 %end

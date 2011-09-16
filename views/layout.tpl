@@ -29,8 +29,6 @@
   <script src="http://{{settings('CONTENT_DOMAIN')}}/static/js/underscore.js" type="text/javascript"></script>
   <!-- script src="http://{{settings('CONTENT_DOMAIN')}}/static/js/backbone-min.js" type="text/javascript"></script-->
   <script src="http://{{settings('CONTENT_DOMAIN')}}/static/js/backbone.js"></script>
-  <script src="http://{{settings('CONTENT_DOMAIN')}}/static/js/swfupload.js" type="text/javascript"></script>
-  <script src="http://{{settings('CONTENT_DOMAIN')}}/static/js/jquery.swfupload.js" type="text/javascript" charset="utf-8"></script>
   <script>
 $(function() {
     // Handle input focus and blur
