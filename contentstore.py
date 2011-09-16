@@ -84,12 +84,21 @@ class S3Store(object):
         return ''.join(url)
 
     def authed_get_url(self,path):   
-        path = path.strip('/')
-        #if not expires:
-        #   expires = datetime.datetime.now() + datetime.timedelta(0,60*10) # In 10 min
+        path = path.strip('/') # Normalize path by dropping extra begin/end slashes
+
         auth_gen = S3.QueryStringAuthGenerator(settings('AWS_ACCESS_KEY_ID'),settings('AWS_SECRET_ACCESS_KEY'), is_secure=False) #PP_BUCKET)
-        #auth_gen.set_expires(expires)
-        return auth_gen.get(self.bucket,path)
+        
+        # if not expires:
+        #    expires = datetime.datetime.now() + datetime.timedelta(0,60*10) # In 10 min
+        # auth_gen.set_expires(expires)
+        
+        uri = auth_gen.get(self.bucket,path)
+        
+        # We actually want to `unquote` the `/` char to allow for prettier key URLs
+        i = uri.index('?')
+        lside = uri[:i].replace('%2F','/')
+        risde = uri[i:]
+        return lside + rside
 
 
     def put(self,fp,name,options={}):
