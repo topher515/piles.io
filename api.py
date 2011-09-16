@@ -366,7 +366,6 @@ def put_file_content(pid,fid):
 def short_file_content(pid,fid):
     f = db.files.find_one({'_id':fid,'pid':pid})
     uri = Store().public_get_url(f['path'])
-    print uri
     return redirect(uri)
 
 
@@ -375,6 +374,7 @@ def short_file_content(pid,fid):
 def get_file_content(pid,fid):
     f = db.files.find_one({'_id':fid,'pid':pid})
     authed_url = Store().authed_get_url(f['path'])
+    print authed_url
     return redirect(authed_url)
 
 
