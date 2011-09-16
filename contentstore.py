@@ -98,7 +98,7 @@ class S3Store(object):
         #i = uri.index('?')
         #lside = uri[:i].replace('%2F','/')
         #rside = uri[i:]
-        return lside + rside
+        return uri
 
 
     def put(self,fp,name,options={}):
