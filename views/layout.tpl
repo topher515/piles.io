@@ -43,6 +43,9 @@ $(function() {
           $this.val($this.attr('title'));
         }
     });
+    $('a[href=#]').live('click',function(e) {
+        e.preventDefault()
+    })
 })
   </script>
 </script>

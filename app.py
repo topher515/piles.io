@@ -94,7 +94,7 @@ def create_do():
         pid = randid()
     
     user = {'email':eml,'password':hash_password(pwd)}
-    pile = {'_id':pid,'emails':[eml],'name':name,'welcome':True,'usage_put':0,'usage_get':0,'usage_sto':0}
+    pile = {'_id':pid,'emails':[eml],'name':name,'welcome':True}
     db.piles.save(pile)
     db.users.save(user)
     

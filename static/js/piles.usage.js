@@ -36,32 +36,7 @@ $(function() {
 		    return -uevent.get('date')
 		}
     })
-    
-    var Daily = PilesIO.StorageDaily = Backbone.Model.extend({
-        initialize:function() {
-            this.attributes['date'] = new Date(this.get('date'))
-        }
-    })
-    var Dailies = PilesIO.StorageDailies = Backbone.Collection.extend({
-        model:Daily,
-        comparator:function(daily) {
-            return daily.get('date')
-        },
-    })
-    
-    var Usage = PilesIO.Usage = Backbone.Model.extend({
-        defaults: {
-            cost_sto:0.160,
-            cost_get:0.140,
-            cost_put:0.020,
-        },
-        initialize:function() {
-    		this.files = new FileCollection;
-    		this.daily_puts = new Dailies;
-    		this.daily_gets = new Dailies;
-    		this.daily_sto = new Dailies;
-        },
-    });
+
     
     //
     // Views
@@ -87,8 +62,9 @@ $(function() {
         initialize: function() {
 
         },
-        _chart_files:function(total,files) {
-            var series = [],
+        _chart_files:function(files) {
+            var total = _.reduce(files,function(memo,file) { return memo + file.get('size')}, 0)
+                series = [],
                 percent10 = total/10,
                 cursorSize = total,
                 cursor = 0;
@@ -173,7 +149,7 @@ $(function() {
         },
         _construct_storage_pie: function() {
             var $usage_sto_pie = this.$el.find('#sto-pie')
-            var data = this._chart_files(this.model.get('sto_total_bytes'),this.model.files.models)
+            var data = this._chart_files(this.model.files.models)
             
             var chart = new Highcharts.Chart({
                 chart: {
@@ -197,14 +173,12 @@ $(function() {
                 },
                 tooltip: {
                     formatter: function() {
-                        return '<b>' + this.point.name + '</b>: ' + human_size(Math.round(this.y));
+                        return human_size(Math.round(this.y));
                     },    
                     style:{
                         fontFamily:$('body').css('font-family'),
-                    }
-                },
-                legand: {
-                    enabled:true
+                    },
+                    enabled:true,
                 },
                 plotOptions: {
                     pie: {
@@ -224,8 +198,17 @@ $(function() {
                                 fontSize:12,
                             }
                         },
-                        size:'100%'
+                        size:'100%',
+                        showInLegend:true,
                     }
+                },
+                legend: {
+                    layout:'vertical',
+                    style:{
+                        overflow:'hidden',
+                    },
+                    align:'right',
+                    verticalAlign:'top',
                 },
                 series: [{
                     type: 'pie',
@@ -278,7 +261,7 @@ $(function() {
                 sequence: seq,
                 elem:this.$el.find('#sto-chart'),
             });
-            // Render The Storage chart
+            // Render The STO pie chart
             this._construct_storage_pie();
             
             return this

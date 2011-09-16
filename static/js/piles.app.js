@@ -309,7 +309,38 @@
 	
 	var FileCollection = PilesIO.FileCollection = Backbone.Collection.extend({
 		model: File,
-	})
+	});
+	
+	var Daily = PilesIO.Daily = Backbone.Model.extend({
+        initialize:function() {
+            this.attributes['date'] = new Date(this.get('date'))
+        }
+    })
+    var Dailies = PilesIO.Dailies = Backbone.Collection.extend({
+        model:Daily,
+        comparator:function(daily) {
+            return daily.get('date')
+        },
+    })
+	
+    var Usage = PilesIO.Usage = Backbone.Model.extend({
+        defaults:{
+            "storage_total": 0,
+            "usage_total_get": 0,
+            "usage_total_put": 0,
+        
+            "storage_cost": 0.16,
+            "usage_cost_get": 0.14,
+            "usage_cost_put": 0.02
+        },
+        initialize:function() {
+            this.url = 'http://' + PilesIO.App.APP_DOMAIN + '/piles/'+ (this.get('pid') || this.get('id')) + '/usage'
+    		this.files = new FileCollection;
+    		this.daily_puts = new Dailies;
+    		this.daily_gets = new Dailies;
+    		this.daily_sto = new Dailies;
+        },
+    });
 	
 	var Pile = PilesIO.Pile = Backbone.Model.extend({
 		defaults:{
@@ -319,10 +350,13 @@
 			cost_sto:0.160
 		},
 		initialize: function() {
+		    var self = this;
     		this.urlRoot = 'http://'+PilesIO.App.APP_DOMAIN+'/piles',
 			this.files = new FileCollection
 			this.files.url = 'http://'+PilesIO.App.APP_DOMAIN+'/piles/'+this.id+'/files'
-			var self = this;
+			this.usage = new Usage({'pid':this.get('id')})
+			this.usage.fetch()
+			
 			this.bind('change',function(model) {
 				var new_name = model.hasChanged('name')
 				model.save({},{
@@ -502,6 +536,21 @@
 	});
 	
 	
+	var SmallUsageView = PilesIO.SmallUsageView = Backbone.View.extend({
+        initialize:function() {
+            var self = this;
+            this.$el = $(this.el);
+    		this.model.bind('change',function() {
+    		    self.render()
+    		})
+        },
+        render:function() {
+	        this.$el.html(_.template($('#small-usage-tpl').html(),this.model.toJSON()));
+	        return this;
+        }
+	});
+	
+	
 	var TwipsyView = PilesIO.TwipsyView = Backbone.View.extend({
 	    initialize:function() {
 	        var $el = $(this.el)
@@ -577,13 +626,6 @@
 			/* Handle renames */
 			//this.model.bind('renamesuccess', this.renamedone, this);
 			this.model.bind('renamefailure', function(err) { notify('error',err)}, this);
-			/* Check for usage change on remove */
-			//self.model.files.bind('remove',function() { self.model.fetch() })
-			
-			/* Handle usage changes */
-			this.model.bind('change:usage_put',this.updateusage,this)
-			this.model.bind('change:usage_get',this.updateusage,this)
-			this.model.bind('change:usage_sto',this.updateusage,this)
 						
 
 			// Setup fileuploader
@@ -712,13 +754,6 @@
 		    deemphasizer()
 		},
 		
-		updateusage: function() {
-			var $el = this.$el
-			$el.find('.usage .usage-put').html(human_size(this.model.get('usage_put')))
-			$el.find('.usage .usage-get').html(human_size(this.model.get('usage_get')))
-			$el.find('.usage .usage-sto').html(human_size(this.model.get('usage_sto')))
-		},
-		
 		dorename: function() {
 			var newname = prompt('New name for your Pile',this.model.get('name'))
 			this.model.set({'name':newname})
@@ -752,6 +787,8 @@
            	_.each(this.model.files.models,function(m) {
                 self._render_file(m)
 			})
+			
+			this.$el.find('.usage-container').html((new SmallUsageView({model:this.model.usage})).render().el)
 			
 			this.$el.append(this.twipsy.render().el)
 			this.tooltip(this.$el.find('.usage-container'),'Click to view usage statistics.<br>(Statistics can be up to 30 mins delayed).')

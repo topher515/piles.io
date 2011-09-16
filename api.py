@@ -17,7 +17,7 @@ from auth import hash_password, session, do_login, do_logout, auth_json
 
 from beaker.middleware import SessionMiddleware
 
-
+import usage
 from db import db
 
 
@@ -109,7 +109,7 @@ AgnosticReq = MethodAgnosticRequestWrapper
 ## Feedback
 @route('/feedbacks', method="ANY")
 @emulate_rest('POST')
-@validator(attrs={'message':unicode,'type':unicode,'email':unicode})
+@validator(attrs={'message':unicode,'type':unicode,'email':unicode,'useragent':unicode})
 @jsonp
 def feedbacks_post():
     #print request.validated
@@ -126,6 +126,30 @@ def feedbacks_get(id):
     feedback = db.feedbacks.find_one({'_id':id})
     return m2j(feedback) if feedback else abort(404)
 
+
+### Usage
+@route('/piles/:pid/usage')
+@auth_json
+@jsonp
+def usage_totals(pid):
+    um = usage.UsageMeter()
+    totals = {
+        'storage_cost':0.160,
+        'usage_cost_get':0.140,
+        'usage_cost_put':0.020,
+    }
+    totals['storage_total'] = (um.storage_total(pid) or {}).get('size')
+    totals['usage_total_put'] = (um.usage_total(pid,'PUT') or {}).get('size')
+    totals['usage_total_get'] = (um.usage_total(pid,'GET') or {}).get('size')
+    return m2j(totals)
+
+@route('/piles/:pid/usage/dailies')
+@auth_json
+@jsonp
+def usage_totals(pid):
+    um = usage.UsageMeter()
+    usage_dailies = um.usage_dailies(pid)
+    return ms2js(usage_dailies)
 
 ##########################################################
 ## Piles

@@ -66,6 +66,22 @@
 	<li><h6><%= email %></h6></li>
   </script>
 
+  <script type="text/template" id="small-usage-tpl">
+  	<div class="usage-small">
+		<span class="usage-sto"><%= human_size(storage_total) %></span>
+	</div>
+	<div class="usage-big good">
+		<a href="http://{{settings('APP_DOMAIN')}}/<%= name %>/usage">
+		    <img src="/static/img/box_xsmall.png" />
+			<span class="usage-sto"><%= human_size(storage_total) %></span><br>
+  		<img src="/static/img/arrow_up_xsmall.png" />
+  		<span class="usage-put"><%= human_size(usage_total_put) %></span><br>
+  		<img src="/static/img/arrow_down_xsmall.png" />
+  		<span class="usage-get"><%= human_size(usage_total_get) %></span>
+       </a>
+	</div>
+  </script>
+
   <script type="text/template" id="pile-tpl">
 	
 	<img class="watermark" src="/static/img/pile_256.png" />
@@ -82,20 +98,7 @@
 	</div>
 		
 	<div class="usage-container">
-    	<div class="usage-small">
-    		<span class="usage-sto"><%= human_size(usage_sto) %></span>
-    	</div>
-    	<div class="usage-big good">
-    		<a href="http://{{settings('APP_DOMAIN')}}/<%= name %>/usage">
-    		    <img src="/static/img/box_xsmall.png" />
-    			<span class="usage-sto"><%= human_size(usage_sto) %></span><br>
-        		<img src="/static/img/arrow_up_xsmall.png" />
-        		<span class="usage-put"><%= human_size(usage_put) %></span><br>
-        		<img src="/static/img/arrow_down_xsmall.png" />
-        		<span class="usage-get"><%= human_size(usage_get) %></span>
-             </a>
-		
-    	</div>
+
 	</div>
 		
 	<div class="file-collection">
