@@ -56,7 +56,7 @@ $(function() {
                 </td>
                 <td>Stored in Pile
                     <br><%= PilesIO.human_size(storage_total) %>
-                     <br>$<%= PilesIO.cost_calculator(cost_sto,storage_total).toFixed(3) %> per month
+                     <br>$<%= PilesIO.cost_calculator(storage_cost,storage_total).toFixed(3) %> per month
                 </td>
                 <td>
                     <div id="sto-pie"></div>
@@ -76,7 +76,7 @@ $(function() {
                 </td>
                 <td>Downloaded from Pile
                     <br><%= PilesIO.human_size(usage_total_get) %>
-                     <br>$<%= PilesIO.cost_calculator(cost_get,usage_total_get).toFixed(3) %> total
+                     <br>$<%= PilesIO.cost_calculator(usage_cost_get,usage_total_get).toFixed(3) %> total
                 </td>
                 <td>
                     <table id="get-events">
@@ -97,7 +97,7 @@ $(function() {
                 </td>
                 <td>Uploaded to Pile
                     <br><%= PilesIO.human_size(usage_total_put) %> 
-                    <br>$<%= PilesIO.cost_calculator(cost_put,usage_total_put).toFixed(3) %> total
+                    <br>$<%= PilesIO.cost_calculator(usage_cost_put,usage_total_put).toFixed(3) %> total
                 </td>
                 <td>
                     <div id="put-chart"></div>

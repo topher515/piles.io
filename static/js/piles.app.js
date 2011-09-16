@@ -789,6 +789,7 @@
 			})
 			
 			this.$el.find('.usage-container').html((new SmallUsageView({model:this.model.usage})).render().el)
+			    .click(function() {location.href='http://'+PilesIO.App.APP_DOMAIN +'/'+ self.model.get('name') +'/usage' })
 			
 			this.$el.append(this.twipsy.render().el)
 			this.tooltip(this.$el.find('.usage-container'),'Click to view usage statistics.<br>(Statistics can be up to 30 mins delayed).')

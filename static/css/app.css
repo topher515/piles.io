@@ -303,10 +303,11 @@
 		z-index:600;
 		width:100px;
 		height:30px;
+		cursor:pointer;
+	    color:white;
+		text-decoration:none;
 		}
 		.pile-view .usage-container a {
-		    text-decoration:none;
-		    color:white;
 		}
 		.pile-view .usage-container img {
 		    margin-top:3px
