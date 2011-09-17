@@ -793,7 +793,7 @@
 			    .click(function() {location.href='http://'+PilesIO.App.APP_DOMAIN +'/'+ self.model.get('name') +'/usage' })
 			
 			this.$el.append(this.twipsy.render().el)
-			this.tooltip(this.$el.find('.usage-container'),'Click to view usage statistics.<br>(Statistics can be up to 30 mins delayed).','left')
+			//this.tooltip(this.$el.find('.usage-container'),'Click to view usage statistics.<br>(Statistics can be up to 30 mins delayed).','left')
 			this.tooltip(this.$el.find('.searcher'), 'Click to search for files.')
 			this.tooltip(this.$el.find('.trash'), 'Drag files here to delete them.','left')
 			
@@ -809,18 +809,22 @@
 		    
 		    var self = this,
 		        pos = {
-		            below:'top center',
-		            left:'center right',
-		            right:'center left'
-		        }[direction];
-		        
+		            below:'center top',
+		            left:'right center ',
+		            right:'left center '
+		        }[direction],
+		        off = {
+		            below:'0 10',
+		            left:'-25 0',
+		            right:'25 0',
+		        }[direction]
 		    
 		    $hover_elem.mousemove(function(ev){    
 		        self.twipsy.tip(tip,direction);
                 self.twipsy.$el.position({
                         my: pos,
                         of: ev,
-                        offset: "0 " + self.twipsy.$el.height(),
+                        offset: off,
                         collision: "fit"
                     });
             }).mouseout(function() {

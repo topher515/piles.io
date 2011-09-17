@@ -76,7 +76,9 @@
   		<img src="/static/img/arrow_up_xsmall.png" />
   		<span class="usage-put"><%= human_size(usage_total_put) %></span><br>
   		<img src="/static/img/arrow_down_xsmall.png" />
-  		<span class="usage-get"><%= human_size(usage_total_get) %></span>
+  		<span class="usage-get"><%= human_size(usage_total_get) %></span><br>
+  		<span>Click for more info.</span><br>
+  		<span style="font-size:.7em;">(Can have 30+ min delay).</span>
 	</div>
   </script>
 
