@@ -38,7 +38,7 @@
 			wmv:'wmv_icon.png',
 			zip:'zip_icon.png',
 		}
-		if (img_icons[ext]) return '/static/img/icons/' + img_icons[ext.toLowerCase()]
+		if (img_icons[ext.toLowerCase()]) return '/static/img/icons/' + img_icons[ext.toLowerCase()]
 		return '/static/img/file.png'
 	}
 	
