@@ -55,13 +55,17 @@ $(function() {
         },
     })
     
+    
+    
+    
     var UsageView = PilesIO.UsageView = Backbone.View.extend({
         
-        className: 'usage-diagram',
+        className: 'usage',
         
         initialize: function() {
-
+            
         },
+        
         _chart_files:function(files) {
             var total = _.reduce(files,function(memo,file) { return memo + file.get('size')}, 0)
                 series = [],
@@ -76,16 +80,6 @@ $(function() {
             }
             series.push(['Others...',cursorSize])
             return series;
-        },
-        
-        animate_progressbar: function($pbar,to) {
-            var step_pbar = function($pbar,at,to) {
-                $pbar.progressbar( "option", "value",at)
-                if (at < to) {
-                    setTimeout(function() {step_pbar($pbar,at+1,to)}, 15);
-                }
-            }
-            step_pbar($pbar,0,to)
         },
         
         _construct_usage_chart: function(custom) {
@@ -220,7 +214,8 @@ $(function() {
         
         render:function() {
             var $el = $(this.el),
-                tpl = _.template($('#usage-tpl').html())
+                tpl = _.template($('#usage-tpl').html()),
+                self = this;
             this.$el = $el
             $el.html(tpl(this.model.toJSON()))
             
@@ -263,6 +258,21 @@ $(function() {
             });
             // Render The STO pie chart
             this._construct_storage_pie();
+            
+            // Bind hover events 
+            this.$el.find('#simple-usage-get').hover(function(e) {
+                self.$el.find('.details').not('#detailed-usage-get').hide()
+                self.$el.find('#detailed-usage-get').slideDown()
+            })
+            this.$el.find('#simple-usage-put').hover(function(e) {
+                self.$el.find('.details').not('#detailed-usage-put').hide()
+                self.$el.find('#detailed-usage-put').slideDown()
+            })
+            this.$el.find('#simple-storage').hover(function(e) {
+                self.$el.find('.details').not('#detailed-storage').hide()
+                self.$el.find('#detailed-storage').slideDown()
+            })
+            
             
             return this
         }

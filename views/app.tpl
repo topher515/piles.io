@@ -84,7 +84,7 @@
 
   <script type="text/template" id="pile-tpl">
 	
-	<img class="watermark" src="/static/img/pile_256.png" />
+	<!-- img class="watermark" src="/static/img/pile_256.png" / -->
 	
 	<div class="emails">
 		<h6 class="current"><%= emails %></h6>

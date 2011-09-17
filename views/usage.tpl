@@ -40,91 +40,98 @@ $(function() {
 
 
 <script type="text/template" id="usage-tpl">
-    <table class="zebra-striped">
-        <tbody>
+    <div class="simple-usage">
+    
+        <div class="simple-item well" id="simple-usage-get">
+            <h6>Downloads</h6>
+            <h1>$<%= PilesIO.cost_calculator(usage_cost_get,usage_total_get).toFixed(3) %></h1>
+            <h6><%= PilesIO.human_size(usage_total_get)%></h6>
+        </div>
+        <div class="simple-spacer" ><h6>+</h6></div>
+        <div class="simple-item well" id="simple-usage-put">
+            <h6>Uploads</h6>
+            <h1>$<%= PilesIO.cost_calculator(usage_cost_put,usage_total_put).toFixed(3) %></h1>
+            <h6><%= PilesIO.human_size(usage_total_put)%></h6>
+        </div>
+        <div class="simple-spacer" ><h6>+</h6></div>
+        <div class="simple-item well" id="simple-storage">
+            <h6>Storage</h6>
+            <h1>$<%= PilesIO.cost_calculator(storage_cost,storage_total).toFixed(3) %></h1>
+            <h6><%= PilesIO.human_size(storage_total) %></h6>
+        </div>
+        <div class="simple-spacer "><h6>=</h6></div>
+        <div class="simple-item well" id="simple-sum">
+            <h6>Total</h6>
+            <h1>$<%= Number(PilesIO.cost_calculator(usage_cost_get,usage_total_get).toFixed(3)) + Number(PilesIO.cost_calculator(usage_cost_put,usage_total_put).toFixed(3)) + Number(PilesIO.cost_calculator(storage_cost,storage_total).toFixed(3)) %></h1>
+        </div>
+    </div>
+
+    <div id="details-container">
+
             <!-- STORAGE -->
-            <tr>
+            <div id="detailed-storage" style="display:block;" class="details well">
             
-                <td><h4>In Pile</h4>
+                <div class="left">
+                    <h2>Currently Stored</h2>
                     <br><%= PilesIO.human_size(storage_total) %>
-                     <br>$<%= PilesIO.cost_calculator(storage_cost,storage_total).toFixed(3) %> per month
+                    <br>$<%= PilesIO.cost_calculator(storage_cost,storage_total).toFixed(3) %> per month
                      
-                     
-                         <div class="pile">
-                             <img src="http://{{settings('CONTENT_DOMAIN')}}/static/img/pile_256.png">
-                         </div>
-                </td>
-                <td>
-                </td>
-                <td>
+                    <div class="pile">
+                        <img src="http://{{settings('CONTENT_DOMAIN')}}/static/img/pile_256.png">
+                    </div>
+                </div>
+                <div class="right">
                     <div id="sto-pie"></div>
                     <div id="sto-chart"></div>
-                </td>
-                <td></td>
-            </tr>
+                </div>
+            </div>
         
             <!-- DOWNLOADS -->
-            <tr class="download-row">
-                <td>
-                    <h3>Downloaded</h3>
-                    <h6> from Pile</h6>
-            
-                    <h4>Total</h4>
+            <div id="detailed-usage-get" class="details well">
+                <div class="left">
+                    <h2>Downloaded</h2>
                     <br><%= PilesIO.human_size(usage_total_get) %>
                      <br>$<%= PilesIO.cost_calculator(usage_cost_get,usage_total_get).toFixed(3) %> total
-                     
-
-                     
-                </td>
-                 
-                <td>
+     
                      <div class="world">
                          <img class="arrow" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/arrow_down.png">
                          <img class="graphic" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/world_big.png">
 
                      </div>
-                </td>
-                <td>
-                    <table id="get-events">
-                    </table>
+                </div>
+                <div class="right">
                     <div id="get-chart"></div>
-                </td>
-                <td></td>
-            </tr>
+                </div>
+            </div>
             
             <!-- UPLOADS -->
-            <tr>
-                <td><h3>Uploaded</h3>
-                    <h6> to Pile</h6>
-            
-                    <h4>Total</h4>
+            <div id="detailed-usage-put" class="details well">
+                <div class="left">
+                    <h2>Uploaded</h2>
                     <br><%= PilesIO.human_size(usage_total_put) %> 
                     <br>$<%= PilesIO.cost_calculator(usage_cost_put,usage_total_put).toFixed(3) %> total
-                </td>
-                <td>
+
                     <div class="comp" >
                         <img class="arrow" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/arrow_up.png">
                         <img class="graphic" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/macbook_pro.png" >
 
                     </div>  
-                </td>
-                <td>
+                </div>
+                <div class="right">
                     <div id="put-chart"></div>
-                </td>
-                <td></td>
-            </tr>
-        </tbody>
-        
-    </table>
+                </div>
+            </div>
+    </div>
 </script>
 
 
 <div class="container">
     <div class="content" style="position:relative">
         
+    
     <h1 style="margin: 25px inherit 0px inherit; z-index: 250;">
         <a class="btn" href="http://{{settings('CONTENT_DOMAIN')}}/app#{{pile['name']}}">&lt; Back</a>
-        {{pile['name']}} | Usage Statistics</h1>
+        {{pile['name']}}</h1>
 
     <div>
         <p></p>
