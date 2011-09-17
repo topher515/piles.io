@@ -561,7 +561,8 @@
 	        this.$el.html(_.template($('#twipsy-tpl').html(),this.model.toJSON()));
 	        return this;
 	    },
-	    tip:function(tip) {
+	    tip:function(tip,direction) {
+	        this.$el.removeClass('below right left').addClass(direction)
 	        this.$el.find('.twipsy-inner').html(tip)
 	    }
 	});
@@ -792,9 +793,9 @@
 			    .click(function() {location.href='http://'+PilesIO.App.APP_DOMAIN +'/'+ self.model.get('name') +'/usage' })
 			
 			this.$el.append(this.twipsy.render().el)
-			this.tooltip(this.$el.find('.usage-container'),'Click to view usage statistics.<br>(Statistics can be up to 30 mins delayed).')
+			this.tooltip(this.$el.find('.usage-container'),'Click to view usage statistics.<br>(Statistics can be up to 30 mins delayed).','left')
 			this.tooltip(this.$el.find('.searcher'), 'Click to search for files.')
-			this.tooltip(this.$el.find('.trash'), 'Drag files here to delete them.')
+			this.tooltip(this.$el.find('.trash'), 'Drag files here to delete them.','left')
 			
 			$('form').submit(function() {return false})
 			
@@ -802,12 +803,22 @@
 			return this;
 		},
 		
-		tooltip: function($hover_elem,tip) {
-		    var self = this
-		    $hover_elem.mousemove(function(ev){
-		        self.twipsy.tip(tip)
+		tooltip: function($hover_elem,tip,direction) {
+		    
+	        if (!direction) direction='below';
+		    
+		    var self = this,
+		        pos = {
+		            below:'top center',
+		            left:'center right',
+		            right:'center left'
+		        }[direction];
+		        
+		    
+		    $hover_elem.mousemove(function(ev){    
+		        self.twipsy.tip(tip,direction);
                 self.twipsy.$el.position({
-                        my: "top center",
+                        my: pos,
                         of: ev,
                         offset: "0 " + self.twipsy.$el.height(),
                         collision: "fit"

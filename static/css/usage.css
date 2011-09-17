@@ -1,3 +1,7 @@
+.highcharts-container text[text-anchor=end] {
+    display:none;
+}
+
 .usage-diagram {
 	position:relative;
 	}
@@ -5,7 +9,7 @@
 	    position:relative;
 		}
 		.usage-diagram div.comp img.graphic {
-			width: 128px;
+			width: 110px;
 		}
 		.usage-diagram div.comp .arrow {
 			position: absolute;
@@ -24,16 +28,23 @@
 			line-height:1em;
 		}
 	.usage-diagram div.pile {
-	    position:relative;
+	    position:absolute;
+	    top:40px;
+	    left:100px;
 	    }
         .usage-diagram div.pile img {
-	        width:128px;
+	        opacity:.2;
 	    }
+	    
+	.uage-diagram td {
+	    overflow:hidden;
+	}
+	    
 	.usage-diagram div.world {
 	    position:relative;
 		}
 		.usage-diagram div.world img.graphic {
-			width:128px;
+			width:96px;
 		}
 		.usage-diagram div.world .arrow {
 			position:absolute;

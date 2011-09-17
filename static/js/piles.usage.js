@@ -106,7 +106,7 @@ $(function() {
                      fontFamily:$('body').css('font-family'),
                     },
                     width:custom.width || 600,
-                    height:custom.height || 200,
+                    height:custom.height || 160,
                 },
                 plotOptions: {
                     area: {
@@ -161,7 +161,7 @@ $(function() {
                         fontFamily:$('body').css('font-family'),
                     },
                     width:600,
-                    height:180,
+                    height:160,
                 },
                 title: {
                     text: 'Storage Used',
@@ -238,13 +238,13 @@ $(function() {
             
             // Render the PUT chart
             this._construct_usage_chart({
-                title: 'Uploads',
+                title: null,
                 sequence: _.map(this.model.daily_puts.models,function(m) { return {date:m.get('date'),size:m.get('size') }}),
                 elem:this.$el.find('#put-chart'),
             });
             // Render the GET chart
             this._construct_usage_chart({
-                title: 'Downloads',
+                title: null,
                 sequence: _.map(this.model.daily_gets.models,function(m) { return {date:m.get('date'),size:m.get('size') }}),
                 elem:this.$el.find('#get-chart'),
             });
@@ -257,7 +257,7 @@ $(function() {
             
             // Render the STO chart
             this._construct_usage_chart({
-                title: 'Storage',
+                title: null,
                 sequence: seq,
                 elem:this.$el.find('#sto-chart'),
             });

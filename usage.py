@@ -22,6 +22,9 @@ class UsageMeter(object):
     usage information.
     '''
     
+    
+    
+    
     def update(self):
         self._mr_storage_totals()
         self._mr_storage_dailies()
@@ -33,6 +36,7 @@ class UsageMeter(object):
         r=(db.storage_totals.find_one({'value.pid':pid}) or {'value':None})['value']
         logger.debug('Storage total %s' % r)
         return r
+        
     def usage_total(self,pid,op):
         '''Return the dict representing the total usage by op type (GET,PUT,DELETE) for the `pid`'''
         r=(db.usage_totals.find_one({'value.pid':pid,'value.op':op}) or {'value':None})['value']

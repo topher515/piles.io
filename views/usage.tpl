@@ -41,22 +41,20 @@ $(function() {
 
 <script type="text/template" id="usage-tpl">
     <table class="zebra-striped">
-        <thead>
-            <tr>
-                <td></td><td>Total</td><td>Status</td><td></td>
-            </tr>
-        </thead>
         <tbody>
             <!-- STORAGE -->
             <tr>
-                <td>
-                    <div class="pile">
-                        <img src="http://{{settings('CONTENT_DOMAIN')}}/static/img/pile_128.png">
-                    </div>
-                </td>
-                <td>Stored in Pile
+            
+                <td><h4>In Pile</h4>
                     <br><%= PilesIO.human_size(storage_total) %>
                      <br>$<%= PilesIO.cost_calculator(storage_cost,storage_total).toFixed(3) %> per month
+                     
+                     
+                         <div class="pile">
+                             <img src="http://{{settings('CONTENT_DOMAIN')}}/static/img/pile_256.png">
+                         </div>
+                </td>
+                <td>
                 </td>
                 <td>
                     <div id="sto-pie"></div>
@@ -66,17 +64,25 @@ $(function() {
             </tr>
         
             <!-- DOWNLOADS -->
-            <tr>
+            <tr class="download-row">
                 <td>
-                    <div class="world">
-                        <img class="arrow" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/arrow_down.png">
-                        <img class="graphic" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/world_big.png">
-
-                    </div>
-                </td>
-                <td>Downloaded from Pile
+                    <h3>Downloaded</h3>
+                    <h6> from Pile</h6>
+            
+                    <h4>Total</h4>
                     <br><%= PilesIO.human_size(usage_total_get) %>
                      <br>$<%= PilesIO.cost_calculator(usage_cost_get,usage_total_get).toFixed(3) %> total
+                     
+
+                     
+                </td>
+                 
+                <td>
+                     <div class="world">
+                         <img class="arrow" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/arrow_down.png">
+                         <img class="graphic" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/world_big.png">
+
+                     </div>
                 </td>
                 <td>
                     <table id="get-events">
@@ -88,16 +94,19 @@ $(function() {
             
             <!-- UPLOADS -->
             <tr>
+                <td><h3>Uploaded</h3>
+                    <h6> to Pile</h6>
+            
+                    <h4>Total</h4>
+                    <br><%= PilesIO.human_size(usage_total_put) %> 
+                    <br>$<%= PilesIO.cost_calculator(usage_cost_put,usage_total_put).toFixed(3) %> total
+                </td>
                 <td>
                     <div class="comp" >
                         <img class="arrow" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/arrow_up.png">
                         <img class="graphic" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/macbook_pro.png" >
 
                     </div>  
-                </td>
-                <td>Uploaded to Pile
-                    <br><%= PilesIO.human_size(usage_total_put) %> 
-                    <br>$<%= PilesIO.cost_calculator(usage_cost_put,usage_total_put).toFixed(3) %> total
                 </td>
                 <td>
                     <div id="put-chart"></div>
@@ -113,10 +122,13 @@ $(function() {
 <div class="container">
     <div class="content" style="position:relative">
         
-    <img style="position:absolute; top:0; right:0; opacity:.1; z-index:200;" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/pile_256.png" />
     <h1 style="margin: 25px inherit 0px inherit; z-index: 250;">
         <a class="btn" href="http://{{settings('CONTENT_DOMAIN')}}/app#{{pile['name']}}">&lt; Back</a>
         {{pile['name']}} | Usage Statistics</h1>
+
+    <div>
+        <p></p>
+    </div>
 
     <div id="noscript" style="margin: 300px;">Bro, your javascript is off or broke!</div>
 

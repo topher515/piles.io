@@ -397,6 +397,9 @@ def short_file_content(pid,fid):
 @auth_json
 def get_file_content(pid,fid):
     f = db.files.find_one({'_id':fid,'pid':pid})
+    
+    
+    
     authed_url = Store().authed_get_url(f['path'])
     print authed_url
     return redirect(authed_url)
