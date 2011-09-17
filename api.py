@@ -138,9 +138,9 @@ def usage_totals(pid):
         'usage_cost_get':0.140,
         'usage_cost_put':0.020,
     }
-    totals['storage_total'] = (um.storage_total(pid) or {}).get('size')
-    totals['usage_total_put'] = (um.usage_total(pid,'PUT') or {}).get('size')
-    totals['usage_total_get'] = (um.usage_total(pid,'GET') or {}).get('size')
+    totals['storage_total'] = (um.storage_total(pid) or {'size':0}).get('size')
+    totals['usage_total_put'] = (um.usage_total(pid,'PUT') or {'size':0}).get('size')
+    totals['usage_total_get'] = (um.usage_total(pid,'GET') or {'size':0}).get('size')
     return m2j(totals)
 
 @route('/piles/:pid/usage/dailies')

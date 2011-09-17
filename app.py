@@ -204,12 +204,12 @@ def usage(pilename):
                 elif u['op'] == 'GET':
                     usage_dailies_gets.append(u)
                     
-            usage_total_put = um.usage_total(thispid,'PUT')
-            usage_total_get = um.usage_total(thispid,'GET')
+            usage_total_put = um.usage_total(thispid,'PUT') or {'size':0}
+            usage_total_get = um.usage_total(thispid,'GET') or {'size':0}
             
             # Grab storage data
             storage_dailies = um.storage_dailies(thispid)
-            storage_total = um.storage_total(thispid)
+            storage_total = um.storage_total(thispid) or {'size':0}
             
             
             # Get the pile's files
