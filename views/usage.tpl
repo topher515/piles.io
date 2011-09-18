@@ -18,6 +18,8 @@ $(function() {
     window.usage = new PilesIO.Usage({
         usage_total_put: {{usage_total_put['size']}},
         usage_total_get: {{usage_total_get['size']}},
+        usage_this_month_put: {{usage_this_month_put['size']}},
+        usage_this_month_get: {{usage_this_month_get['size']}},
         storage_total: {{storage_total['size']}}
     });
     
@@ -44,25 +46,28 @@ $(function() {
     
         <div class="simple-item well" id="simple-usage-get">
             <h6>Downloads</h6>
-            <h1>$<%= PilesIO.cost_calculator(usage_cost_get,usage_total_get).toFixed(3) %></h1>
-            <h6><%= PilesIO.human_size(usage_total_get)%></h6>
+            <h1>$<%= PilesIO.cost_calculator(usage_cost_get,usage_this_month_get).toFixed(3) %></h1>
+            <h6><%= PilesIO.human_size(usage_this_month_get)%></h6>
+            <h6>Month so far</h6>
         </div>
         <div class="simple-spacer" ><h6>+</h6></div>
         <div class="simple-item well" id="simple-usage-put">
             <h6>Uploads</h6>
-            <h1>$<%= PilesIO.cost_calculator(usage_cost_put,usage_total_put).toFixed(3) %></h1>
-            <h6><%= PilesIO.human_size(usage_total_put)%></h6>
+            <h1>$<%= PilesIO.cost_calculator(usage_cost_put,usage_this_month_put).toFixed(3) %></h1>
+            <h6><%= PilesIO.human_size(usage_this_month_put)%></h6>
+            <h6>Month so far</h6>
         </div>
         <div class="simple-spacer" ><h6>+</h6></div>
         <div class="simple-item well" id="simple-storage">
             <h6>Storage</h6>
             <h1>$<%= PilesIO.cost_calculator(storage_cost,storage_total).toFixed(3) %></h1>
             <h6><%= PilesIO.human_size(storage_total) %></h6>
+            <h6>Month so far</h6>
         </div>
         <div class="simple-spacer "><h6>=</h6></div>
         <div class="simple-item well" id="simple-sum">
             <h6>Total</h6>
-            <h1>$<%= Number(PilesIO.cost_calculator(usage_cost_get,usage_total_get).toFixed(3)) + Number(PilesIO.cost_calculator(usage_cost_put,usage_total_put).toFixed(3)) + Number(PilesIO.cost_calculator(storage_cost,storage_total).toFixed(3)) %></h1>
+            <h1>$<%= (Number(PilesIO.cost_calculator(usage_cost_get,usage_this_month_get).toFixed(3)) + Number(PilesIO.cost_calculator(usage_cost_put,usage_this_month_put).toFixed(3)) + Number(PilesIO.cost_calculator(storage_cost,storage_total).toFixed(3))).toFixed(3) %></h1>
         </div>
     </div>
 
@@ -72,8 +77,7 @@ $(function() {
             <div id="detailed-storage" style="display:block;" class="details well">
             
                 <div class="left">
-                    <h2>Currently Stored</h2>
-                    <br><%= PilesIO.human_size(storage_total) %>
+                    <h2>Currently Stored</h2><%= PilesIO.human_size(storage_total) %>
                     <br>$<%= PilesIO.cost_calculator(storage_cost,storage_total).toFixed(3) %> per month
                      
                     <div class="pile">
@@ -90,8 +94,11 @@ $(function() {
             <div id="detailed-usage-get" class="details well">
                 <div class="left">
                     <h2>Downloaded</h2>
-                    <br><%= PilesIO.human_size(usage_total_get) %>
-                     <br>$<%= PilesIO.cost_calculator(usage_cost_get,usage_total_get).toFixed(3) %> total
+                    <h5>So far this month</h5><%= PilesIO.human_size(usage_this_month_get) %>
+                     <br>$<%= PilesIO.cost_calculator(usage_cost_get,usage_this_month_get).toFixed(3) %> total
+     
+     
+                     <h5>Total</h5><%= PilesIO.human_size(usage_total_get) %>
      
                      <div class="world">
                          <img class="arrow" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/arrow_down.png">
@@ -108,8 +115,11 @@ $(function() {
             <div id="detailed-usage-put" class="details well">
                 <div class="left">
                     <h2>Uploaded</h2>
-                    <br><%= PilesIO.human_size(usage_total_put) %> 
-                    <br>$<%= PilesIO.cost_calculator(usage_cost_put,usage_total_put).toFixed(3) %> total
+                    <h5>So far this month</h5><%= PilesIO.human_size(usage_this_month_put) %> 
+                    <br>$<%= PilesIO.cost_calculator(usage_cost_put,usage_this_month_put).toFixed(3) %> total
+                    
+                    <h5>Total</h5><%= PilesIO.human_size(usage_total_put) %>
+
 
                     <div class="comp" >
                         <img class="arrow" src="http://{{settings('CONTENT_DOMAIN')}}/static/img/arrow_up.png">

@@ -309,6 +309,9 @@
 	
 	var FileCollection = PilesIO.FileCollection = Backbone.Collection.extend({
 		model: File,
+		comparator:function(file) {
+		    return -file.get('size')
+		}
 	});
 	
 	var Daily = PilesIO.Daily = Backbone.Model.extend({

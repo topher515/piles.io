@@ -22,12 +22,6 @@ $(function() {
     //
     // Models
     //
-    var FileCollection = PilesIO.FileCollection = Backbone.Collection.extend({
-		model: PilesIO.File,
-		comparator:function(file) {
-		    return -file.get('size')
-		}
-	})
     
     var UsageEvent = PilesIO.UsageEvent = Backbone.Model.extend({})
     var UsageEventCollection = PilesIO.UsageEventCollection = Backbone.Collection.extend({
@@ -72,7 +66,7 @@ $(function() {
                 percent10 = total/10,
                 cursorSize = total,
                 cursor = 0;
-            while (files[cursor] != undefined && cursorSize > percent10) {
+            while (files[cursor] != undefined && cursorSize > percent10 && cursor < 10) {
                 file = files[cursor]
                 series.push([file.get('name'),file.get('size')])
                 cursor += 1
@@ -112,6 +106,12 @@ $(function() {
                             ]
                         }
                     },
+                    line: {
+                       dataLabels: {
+                          enabled: true
+                       },
+                       enableMouseTracking: false
+                    }
                 },
                 title: {
                     text: custom.title

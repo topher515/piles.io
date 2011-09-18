@@ -38,6 +38,10 @@
     	        right:0;
     	        top:0;
     	    }
+    	    .usage #details-container .details h5 {
+    	        margin-top:1em;
+    	        line-height:1em;
+    	    }
 	
 	.usage .simple-usage {
 	    min-height:120px;
@@ -55,6 +59,7 @@
     	    width: 125px;
     	    height: 70px;
     	    vertical-align:middle;
+    	    cursor:default;
     	    /*
     	    background-color:#E9EAEE;
     	    padding:5px;

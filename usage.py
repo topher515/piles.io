@@ -22,14 +22,12 @@ class UsageMeter(object):
     usage information.
     '''
     
-    
-    
-    
     def update(self):
         self._mr_storage_totals()
         self._mr_storage_dailies()
         self._mr_usage_totals()
         self._mr_usage_dailies()
+        self._mr_usage_monthlies()
     
     def storage_total(self,pid):
         '''Return the dict representing the total storage used by the `pid`'''
@@ -37,23 +35,98 @@ class UsageMeter(object):
         logger.debug('Storage total %s' % r)
         return r
         
-    def usage_total(self,pid,op):
+    def usage_total(self,pid,op=None):
         '''Return the dict representing the total usage by op type (GET,PUT,DELETE) for the `pid`'''
-        r=(db.usage_totals.find_one({'value.pid':pid,'value.op':op}) or {'value':None})['value']
+        spec = {'value.pid':pid}
+        if op:
+            spec['value.op'] = op
+        r=(db.usage_totals.find_one(spec) or {'value':None})['value']
         logger.debug('usage total %s' % r)
         return r
         
     def storage_dailies(self,pid):
         r=[s['value'] for s in (db.storage_dailies.find({'value.pid':pid}) or [])]
+        
+        
         logger.debug('Storage dailies %s' % r)
         return r
+        
+
+    def cumulative_storage_dailies(self,pid):
+        dailies = self.storage_dailies(self,pid)
+        sum = 0
+        now = datetime.datetime.now()
+        for daily in dailies:
+            sum += daily['size']
+            if daily['date'].year == now.year and daily['date'].month == now.month \
+                or daily['date'].year == now.year and daily['date'].month == now.month:
+                pass
+                 
+        
     def usage_dailies(self,pid):
         r=[s['value'] for s in (db.usage_dailies.find({'value.pid':pid}) or [])]
-        logger.debug('Usage dailies %s' % r)
+        
+        dailies = []
+        
+        dayiter = iter(r)
+        prevday = dayiter.next()
+        dailies.append(prevday)
+        curday = dayiter.next()
+        while curday:
+            dailies.append(curday)
+            daydelta = (curday - prevday)
+            if daydelta >= timedelta(days=2):
+                prevday = curday
+                curday = curday + timedelta(days=1)
+            else:
+                prevday = curday
+                curday = dayiter.next()
+        
+        return dailies
+        
+    def storage_monthlies(self,pid):
+        r=[s['value'] for s in (db.storage_monthlies.find({'value.pid':pid}) or [])]
+        logger.debug('Storage monthlies %s' % r)
         return r
+
+    def usage_monthlies(self,pid):
+        r=[s['value'] for s in (db.usage_monthlies.find({'value.pid':pid}) or [])]
+        logger.debug('Usage monthlies %s' % r)
+        return r
+
+    def usage_this_month(self,pid,op)  :
+        m = db.usage_monthlies.find({'value.pid':pid,'value.op':op}, sort=[('date',pymongo.DESCENDING)])
+        if m and m.count() > 0:
+            return m[0]
+        return None
+   
+    
     def reset(self):
         for c in ['storage_totals','storage_dailies','usage_totals','usage_dailies']:
             db.mr_tracker.remove({'collection':c})
+    
+    
+    def _mr_usage_monthlies(self):
+
+        map_func ='''function() {
+                    var theday = new ISODate()
+                    themonth.setFullYear(this.logged_time.getFullYear(), this.logged_time.getMonth());
+                    emit( this.pid + ':' + this.op + ':' + this.logged_time.toDateString(),
+                        {size: Number(this.size), date: theday, pid: this.pid, op: this.op});
+                }'''
+        reduce_func = '''function(key,values) {
+                    var result = {size: 0}
+                    values.forEach(function(value) {
+                        result.size += value.size;
+                        result.date = value.date;
+                        result.pid = value.pid;
+                        result.op = value.op;
+                    });
+                    return result;
+                }'''
+
+        return self._do_mr(map_func,reduce_func,'usage_events','usage_monthlies')
+    
     
     def _mr_storage_totals(self):
         
@@ -77,6 +150,45 @@ class UsageMeter(object):
                 }'''
       
         return self._do_mr(map_func,reduce_func,'usage_events','storage_totals')  
+
+
+    def _mr_storage_monthlies(self):
+
+        map_func = '''function() {
+
+                    var date = new ISODate()
+                    date.setFullYear(this.logged_time.getFullYear(),this.logged_time.getMonth())
+
+                    if (this.op == 'PUT') {
+                        emit(this.pid + ':' + date.toDateString(), 
+                            { pid: this.pid, 
+                            size: Number(this.size),
+                            date:date,
+                        })
+
+                    } else if (this.op == 'DELETE') {
+                        emit(this.pid + ':' + date.toDateString(),
+                            { pid: this.pid, 
+                            size: -Number(this.size),
+                            date: date,
+                        })
+                    }
+                }'''
+        reduce_func = '''function(key,values) {
+                    var result = {
+                        size: 0,
+                        pid: '',
+                        date: null,
+                    }
+                    values.forEach(function(val) {
+                        result.size += val.size;
+                        result.pid = val.pid;
+                        result.date = val.date
+                    });
+                    return result;
+                }'''
+
+        return self._do_mr(map_func,reduce_func,'usage_events','storage_monthlies')
 
     
     def _mr_storage_dailies(self):

@@ -150,6 +150,14 @@ def usage_totals(pid):
     um = usage.UsageMeter()
     usage_dailies = um.usage_dailies(pid)
     return ms2js(usage_dailies)
+    
+@route('/piles/:pid/usage/monthlies')
+@auth_json
+@jsonp
+def usage_totals(pid):
+    um = usage.UsageMeter()
+    usage_monthlies = um.usage_monthlies(pid)
+    return ms2js(usage_monthlies)
 
 ##########################################################
 ## Piles
