@@ -74,10 +74,13 @@ class UsageMeter(object):
         curday = dayiter.next()
         while curday:
             dailies.append(curday)
-            daydelta = (curday - prevday)
+            daydelta = (curday['date'] - prevday['date'])
             if daydelta >= timedelta(days=2):
                 prevday = curday
-                curday = curday + timedelta(days=1)
+                curday = {
+                    'size':0,
+                    'date':curday['date']+timedelta(days=1)
+                }
             else:
                 prevday = curday
                 curday = dayiter.next()
