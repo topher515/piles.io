@@ -3,7 +3,7 @@ import json
 import pymongo
 from db import db
 import apachelog
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 logger = logging.getLogger()
 from utils import FakeLogger
