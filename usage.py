@@ -83,7 +83,10 @@ class UsageMeter(object):
                 }
             else:
                 prevday = curday
-                curday = dayiter.next()
+                try:
+                    curday = dayiter.next()
+                except StopIteration:
+                    break
         
         return dailies
         
