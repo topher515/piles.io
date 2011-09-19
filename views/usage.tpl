@@ -129,10 +129,10 @@ $(function() {
             <!-- SUMMARY -->
             <div id="detailed-sum" class="details well">
 
-                <p>Every free user on Piles.io gets $<%= freeloaders_this_month_dollars %> free! You'<!-- '-->re using <%= this.model.get('this_month_dollars') %>.</p>
+                <p>Every free user on Piles.io gets $<%= freeloaders_this_month_dollars %> free! You'<!-- '-->re using <%= this_month_dollars %>.</p>
                 
                 <h1 id="begin-dollar"><%= this_month_dollars.toFixed(3) %></h1>
-                <h1 id="end-dollar"><%= this.model.get('this_month_dollars') %></h1>
+                <h1 id="end-dollar"><%= this_month_dollars %></h1>
                 <div id="free-progress"></div>
                 
             </div>

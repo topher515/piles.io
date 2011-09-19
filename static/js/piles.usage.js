@@ -231,7 +231,7 @@ $(function() {
             // Render the PUT chart
             this._construct_usage_chart({
                 title: 'Uploads',
-                height:250,
+                height:280,
                 sequence: _.map(this.model.daily_puts.models,function(m) { 
                     return {date:m.get('date'),size:m.get('size') }}),
                 elem:this.$el.find('#put-chart'),
@@ -239,7 +239,7 @@ $(function() {
             // Render the GET chart
             this._construct_usage_chart({
                 title: 'Downloads',
-                height:250,
+                height:280,
                 sequence: _.map(this.model.daily_gets.models,function(m) { 
                     return {date:m.get('date'),size:m.get('size') }}),
                 elem:this.$el.find('#get-chart'),

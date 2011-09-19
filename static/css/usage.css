@@ -97,26 +97,26 @@
     .usage #detailed-sum #begin-dollar {
         position:absolute;
         left:200px;
-        top:150px;
+        top:130px;
     }
     .usage #detailed-sum #end-dollar {
         position:absolute;
         right:200px;
-        top:150px;
+        top:130px;
     }
     .usage #detailed-sum #free-progress {
         position:absolute;
         left: 200px;
         right: 200px;
-        top: 200px;
-        bottom:10px;
+        top: 140px;
+        bottom:140px;
     }
         	
 	.usage div.comp {
 	    position:absolute;
 		opacity:.7;
-	    top:47%;
-	    left:10px;
+	    top:43%;
+	    left:30px;
 		}
 		.usage div.comp img.graphic {
 		}
