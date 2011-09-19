@@ -74,8 +74,7 @@ $(function() {
                     <h4>So far this month</h4>
                     <br>$<%= storage_this_month_dollars.toFixed(3) %>
                      
-                    <h5>Ever</h5><%= PilesIO.human_size(storage_total_total_bytes) %>
-                    <br>$<%= storage_total_dollars.toFixed(3) %>
+                    <h5>Currently stored</h5><%= PilesIO.human_size(storage_current_bytes) %>
                      
                     <div class="pile">
                         <img src="http://{{settings('CONTENT_DOMAIN')}}/static/img/pile_256.png">
