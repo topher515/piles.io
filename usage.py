@@ -133,9 +133,9 @@ class UsageMeter(object):
         # Usage this month
         for utm in db.usage_monthlies.find({'value.pid':pid}, sort=[('date',pymongo.DESCENDING)]):
             if utm['value']['op'] == 'PUT':
-                summary['usage_put_this_month_bytes'] = ut['value']['size']
+                summary['usage_put_this_month_bytes'] = utm['value']['size']
             elif utm['value']['op'] == 'GET':
-                summary['usage_get_this_month_bytes'] = ut['value']['size']
+                summary['usage_get_this_month_bytes'] = utm['value']['size']
                
                 
         # Calculate costs
