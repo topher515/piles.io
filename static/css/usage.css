@@ -108,8 +108,14 @@
         position:absolute;
         left: 200px;
         right: 200px;
-        top: 160px;
-        bottom:120px;
+        top: 180px;
+        bottom:100px;
+    	box-shadow: 0 0 5px rgba(222, 127, 8, .4);
+    }
+    .usage #detailed-sum #sum-desc {
+        position:absolute;
+        left: 200px;
+        top: 230px;
     }
         	
 	.usage div.comp {
