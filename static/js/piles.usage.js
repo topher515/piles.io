@@ -63,7 +63,7 @@ $(function() {
                 percent10 = total/10,
                 cursorSize = total,
                 cursor = 0;
-            while (files[cursor] != undefined && cursorSize > percent10 && cursor < 10) {
+            while (files[cursor] != undefined && cursorSize > percent10 && cursor < 8) {
                 file = files[cursor]
                 series.push([file.get('name'),file.get('size')])
                 cursor += 1
@@ -111,7 +111,7 @@ $(function() {
                     }
                 },
                 title: {
-                    text: custom.title
+                    text: null,
                 },
                 xAxis: {
                     type: 'datetime',
@@ -230,14 +230,18 @@ $(function() {
             
             // Render the PUT chart
             this._construct_usage_chart({
-                title: null,
-                sequence: _.map(this.model.daily_puts.models,function(m) { return {date:m.get('date'),size:m.get('size') }}),
+                title: 'Uploads',
+                height:250,
+                sequence: _.map(this.model.daily_puts.models,function(m) { 
+                    return {date:m.get('date'),size:m.get('size') }}),
                 elem:this.$el.find('#put-chart'),
             });
             // Render the GET chart
             this._construct_usage_chart({
-                title: null,
-                sequence: _.map(this.model.daily_gets.models,function(m) { return {date:m.get('date'),size:m.get('size') }}),
+                title: 'Downloads',
+                height:250,
+                sequence: _.map(this.model.daily_gets.models,function(m) { 
+                    return {date:m.get('date'),size:m.get('size') }}),
                 elem:this.$el.find('#get-chart'),
             });
             

@@ -95,7 +95,7 @@
 	.usage div.comp {
 	    position:absolute;
 		opacity:.7;
-	    top:35%;
+	    top:47%;
 	    left:10px;
 		}
 		.usage div.comp img.graphic {
@@ -108,8 +108,8 @@
 	.usage div.pile {
     	position:absolute;
 		opacity:.7;
-	    top:50%;
-	    left:10px;
+	    top:40%;
+	    left:30px;
 	    }
         .usage div.pile img.graphic {
             
