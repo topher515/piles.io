@@ -110,7 +110,7 @@ AgnosticReq = MethodAgnosticRequestWrapper
 @route('/feedbacks', method="ANY")
 @emulate_rest('POST')
 @jsonp
-@validator(attrs={'message':unicode,'type':unicode,'email':unicode,'useragent':unicode})
+@validator(attrs={'message':{'type':unicode},'type':{'type':unicode},'email':{'type':unicode},'useragent':{'type':unicode}})
 def feedbacks_post():
     #print request.validated
     v = request.validated

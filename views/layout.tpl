@@ -56,8 +56,8 @@ $(function() {
   <style>
 	.top-right {
 		position: absolute;
-		top:10px;
-		right:10px;
+		top:8px;
+		right:8px;
 		z-index:1000;
 	}
 	.small-center {

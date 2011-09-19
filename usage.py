@@ -84,11 +84,16 @@ class UsageMeter(object):
         
         
         # Calculate byte-hours from dailies
-        sto_dailies = db.storage_dailies.find({'value.pid':pid})
-        prev_date = sto_dailies.next()
-        a_day_later = {'value':{'date':prev_date['value']['date'] + timedelta(days=1),'size':0}}
-        next_date = sto_dailies.next()
-        cur_bytes = 0
+        try:
+            sto_dailies = db.storage_dailies.find({'value.pid':pid})
+            prev_date = sto_dailies.next()
+            a_day_later = {'value':{'date':prev_date['value']['date'] + timedelta(days=1),'size':0}}
+            next_date = sto_dailies.next()
+            cur_bytes = 0
+        except StopIteration:
+            logger.warn("Not enough data to calculate summary")
+            return summary
+            
         while True:
             
             # Choose time interval

@@ -85,21 +85,22 @@
 
   <script type="text/template" id="pile-tpl">
 	
-	<!-- img class="watermark" src="/static/img/pile_256.png" / -->
+	<div class="top-bar">
 	
-	<div class="emails">
-		<h6 class="current"><%= emails %></h6>
-		<!-- input type="text" value="Email" /><button class="btn small">Add</button -->
-	</div>
+    	<div class="emails">
+    		<!-- --><%= emails %>
+    	</div>
 	
-	<div class="searcher">
-	    <form action="#">
-	        <input class="input xlarge" type="text" value="Search Files" />
-	    </form>
-	</div>
+    	<div class="searcher">
+    	    <form action="#">
+    	        <input class="input xlarge" type="text" value="Search Files" />
+    	    </form>
+    	</div>
 		
-	<div class="usage-container">
+    	<div class="usage-container">
 
+    	</div>
+		
 	</div>
 		
 	<div class="file-collection">
