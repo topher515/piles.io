@@ -62,6 +62,8 @@ class UsageMeter(object):
         
         self.defaults.update(custom)
     
+        
+    
     def update(self):
         self._mr_storage_totals()
         self._mr_storage_dailies()

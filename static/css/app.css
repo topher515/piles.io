@@ -260,7 +260,7 @@ a.btn {
 		padding:0;
 		position:absolute;
 		right: 0px;
-		bottom: 132px;
+		bottom: 0px;
 		z-index:300;
 	}
 	.pile-view .trash h1 {

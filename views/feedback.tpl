@@ -4,6 +4,9 @@
 $(function() {
 	
 	var Feedback = Backbone.Model.extend({
+	    defaults:{
+	        useragent:navigator.userAgent
+	    },
 		urlRoot:'http://{{settings("APP_DOMAIN")}}/feedbacks'
 	});
 	
@@ -69,23 +72,62 @@ $(function() {
 		},
 	})
 	
-	$('.feedback-button').click(function() {
-		$.blockUI({
-			message: (new FeedbackView({model:new Feedback()})).render().el,
-			css: {cursor:'auto'}
-		})
-		$('body').append()
-	})
+	$('.feedback-button').hover(
+	    function() {
+	        $(this).animate({left:0})
+	    },
+	    function() {
+	        $(this).animate({left:-126})
+	    }
+	    ).click(function() {
+	    	$.blockUI({
+    			message: (new FeedbackView({model:new Feedback()})).render().el,
+    			css: {cursor:'auto'}
+    		})
+    		$('body').append()
+    	})
 })
 </script>
 
 <style type="text/css" media="screen">
-.feedback-button {
-	position:fixed;
+.feedback-button-container {
+    position:fixed;
 	left:0;
-	top:45%;
+	top:35%;
 	z-index:1000;
 }
+.feedback-button {
+    position:absolute;
+    left:-126px;
+	width: 156px;
+	height:22px;
+	background: rgb(224,224,224); /* Old browsers */
+    background: -moz-linear-gradient(top, rgba(224,224,224,1) 0%, rgba(197,197,197,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(224,224,224,1)), color-stop(100%,rgba(197,197,197,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, rgba(224,224,224,1) 0%,rgba(197,197,197,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, rgba(224,224,224,1) 0%,rgba(197,197,197,1) 100%); /* Opera11.10+ */
+    background: -ms-linear-gradient(top, rgba(224,224,224,1) 0%,rgba(197,197,197,1) 100%); /* IE10+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e0e0e0', endColorstr='#c5c5c5',GradientType=0 ); /* IE6-9 */
+    background: linear-gradient(top, rgba(224,224,224,1) 0%,rgba(197,197,197,1) 100%); /* W3C */
+    padding:5px;
+    -webkit-border-top-right-radius: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    -moz-border-radius-topright: 5px;
+    -moz-border-radius-bottomright: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    -webkit-box-shadow: 4px 4px 5px 0px , 0, 0, .5);
+    -moz-box-shadow: 4px 4px 5px 0px , 0, 0, .5);
+    box-shadow: 4px 4px 5px 0px , 0, 0, .5);
+    cursor:pointer;
+    }
+    .feedback-button span {
+        vertical-align:middle;
+        margin-top:3px;
+    }
+    .feedback-button img {
+        float:right;
+    }
 
 .feedback-widget {
 
@@ -105,8 +147,10 @@ $(function() {
 	}
 </style>
 
-<div class="feedback-button">
-	<img src="http://{{settings('CONTENT_DOMAIN')}}/static/img/feedback.png" />
+<div class="feedback-button-container">
+    <div class="feedback-button">
+    	<span>Feedback &amp; Support</span><img src="http://{{settings('CONTENT_DOMAIN')}}/static/img/speechbubble.png" />
+    </div>
 </div>
 
 <script type="text/template" id="feedback-tpl">
