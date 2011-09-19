@@ -47,7 +47,7 @@ $(function() {
         <div class="simple-spacer" ><h6>+</h6></div>
         <div class="simple-item well" id="simple-usage-put">
             <h6>Uploads</h6>
-            <h1>$<%= usage_get_this_month_dollars.toFixed(3) %></h1>
+            <h1>$<%= usage_put_this_month_dollars.toFixed(3) %></h1>
             <!-- h6><%= PilesIO.human_size(usage_put_this_month_bytes)%></h6 -->
             <h6>Month so far</h6>
         </div>
