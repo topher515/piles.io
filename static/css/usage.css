@@ -2,7 +2,7 @@
     display:none;
 }
 
-.usage-container {
+.usage-frame {
     position:absolute;
     top:35px;
     bottom:0px;
@@ -24,6 +24,10 @@
 		opacity: .5;
 	}
 
+.usage-container {
+    width:800px;
+}
+
 .usage {
 	position:relative;
 	width:100%;
@@ -33,6 +37,7 @@
 	    min-height:300px;
 	    }
 	    .usage #details-container .details {
+    	    background-color:white;
 	        overflow:hidden;
 	        position:absolute;
 	        top:0;
@@ -68,7 +73,6 @@
 	.usage .simple-usage {
 	    min-height:120px;
 	    margin:50px 0 0 0;
-	    background-color:white;
 	    }
 	    .usage .simple-usage .simple-spacer {
     	    display:inline-block;
