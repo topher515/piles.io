@@ -150,7 +150,8 @@ class UsageMeter(object):
         summary['usage_put_this_month_dollars'] = summary['usage_put_this_month_bytes'] * summary['usage_put_cost'] / (1024*1024*1024) 
         summary['usage_get_this_month_dollars'] = summary['usage_get_this_month_bytes'] * summary['usage_get_cost'] / (1024*1024*1024)
         
-        summary['total_dollars'] = summary['']
+        summary['total_dollars'] = summary['usage_put_total_dollars'] + \
+            summary['usage_get_total_dollars'] + summary['storage_total_dollars']
         summary['this_month_dollars'] = summary['usage_put_this_month_dollars'] + \
             summary['usage_get_this_month_dollars'] + summary['storage_this_month_dollars']
         
