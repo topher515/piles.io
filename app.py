@@ -182,61 +182,46 @@ def usage(pilename):
         abort(404,'That Pile does not exist.')
     
     s = session(request)
-    if s.get('authenticated') and not request.GET.get('public'):
-        authed_piles = [ p['_id'] for p in s['authenticated']['piles'] ]
-        thispid = pile['_id']
-        if thispid in authed_piles:
-            # Get the pile's usage
-            #usage_puts = db.usage_puts.find({'pid':pile['_id']}, sort=[('datetime',DESCENDING)], limit=7)
-            #usage_gets = db.usage_gets.find({'pid':pile['_id']}, sort=[('datetime',DESCENDING)], limit=7)
-            
-            print "Display usage for %s" % pile
-            
-            um = UsageMeter()
-            
-            ### Usage
-            
-            # Grab DAILY usage data
-            usage_dailies = um.usage_dailies(thispid)
-            usage_dailies_puts = []
-            usage_dailies_gets = []
-            for u in usage_dailies:
-                if u['op'] == 'PUT':
-                    usage_dailies_puts.append(u)
-                elif u['op'] == 'GET':
-                    usage_dailies_gets.append(u)
-            # Grab MONTHLY usage data
-            usage_this_month_put = um.usage_this_month(thispid,'put') or {'size':0}
-            usage_this_month_get = um.usage_this_month(thispid, 'get') or {'size':0}
-            # Grab TOTAL usage data
-            usage_total_put = um.usage_total(thispid,'PUT') or {'size':0}
-            usage_total_get = um.usage_total(thispid,'GET') or {'size':0}
-            
-            
-            ### Storage
-            
-            #storage_this_month = um.storage_this_month(thispid)
-            
-            # Grab DAILY storage data
-            storage_dailies = um.storage_dailies(thispid)
-            # Grab TOTAL storage data
-            storage_total = um.storage_total(thispid) or {'size':0}
-            
-            
-            # Get the pile's files
-            files = db.files.find({'pid':pile['_id']})
-            return template('usage',{'pile':pile,'files':files, 
-                'usage_dailies_puts':usage_dailies_puts,
-                'usage_dailies_gets':usage_dailies_gets,
-                'usage_total_put':usage_total_put,
-                'usage_total_get':usage_total_get,
-                'usage_this_month_put':usage_this_month_put,
-                'usage_this_month_get':usage_this_month_get,
-                
-                'storage_dailies':storage_dailies,
-                'storage_total':storage_total})
+    
+    if not s.get('authenticated') or request.GET.get('public'):
+        return redirect('/'+pilename)
+    
+    authed_piles = [p['_id'] for p in s['authenticated']['piles']]
+    thispid = pile['_id']
+    if thispid not in authed_piles:
+        return redirect('/'+pilename)
         
-    return redirect('/'+pilename)
+        
+    print "Display usage for %s" % pile
+    um = UsageMeter()
+    
+    ### Usage
+    # Grab DAILY usage data
+    usage_dailies = um.usage_dailies(thispid)
+    usage_dailies_puts = []
+    usage_dailies_gets = []
+    for u in usage_dailies:
+        if u['op'] == 'PUT':
+            usage_dailies_puts.append(u)
+        elif u['op'] == 'GET':
+            usage_dailies_gets.append(u)
+    
+    ### Storage
+    # Grab DAILY storage data
+    storage_dailies = um.storage_dailies(thispid)
+    
+    # Get the pile's files
+    files = db.files.find({'pid':pile['_id']})
+    
+    return template('usage',{
+            'pile':pile,
+            'files':files, 
+            'usage_dailies_puts':usage_dailies_puts,
+            'usage_dailies_gets':usage_dailies_gets,
+            'storage_dailies':storage_dailies,
+            'summary':um.summary(pid),
+        })
+        
     
 
 

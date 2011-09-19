@@ -328,13 +328,31 @@
 	
     var Usage = PilesIO.Usage = Backbone.Model.extend({
         defaults:{
-            "storage_total": 0,
-            "usage_total_get": 0,
-            "usage_total_put": 0,
-        
-            "storage_cost": 0.16,
-            "usage_cost_get": 0.14,
-            "usage_cost_put": 0.02
+            // Storage info
+            "storage_cost": 0.16,           // in dollars/gigabyte/month
+            "storage_current_bytes": 0,     // in bytes
+            "storage_total_byte_hours": 0,  // in byte-hours
+            "storage_total_dollars":0                 
+            "storage_this_month_byte_hours": 0, // in byte-hours
+            "storage_this_month_dollars":0,
+            
+            // Usage get
+            "usage_get_cost": 0.14,         // in dollars/gigabyte
+            "usage_get_total_bytes": 0,     // in bytes
+            "usage_get_total_dollars": 0,
+            'usage_get_this_month_bytes':0, // in bytes
+            "usage_get_this_month_dollars":0,
+            
+            // Usage put
+            "usage_put_cost": 0.02,         // in dollars/gigabyte
+            "usage_put_total_bytes": 0,     // in bytes
+            'usage_put_total_dollars':0,    
+            'usage_put_this_month_bytes':0, // in bytes
+            "usage_put_this_month_dollars":0,
+            
+            // Freeloaders
+            'freeloaders_this_month_max_dollars': 0.25,// in dollars
+            'this_month_dollars':0,
         },
         initialize:function() {
             this.url = 'http://' + PilesIO.App.APP_DOMAIN + '/piles/'+ (this.get('pid') || this.get('id')) + '/usage'
@@ -343,6 +361,12 @@
     		this.daily_gets = new Dailies;
     		this.daily_sto = new Dailies;
         },
+        dollars_this_month:function() {
+            return this.get('storage_this_month_dollars') +
+                this.get('usage_get_this_month_dollars') +
+                this.get('usage_put_this_month_dollars')
+        },
+        
     });
 	
 	var Pile = PilesIO.Pile = Backbone.Model.extend({

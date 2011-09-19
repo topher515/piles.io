@@ -131,17 +131,10 @@ def feedbacks_get(id):
 @route('/piles/:pid/usage')
 @auth_json
 @jsonp
-def usage_totals(pid):
+def usage_summary(pid):
     um = usage.UsageMeter()
-    totals = {
-        'storage_cost':0.160,
-        'usage_cost_get':0.140,
-        'usage_cost_put':0.020,
-    }
-    totals['storage_total'] = (um.storage_total(pid) or {'size':0}).get('size')
-    totals['usage_total_put'] = (um.usage_total(pid,'PUT') or {'size':0}).get('size')
-    totals['usage_total_get'] = (um.usage_total(pid,'GET') or {'size':0}).get('size')
-    return m2j(totals)
+    summary = um.summary(pid)
+    return m2j(summary)
 
 @route('/piles/:pid/usage/dailies')
 @auth_json

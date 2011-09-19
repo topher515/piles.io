@@ -13,10 +13,7 @@ $(function() {
         return str
     }
     
-    var cost_calculator = PilesIO.cost_calculator = function(cost_per_gb,total_bytes) {
-        total_gbs = total_bytes / (1024*1024*1024)
-        return total_gbs * cost_per_gb 
-    }
+
     
     
     //
@@ -273,6 +270,7 @@ $(function() {
                 self.$el.find('#detailed-storage').slideDown()
             })
             
+            this.$el.find('#detailed-sum #free-progress').progressbar({ value = (this.model.get('this_month_dollars') / this.model.get('freeloaders_this_month_dollars')) })
             
             return this
         }

@@ -75,7 +75,7 @@ def m2j(x):
     if x.get('_id'):
         x['id'] = x['_id']
         del x['_id']
-    return json.dumps(x,default=extra_json_serializers)
+    return json.dumps(x,default=extra_json_serializers,indent=3)
 
 def ms2js(l):
     ls = []

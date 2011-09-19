@@ -21,19 +21,139 @@ class UsageMeter(object):
     ''' Map/Reduce Amazon S3 log information to extract PUT/GET
     usage information.
     '''
+    def __init__(self,custom={}):
+        # The default settings for cost, etc.
+        self.defaults = {
+            # Storage
+            "storage_cost": 0.16,           # in dollars/gigabyte/month
+            # Usage get
+            "usage_get_cost": 0.14,         # in dollars/gigabyte
+            # Usage put
+            "usage_put_cost": 0.02,         # in dollars/gigabyte
+            # Freeloaders
+            'freeloaders_this_month_dollars': 0.25, # in dollars
+        }
+        
+        # Zero out all of the important values
+        self.defaults.update({
+            # Storage
+            "storage_current_bytes": 0,     # in bytes
+            "storage_total_byte_hours": 0,  # in byte-hours
+            "storage_total_dollars":0,           
+            "storage_this_month_byte_hours": 0, # in byte-hours
+            "storage_this_month_dollars":0,
+
+            # Usage get
+            "usage_get_total_bytes": 0,     # in bytes
+            "usage_get_total_dollars": 0,
+            'usage_get_this_month_bytes':0, # in bytes
+            "usage_get_this_month_dollars":0,
+
+            # Usage put
+            "usage_put_total_bytes": 0,     # in bytes
+            'usage_put_total_dollars':0,    
+            'usage_put_this_month_bytes':0, # in bytes
+            "usage_put_this_month_dollars":0,
+
+            # Summary
+            'total_dollars':0,
+            'this_month_dollars':0,
+        })
+        
+        self.defaults.update(custom)
     
     def update(self):
         self._mr_storage_totals()
         self._mr_storage_dailies()
+        self._mr_storage_monthlies()
         self._mr_usage_totals()
         self._mr_usage_dailies()
         self._mr_usage_monthlies()
     
-    def storage_total(self,pid):
-        '''Return the dict representing the total storage used by the `pid`'''
-        r=(db.storage_totals.find_one({'value.pid':pid}) or {'value':None})['value']
-        logger.debug('Storage total %s' % r)
-        return r
+    
+    def summary(self,pid):
+        
+        now = datetime.now()
+        
+        summary = dict(self.defaults)
+
+        ### Gather byte data
+        # Storage current
+        s = db.storage_totals.find_one({'value.pid':pid})
+        summary['storage_current_bytes'] = s['value']['size'] if s else 0
+        
+        
+        # Calculate byte-hours from dailies
+        sto_dailies = db.storage_dailies.find({'value.pid':pid})
+        prev_date = sto_dailies.next()
+        a_day_later = {'value':{'date':prev_date['value']['date'] + timedelta(days=1),'size':0}}
+        next_date = sto_dailies.next()
+        cur_bytes = 0
+        while True:
+            
+            # Choose time interval
+            if (next_date['value']['date'] - prev_date['value']['date']) < timedelta(days=2):
+                # If the next date is less than two days then use it
+                closer_date = next_date
+                try:
+                    next_date = sto_dailies.next()
+                except StopIteration:
+                    break
+            else:
+                # Otherwise use `the next day`
+                closer_date = a_day_later
+            a_day_later = {'value':{'date':prev_date['value']['date'] + timedelta(days=1),'size':0}}
+            
+            # Sum bytes
+            cur_bytes += prev_date['value']['size']
+            
+            cd = closer_date['value']['date']
+            
+            # Calculate byte hours for this time frame
+            timepassed = closer_date['value']['date'] - prev_date['value']['date']
+            secspassed = timepassed.days * 3600*24 + timepassed.seconds
+            byte_secs = secspassed * cur_bytes
+            byte_hours = byte_secs / 3600
+            
+            # If we're looking at a date in *the current month* 
+            # then add this sum to the current month 
+            if cd.year == now.year and cd.month == now.month:
+                summary['storage_this_month_byte_hours'] += byte_hours
+            summary['storage_total_byte_hours'] += byte_hours
+            
+            # Overwrite prev_date to continue the loop
+            prev_date = closer_date
+        
+        # Usage totals
+        for ut in db.usage_totals.find({'value.pid':pid}):
+            if ut['value']['op'] == 'PUT':
+                summary['usage_put_total_bytes'] = ut['value']['size']
+            elif ut['value']['op'] == 'GET':
+                summary['usage_get_total_bytes'] = ut['value']['size']
+        # Usage this month
+        for utm in db.usage_monthlies.find({'value.pid':pid}, sort=[('date',pymongo.DESCENDING)]):
+            if utm['value']['op'] == 'PUT':
+                summary['usage_put_this_month_bytes'] = ut['value']['size']
+            elif utm['value']['op'] == 'GET':
+                summary['usage_get_this_month_bytes'] = ut['value']['size']
+               
+                
+        # Calculate costs
+        # Convert from bytes to gigabytes divide by 1024 three times
+        # convert from hours to months divide by 730.484398 (hours in a month)
+        summary['storage_total_dollars'] = summary['storage_total_byte_hours'] * summary['storage_cost'] / (1024*1024*1024) / (730.484398)
+        summary['storage_this_month_dollars'] = summary['storage_this_month_byte_hours'] * summary['storage_cost'] / (1024*1024*1024) / (730.484398)
+        
+        # Convert from bytes to gigabytes by dividing by 1024 three times
+        summary['usage_put_total_dollars'] = summary['usage_put_total_bytes'] * summary['usage_put_cost'] / (1024*1024*1024) 
+        summary['usage_get_total_dollars'] = summary['usage_get_total_bytes'] * summary['usage_get_cost'] / (1024*1024*1024)
+        summary['usage_put_this_month_dollars'] = summary['usage_put_this_month_bytes'] * summary['usage_put_cost'] / (1024*1024*1024) 
+        summary['usage_get_this_month_dollars'] = summary['usage_get_this_month_bytes'] * summary['usage_get_cost'] / (1024*1024*1024)
+        
+        
+        return summary
+    
+    
         
     def usage_total(self,pid,op=None):
         '''Return the dict representing the total usage by op type (GET,PUT,DELETE) for the `pid`'''
@@ -50,28 +170,18 @@ class UsageMeter(object):
         
         logger.debug('Storage dailies %s' % r)
         return r
-        
-
-    def cumulative_storage_dailies(self,pid):
-        dailies = self.storage_dailies(self,pid)
-        sum = 0
-        now = datetime.datetime.now()
-        for daily in dailies:
-            sum += daily['size']
-            if daily['date'].year == now.year and daily['date'].month == now.month \
-                or daily['date'].year == now.year and daily['date'].month == now.month:
-                pass
                  
         
     def usage_dailies(self,pid):
         r=[s['value'] for s in (db.usage_dailies.find({'value.pid':pid}) or [])]
         
+        '''
         dailies = []
         
         dayiter = iter(r)
         prevday = dayiter.next()
         dailies.append(prevday)
-        curday = dayiter.next()
+        curday = prevday['da
         while curday:
             dailies.append(curday)
             daydelta = (curday['date'] - prevday['date'])
@@ -87,8 +197,9 @@ class UsageMeter(object):
                     curday = dayiter.next()
                 except StopIteration:
                     break
+        '''
         
-        return dailies
+        return r
         
     def storage_monthlies(self,pid):
         r=[s['value'] for s in (db.storage_monthlies.find({'value.pid':pid}) or [])]
@@ -108,17 +219,18 @@ class UsageMeter(object):
    
     
     def reset(self):
-        for c in ['storage_totals','storage_dailies','usage_totals','usage_dailies']:
+        for c in ['storage_totals','storage_dailies','usage_totals','usage_dailies', 'storage_monthlies','usage_monthlies']:
             db.mr_tracker.remove({'collection':c})
+            db[c].remove({})
     
     
     def _mr_usage_monthlies(self):
 
         map_func ='''function() {
-                    var theday = new ISODate()
+                    var themonth = new ISODate()
                     themonth.setFullYear(this.logged_time.getFullYear(), this.logged_time.getMonth());
-                    emit( this.pid + ':' + this.op + ':' + this.logged_time.toDateString(),
-                        {size: Number(this.size), date: theday, pid: this.pid, op: this.op});
+                    emit( this.pid + ':' + this.op + ':' + themonth.toDateString(),
+                        {size: Number(this.size), date: this.logged_time, pid: this.pid, op: this.op});
                 }'''
         reduce_func = '''function(key,values) {
                     var result = {size: 0}
@@ -169,14 +281,14 @@ class UsageMeter(object):
                         emit(this.pid + ':' + date.toDateString(), 
                             { pid: this.pid, 
                             size: Number(this.size),
-                            date:date,
+                            date:this.logged_time,
                         })
 
                     } else if (this.op == 'DELETE') {
                         emit(this.pid + ':' + date.toDateString(),
                             { pid: this.pid, 
                             size: -Number(this.size),
-                            date: date,
+                            date: this.logged_time,
                         })
                     }
                 }'''
@@ -208,14 +320,14 @@ class UsageMeter(object):
                         emit(this.pid + ':' + date.toDateString(), 
                             { pid: this.pid, 
                             size: Number(this.size),
-                            date:date,
+                            date:this.logged_time,
                         })
                             
                     } else if (this.op == 'DELETE') {
                         emit(this.pid + ':' + date.toDateString(),
                             { pid: this.pid, 
                             size: -Number(this.size),
-                            date: date,
+                            date: this.logged_time,
                         })
                     }
                 }'''
@@ -266,8 +378,8 @@ class UsageMeter(object):
         map_func ='''function() {
                     var theday = new ISODate()
                     theday.setFullYear(this.logged_time.getFullYear(), this.logged_time.getMonth(), this.logged_time.getDate());
-                    emit( this.pid + ':' + this.op + ':' + this.logged_time.toDateString(),
-                        {size: Number(this.size), date: theday, pid: this.pid, op: this.op});
+                    emit( this.pid + ':' + this.op + ':' + theday.toDateString(),
+                        {size: Number(this.size), date: this.logged_time, pid: this.pid, op: this.op});
                 }'''
         reduce_func = '''function(key,values) {
                     var result = {size: 0}
@@ -596,10 +708,11 @@ def main(command):
     log_proc = S3LogProcessor(settings('LOG_BUCKET'), settings('LOG_BUCKET_PREFIX'), db)
     usage_meter = UsageMeter()
     if command == 'nuke':
-        print "Removing all usage events, resetting log markers, resetting mapreduce markers"
+        print "Resetting log markers, Removing all usage events"
         db.usage_events.remove()
         log_proc.reset_log_marker()
     if command == 'nuke' or command == 'reset':
+        print "resetting mapreduce markers"
         usage_meter.reset()
     if command == 'update':
         # Pull updates from S3 logs
