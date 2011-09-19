@@ -51,9 +51,12 @@
     	    display:inline-block;
     	    width: 60px;
     	    height: 60px;
-    	    font-size:2em;
     	    text-align:center;
-	    }
+	        }
+	        .usage .simple-usage .simple-spacer h6 {
+        	    font-size:2em;
+	        }
+	    
 	    .usage .simple-usage .simple-item {
     	    display:inline-block;
     	    width: 125px;
@@ -91,6 +94,23 @@
         	top:0px;
         }
         	
+    .usage #detailed-sum #begin-dollar {
+        position:absolute;
+        left:200px;
+        top:150px;
+    }
+    .usage #detailed-sum #end-dollar {
+        position:absolute;
+        right:200px;
+        top:150px;
+    }
+    .usage #detailed-sum #free-progress {
+        position:absolute;
+        left: 200px;
+        right: 200px;
+        top: 200px;
+        bottom:10px;
+    }
         	
 	.usage div.comp {
 	    position:absolute;
