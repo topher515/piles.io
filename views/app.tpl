@@ -42,7 +42,8 @@
             		$('body').append(pileview.render().el)
             		$('#brokescript').remove()
 		            
-		        }})  
+		        }})
+		        document.title = pilename + ' | Piles--Alpha'
 		    },
 		    error: error,
 		})
