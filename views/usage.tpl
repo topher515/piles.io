@@ -140,10 +140,10 @@ $(function() {
 </script>
 
 
-<a class="btn" href="http://{{settings('CONTENT_DOMAIN')}}/app#{{pile['name']}}">&lt; Back</a>
 <div class="usage-frame">
     <div class="usage-container">
         <h1 class="pile-title">{{pile['name']}}</h1>
+        <a class="btn" href="http://{{settings('CONTENT_DOMAIN')}}/app#{{pile['name']}}">&lt; Back</a>
     </div>
 
 
