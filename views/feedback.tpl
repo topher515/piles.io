@@ -65,7 +65,8 @@ $(function() {
 		send:function() {
 			this.model.set({
 				message:$(this.el).find('.message textarea').val(),
-				type:$(this.el).find('input[type=radio]:checked').val()
+				type:$(this.el).find('input[type=radio]:checked').val(),
+				email:$(this.el).find('input[name=email]').val()
 			})
 			this.model.save()
 			this.clear()
