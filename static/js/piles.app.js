@@ -332,7 +332,7 @@
             "storage_cost": 0.16,           // in dollars/gigabyte/month
             "storage_current_bytes": 0,     // in bytes
             "storage_total_byte_hours": 0,  // in byte-hours
-            "storage_total_dollars":0                 
+            "storage_total_dollars":0,
             "storage_this_month_byte_hours": 0, // in byte-hours
             "storage_this_month_dollars":0,
             

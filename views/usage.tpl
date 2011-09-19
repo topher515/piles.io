@@ -15,15 +15,7 @@
 <script>
 $(function() {
     
-    window.usage = new PilesIO.Usage({
-        usage_total_put: {{usage_total_put['size']}},
-        usage_total_get: {{usage_total_get['size']}},
-        usage_this_month_put: {{usage_this_month_put['size']}},
-        usage_this_month_get: {{usage_this_month_get['size']}},
-        storage_total: {{storage_total['size']}},
-        
-        freeloaders_max: 0.25,
-    });
+    window.usage = new PilesIO.Usage({{summary}});
     
     usage.files.reset({{ms2js(files)}})
     
