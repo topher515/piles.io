@@ -24,7 +24,7 @@ $(function() {
     usage.daily_sto.reset(({{ms2js(storage_dailies)}}))
     
     usageview = new PilesIO.UsageView({model:usage})
-    $('.content').append(usageview.render().el)
+    $('.usage-container').append(usageview.render().el)
     $('#noscript').remove()
 });
 </script>
@@ -41,14 +41,14 @@ $(function() {
         <div class="simple-item well" id="simple-usage-get">
             <h6>Downloads</h6>
             <h1>$<%= usage_get_this_month_dollars.toFixed(3) %></h1>
-            <h6><%= PilesIO.human_size(usage_get_this_month_bytes)%></h6>
+            <!-- h6><%= PilesIO.human_size(usage_get_this_month_bytes)%></h6 -->
             <h6>Month so far</h6>
         </div>
         <div class="simple-spacer" ><h6>+</h6></div>
         <div class="simple-item well" id="simple-usage-put">
             <h6>Uploads</h6>
             <h1>$<%= usage_get_this_month_dollars.toFixed(3) %></h1>
-            <h6><%= PilesIO.human_size(usage_put_this_month_bytes)%></h6>
+            <!-- h6><%= PilesIO.human_size(usage_put_this_month_bytes)%></h6 -->
             <h6>Month so far</h6>
         </div>
         <div class="simple-spacer" ><h6>+</h6></div>
@@ -140,17 +140,12 @@ $(function() {
 </script>
 
 
-<div class="container">
-    <div class="content" style="position:relative">
+<div class="usage-container">
+    <h1 class="pile-title">{{pile['name']}}</h1>
         
-    
-    <h1 style="margin: 25px inherit 0px inherit; z-index: 250;">
-        <a class="btn" href="http://{{settings('CONTENT_DOMAIN')}}/app#{{pile['name']}}">&lt; Back</a>
-        {{pile['name']}}</h1>
+    <a class="btn" href="http://{{settings('CONTENT_DOMAIN')}}/app#{{pile['name']}}">&lt; Back</a>
 
-    <div>
-        <p></p>
-    </div>
+
 
     <div id="noscript" style="margin: 300px;">Bro, your javascript is off or broke!</div>
 
