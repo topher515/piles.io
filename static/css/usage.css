@@ -26,6 +26,7 @@
 
 .usage-container {
     width:800px;
+    margin:auto;
 }
 
 .usage {
@@ -45,6 +46,7 @@
 	        display:none;
 	        height:300px;
         	width:100%;
+    	    border:1px solid #DDD;
         	
 	        /*padding:10px;
         	border: 2px solid #DDD;
@@ -90,6 +92,7 @@
     	    height: 70px;
     	    vertical-align:middle;
     	    cursor:default;
+    	    border:1px solid #DDD;
     	    /*
     	    background-color:#E9EAEE;
     	    padding:5px;
