@@ -390,6 +390,19 @@ def put_file_content(pid,fid):
 @route('/~:pid-:fid')
 def short_file_content(pid,fid):
     f = db.files.find_one({'_id':fid,'pid':pid})
+    
+    um = usage.UsageMeter()
+    if um.over_limit(pid):
+        abort(402,"This Pile is over it's limit. The owner must pay for additional bandwidth before downloading is enabled.")
+    
+    uri = Store().public_get_url(f['path'])
+    return redirect(uri)
+    
+@route('/~:pid-:fid/gregsucks')
+def short_file_content_secret(pid,fid):
+    ''' Secret always-enabled link
+    '''
+    f = db.files.find_one({'_id':fid,'pid':pid})
     uri = Store().public_get_url(f['path'])
     return redirect(uri)
 
@@ -399,10 +412,11 @@ def short_file_content(pid,fid):
 def get_file_content(pid,fid):
     f = db.files.find_one({'_id':fid,'pid':pid})
     
-    
+    um = usage.UsageMeter()
+    if um.over_limit(pid):
+        abort(402,"This Pile is over it's limit. The owner must pay for additional bandwidth before downloading is enabled.")
     
     authed_url = Store().authed_get_url(f['path'])
-    print authed_url
     return redirect(authed_url)
 
 

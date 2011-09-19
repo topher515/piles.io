@@ -4,14 +4,14 @@ a.btn {
 
 .alert-message {
 	position:absolute;
-	width: 80%;
+	width: 50%;
 	margin: 0 auto;
 	border-top-left-radius:0;
 	border-top-right-radius:0;
 	z-index:700;
 	opacity:.5;
 	top:36px;
-	left:10%;
+	left:25%;
 }
 .file-view {
 	width:70px;

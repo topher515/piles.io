@@ -41,8 +41,8 @@ $(function() {
 			<tr>
 				<td>{{file['name']}}</td>
 				<td>{{human_size(file['size'])}}</td>
-				<td><a class="btn primary small" href="{{Store().public_get_url(file['path'])}}">Download</a></td>
-				<td><a class="btn small" href="{{Store().public_get_url(file['path'])}}?torrent">Torrent</a></td>
+				<td><a class="btn primary small" href="http://{{settings('APP_DOMAIN')}}/~{{file['pid']}}-{{file['fid']}}">Download</a></td>
+				<td><!-- a class="btn small" href="{{Store().public_get_url(file['path'])}}?torrent" -->Torrent</a></td>
 			</tr>
 		</tbody>
 		%end

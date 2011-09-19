@@ -129,7 +129,11 @@ $(function() {
             <!-- SUMMARY -->
             <div id="detailed-sum" class="details well">
 
-                <p id="sum-desc">Every free user on Piles.io gets $<%= freeloaders_this_month_dollars %> free! You'<!-- '-->ve spent <em>$<%= this_month_dollars.toFixed(3) %></em> of our hard earned money this month. Our statistics can be up to 30 mins late though--so if a bunch of uploads, downloads or deletes have happened recently they might not be reflected in these statistics.</p>
+                <div id="sum-desc">
+                    <p>Every free user on Piles.io gets $<%= freeloaders_this_month_dollars %> free! You'<!-- '-->ve spent <em>$<%= this_month_dollars.toFixed(3) %></em> of our hard earned money this month. Our statistics can be up to 30 mins late though--so if a bunch of uploads, downloads or deletes have happened recently they might not be reflected in these statistics.</p>
+                    <p>I haven't built the pay-for-use system yet, so if you get locked out of something important let me know <a href="mailto:ckwilcox@gmail.com">ckwilcox@gmail.com</a></p>
+                </div>
+                
                 
                 <h1 id="begin-dollar">$<%= this_month_dollars.toFixed(3) %></h1>
                 <h1 id="end-dollar">$<%= freeloaders_this_month_dollars %></h1>

@@ -113,7 +113,8 @@
 				<div class="inner">
 					<h3 class="title">Drag files on to me!</h3>
 					<div class="content">
-						<p>Grab files from anywhere and drag them onto this window! They'<!--'-->ll Auto-magically upload to our systems.</p>
+						<p>Grab files from anywhere and drag them onto this window! They'<!--'-->ll Auto-magically upload to your Pile.</p>
+						<p>You'<!--'-->ll always be able to access them at <a href="http://piles.io/<%= name %>">piles.io/<%= name %></a>.</p>
 					</div>
 				</div>
 			</div>
@@ -151,7 +152,7 @@
 				<li>Size: <%= human_size(size) %></li>
 				<li>Type: <%= type %></li>
 <!-- -->        <% if (pub) {%>
-				    <li>Public URL: <a href="http://<%= PilesIO.App.CONTENT_DOMAIN %>/<%= path %>">http://<%= PilesIO.App.CONTENT_DOMAIN %>/<%= path %></a></li>
+				    <li>Public URL: <a href="http://<%= PilesIO.App.APP_DOMAIN %>/~<%= pid %>-<%= id %>">http://<%= PilesIO.App.APP_DOMAIN %>/~<%= pid %>-<%= id %></a></li>
 <!-- -->        <% } %>
 			</ul>
 <!-- -->	<% if (type.slice(0,5) == 'audio') { %>

@@ -73,6 +73,12 @@ class UsageMeter(object):
         self._mr_usage_monthlies()
     
     
+    def over_limit(self,pid):
+        summary = self.summary(pid)        
+        return summary['this_month_dollars'] > summary['freeloaders_this_month_dollars']
+
+    
+    
     def summary(self,pid):
         
         now = datetime.now()
