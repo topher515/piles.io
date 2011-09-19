@@ -135,6 +135,10 @@ def logout():
     redirect('/login')
     
     
+@route('/feedback', method="GET")
+def feedback():
+    return template('features', feedbacks=db.feedbacks.find(sort=[('datetime',DESCENDING)]))
+    
 @route('/verify',method="GET")
 def verify():
     code = request.GET.get('code')
