@@ -71,8 +71,7 @@ $(function() {
             
                 <div class="left">
                     <h2>Storage</h2>
-                    <h4>So far this month</h4>
-                    <br>$<%= storage_this_month_dollars.toFixed(3) %>
+                    <h4>So far this month</h4>$<%= storage_this_month_dollars.toFixed(3) %>
                      
                     <h5>Currently stored</h5><%= PilesIO.human_size(storage_current_bytes) %>
                      

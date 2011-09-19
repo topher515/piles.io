@@ -270,6 +270,11 @@ $(function() {
                 self.$el.find('#detailed-storage').slideDown()
             })
             
+            this.$el.find('#simple-sum').hover(function(e) {
+                self.$el.find('.details').not('#detailed-sum').hide()
+                self.$el.find('#detailed-sum').slideDown()
+            })
+            
             this.$el.find('#detailed-sum #free-progress').progressbar({ value : (this.model.get('this_month_dollars') / this.model.get('freeloaders_this_month_dollars')) })
             
             return this
