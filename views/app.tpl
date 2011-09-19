@@ -68,15 +68,15 @@
 
   <script type="text/template" id="small-usage-tpl">
   	<div class="usage-small">
-		<span class="usage-sto"><%= human_size(storage_total) %></span>
+		<span class="usage-sto"><%= human_size(storage_current_bytes) %></span>
 	</div>
 	<div class="usage-big good">
 		    <img src="/static/img/box_xsmall.png" />
-			<span class="usage-sto"><%= human_size(storage_total) %></span><br>
+			<span class="usage-sto"><%= human_size(storage_current_bytes) %></span><br>
   		<img src="/static/img/arrow_up_xsmall.png" />
-  		<span class="usage-put"><%= human_size(usage_total_put) %></span><br>
+  		<span class="usage-put"><%= human_size(usage_put_this_month_bytes) %></span><br>
   		<img src="/static/img/arrow_down_xsmall.png" />
-  		<span class="usage-get"><%= human_size(usage_total_get) %></span><br>
+  		<span class="usage-get"><%= human_size(usage_get_this_month_bytes) %></span><br>
   		<span>Click for more info.</span><br>
   		<span style="font-size:.7em;">(Can have 30+ min delay).</span>
 	</div>

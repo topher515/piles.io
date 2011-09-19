@@ -219,7 +219,7 @@ def usage(pilename):
             'usage_dailies_puts':usage_dailies_puts,
             'usage_dailies_gets':usage_dailies_gets,
             'storage_dailies':storage_dailies,
-            'summary':um.summary(pid),
+            'summary':um.summary(thispid),
         })
         
     
