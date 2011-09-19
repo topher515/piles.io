@@ -1,5 +1,6 @@
 %from api import Store #public_get_url
 %from utils import human_size
+%from settings import settings
 
 %def head():
 <script src="/static/js/jquery.tablesorter.js"></script>
