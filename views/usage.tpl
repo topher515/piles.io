@@ -55,7 +55,6 @@ $(function() {
         <div class="simple-item well" id="simple-storage">
             <h6>Storage</h6>
             <h1>$<%= storage_this_month_dollars.toFixed(3) %></h1>
-            <h6><%= PilesIO.human_size(storage_this_month_bytes) %></h6>
             <h6>Month so far</h6>
         </div>
         <div class="simple-spacer "><h6>=</h6></div>
