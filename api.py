@@ -427,7 +427,7 @@ def get_file_content(pid,fid):
         
     path = f['path']
     if f['type'].startswith('image'):
-        path += '&response-content-disposition=inline;%%20%s' % (f['path'])
+        path += '?response-content-disposition=inline;%%20%s' % (f['path'])
         path += '&response-content-type=%s' % (f['type'])
     authed_url = Store().authed_get_url(path)
     return redirect(authed_url)
