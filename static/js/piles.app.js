@@ -334,7 +334,9 @@
                 acl: PilesIO.App.APP_BUCKET_ACL,
                 key: self.get('path'),
                 signature: self.get('signature'),
-                policy: self.get('policy')
+                policy: self.get('policy'),
+                'Content-Type': self.get('type'),
+                'Content-Disposition':self.get('type').slice(0,5) == 'image' ? 'inline;' : 'attachment',
             })
             
 		    /* Send file data */

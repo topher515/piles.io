@@ -426,9 +426,9 @@ def get_file_content(pid,fid):
         abort(402,"This Pile is over it's limit. The owner must pay for additional bandwidth before downloading is enabled.")
         
     path = f['path']
-    if f['type'].startswith('image'):
-        path += '?response-content-disposition=inline;%%20%s' % (f['path'])
-        path += '&response-content-type=%s' % (f['type'])
+    #if f['type'].startswith('image'):
+    #    path += '?response-content-disposition=inline;%%20%s' % (f['path'])
+    #    path += '&response-content-type=%s' % (f['type'])
     authed_url = Store().authed_get_url(path)
     return redirect(authed_url)
 
