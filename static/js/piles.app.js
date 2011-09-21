@@ -342,7 +342,9 @@
                     acl: 'public-read',
                     key: self.get('thumb'),
                     signature: self.get('thumb_signature'),
-                    policy: self.get('thumb_policy')
+                    policy: self.get('thumb_policy'),
+                    'Content-Type': 'image/png',
+                    'Content-Disposition':'inline; ',
                 })
 
     		    fuc.do_file_upload({
