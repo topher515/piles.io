@@ -31,16 +31,19 @@ class S3Store(object):
         entity['signature'] = signature
         
         if entity.get('thumb'):
-            policy,signature = self.build_policy_doc(entity['thumb'])
+            policy,signature = self.build_policy_doc(entity['thumb'],'public-read')
             entity['thumb_policy'] = policy
             entity['thumb_signature'] = signature
         return entity
     
-    def build_policy_doc(self,key):
+    def build_policy_doc(self,key,acl=''):
+        if not acl:
+            acl = settings('APP_BUCKET_ACL')
+        
         policy = {
             'expiration':(datetime.datetime.now()+datetime.timedelta(1)).strftime('%Y-%m-%dT%H:%M:%S.000Z'), # Valid for one day. This means the user MUST refresh the page once a day to do uploads
             'conditions': [
-                {'acl':settings('APP_BUCKET_ACL')},
+                {'acl':acl},
                 {'bucket':self.bucket},
                 {'key': key},
                 # <hack> This is a hack to allow SWF based uploads to the bucket as described here: 

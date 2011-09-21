@@ -354,7 +354,7 @@
                 /* Prepare thumbnail form data */
     		    formdata = fuc.obj2tuple({
                     AWSAccessKeyId: PilesIO.App.AWS_ACCESS_KEY_ID,
-                    acl: PilesIO.App.APP_BUCKET_ACL,
+                    acl: 'public-read',
                     key: self.get('thumb'),
                     signature: self.get('thumb_signature'),
                     policy: self.get('thumb_policy')
@@ -979,11 +979,19 @@
 		postrender:function() {
 			// Setup circle player
 			var self = this;
+			if (self.model.get('type').slice(0,5) != 'audio') {
+			    return;
+			}
+			
+			// If this is an audio file setup the player!
+			// TODO: All audio files are forced to download with this
+			
     	    this.myCirclePlayer = new CirclePlayer("#jquery_jplayer",
     	    {
                 mp3: "http://" + PilesIO.App.APP_DOMAIN + "/piles/" + self.model.get('pid') + "/files/" + self.model.get('id') + "/content"
             },
         	{
+        	    preload:'none',
         		cssSelectorAncestor: "#cp_container",
         		supplied: 'mp3, m4a, oga',
     			swfPath: PilesIO.App.CONTENT_DOMAIN + '/static/js/Jplayer.swf',
@@ -995,7 +1003,7 @@
 		},
 		clear:function() {
 			var self = this;
-			this.myCirclePlayer.destroy()
+			if (this.myCirclePlayer) this.myCirclePlayer.destroy()
 			$.unblockUI()
 			$(this.el).fadeOut(self.remove)
 		}

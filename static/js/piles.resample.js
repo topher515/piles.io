@@ -106,7 +106,7 @@ var Resample = (function (canvas) {
       Blobber = WebKitBlobBuilder || MozBlobBuilder;
       blobber = new Blobber();
       blobber.append(pngDataURL);
-      onresample(pngDataURL,blobber.getBlob());
+      onresample(pngDataURL,blobber.getBlob('image/png'));
   }
   
  }
