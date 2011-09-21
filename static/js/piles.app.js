@@ -268,14 +268,15 @@
 		initialize: function() {
 		    
 		    // Reset to sane values
-		    if (this.get('x') > 100) { this.set({'x':95}) }
-		    else if (this.get('x') < 0) { this.set({'x':0}) }
+		    if (this.get('x') > 100) { this.save({'x':95}) }
+		    else if (this.get('x') < 0) { this.save({'x':0}) }
 		    
-		    if (this.get('y') > 100) { this.set({'y':90}) }
-		    else if (this.get('y') < 0) { this.set({'y':0}) }
+		    if (this.get('y') > 100) { this.save({'y':90}) }
+		    else if (this.get('y') < 0) { this.save({'y':0}) }
+		    
 		    
 		    // Bind to file changes 
-			this.bind('change', function(model,collection) {
+			/*this.bind('change', function(model,collection) {
 				var prevattrs = model.previousAttributes(),
 					self = this,
 					attrs = model.attributes;
@@ -303,7 +304,21 @@
 					}
 				});
 				
-			}, this);
+			}, this);*/
+		},
+		
+		save: function(attributes,options) {
+		    options || (options = {});
+		    this.trigger('startworking')
+		    var self=this,
+		        stopwork = (function() { self.trigger('stopworking') }),
+		        savesucc = function(m,r) { stopwork(); self.trigger('savesuccess',m); },
+    		    saveerr = function(m,r) { stopwork(); self.trigger('saveerror'); },
+		        succ = options.success ? function(m,r) { savesucc(m,r); options.success(m,r) } : savesucc,
+		        err = options.error ? function(m,r) { saveerr(m,r); options.error(m,r) } : saveerr;
+		    
+		    opts = _.extend({}, options, {success:succ, error:err})
+		    Backbone.Model.prototype.save.call(this, attributes, opts);  
 		},
 		
 		associate_content: function(file) {
@@ -334,9 +349,9 @@
 		    /* Create the thumbnail and upload it */
 		    (new Thumbnailer).create(file).done(function(dataUrl,blob) {
 
-                self.trigger('localthumb',dataUrl)
+                //self.trigger('localthumb',dataUrl)
 
-                /* Prepare thumbnail form data */
+                /* Prepare thumbnail form data 
     		    formdata = fuc.obj2tuple({
                     AWSAccessKeyId: PilesIO.App.AWS_ACCESS_KEY_ID,
                     acl: 'public-read',
@@ -354,9 +369,13 @@
     		        done:function() { console.log('Thumb upload done') },
     		        fail:function() { console.log('Thumb upload failed') },
     		    })
+    		    */
+    		    
+    		    self.save({thumb:dataUrl})
+    		    
 		        
 		    }).fail(function() {
-		        self.set({thumb:''})
+		        //self.set({thumb:''})
 		    })
 		},
 		
@@ -524,7 +543,7 @@
 			this.model.bind('savesuccess', this.savesuccess, this);
 			this.model.bind('saveerror', this.saveerror, this);
 			
-			this.model.bind('localthumb', this.set_thumb_src, this);
+			this.model.bind('change:thumb', this.set_thumb_src, this);
 		},
 		
 		domodal:function() {
@@ -547,14 +566,15 @@
 			this.$el.removeClass('working').draggable('option','disabled',false)
 		},
 		
-		set_thumb_src:function(newsrc) {
-		    this.$el.find('img.icon').attr('src',newsrc)
+		set_thumb_src:function(model) {
+		    //this.$el.find('img.icon').attr('src',model.get('thumb'))
+		    this.render()
 		},
 		
 		savesuccess:function(model) {
 			var $el = $(this.el);
 			model.get('pub') ? $el.addClass('pub') : $el.removeClass('pub');
-			$el.effect("shake", { times:2, direction:'up', distance:10}, 100);
+			$el.effect("shake", { times:2, direction:'up', distance:7}, 100);
 		},
 		
 		saveerror:function(prevattrs) {
@@ -785,7 +805,7 @@
 		_do_percent_positioning: function($container,$elem,elem_offset) {
             var calced = this._do_percent_calculation($container,$elem,elem_offset)
 			$elem.appendTo($container)
-		    $elem.css({left:calced[0]+'%', top:calced[1]+'%'})
+		    $elem.css({left:calced[0]+'%', top:calced[1]+'%', position:'absolute'})
 			return calced
 		},
 		
@@ -803,7 +823,6 @@
 					var elem = ui.draggable[0],
 					    $elem = $(elem),
 					    calced = self._do_percent_positioning($trash,$elem,ui.offset);
-					// elem.view.model.set({x:calced[0], y:calced[1]}) <-- No need to save! We're deleting the file!
 					ui.draggable[0].view.dodelete() // Thats kinda hacky...
 				},
 				tolerance:'intersect',
@@ -818,7 +837,7 @@
 					var elem = ui.draggable[0],
 					    $elem = $(elem),
 					    calced = self._do_percent_positioning($priv,$elem,ui.offset);
-					elem.view.model.set({pub:false, x:calced[0], y:calced[1]})
+					elem.view.model.save({pub:false, x:calced[0], y:calced[1]})
 				},
 				tolerance:'intersect',
 				hoverClass:'drophover',
@@ -831,7 +850,7 @@
 					var elem = ui.draggable[0],
 					    $elem = $(elem),
 					    calced = self._do_percent_positioning($pub,$elem,ui.offset);
-					elem.view.model.set({pub:true, x:calced[0], y:calced[1]})
+					elem.view.model.save({pub:true, x:calced[0], y:calced[1]})
 				},
 				tolerance:'intersect',
 				hoverClass:'drophover',
@@ -860,7 +879,7 @@
 		
 		dorename: function() {
 			var newname = prompt('New name for your Pile',this.model.get('name'))
-			this.model.set({'name':newname})
+			this.model.save({'name':newname})
 		},
 		renamedone: function() {
 			window.location.href = '/' + this.model.get('name')

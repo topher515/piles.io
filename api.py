@@ -332,8 +332,8 @@ def file_delete(pid,fid):
     store.delete(entity['path'])
     
     # If there's a thumbnail, delete it as well!
-    if entity.get('thumb'):
-        store.delete(entity['thumb'])
+    #if entity.get('thumb'):
+    #    store.delete(entity['thumb'])
     
     db.files.remove(entity)
     

@@ -34,9 +34,9 @@ def file_post():
     except:
         from traceback import print_exc
         print_exc()
-        print "================================================"
-        print fileread #b64encode(fileread)
-        print "================================================"
+        #print "================================================"
+        #print fileread #b64encode(fileread)
+        #print "================================================"
         
     print "...done reading."
     
