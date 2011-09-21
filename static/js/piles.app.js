@@ -201,36 +201,19 @@
                 done:empty,
             },options)
             
-            
-		  //  formData:get_form_data(form),
+            /* We have to destroy the fileupload thingy EVERY SINGLE TIME
+            otherwise we get some craziness where the file is SENT AGAIN!
+            I think I need a new upload library =-O  !!! */
+            var done_ = opts.done;
+            opts.done = function() {
+                $el.fileupload('destroy')
+                done_()
+            }
             
             $el.fileupload(opts)
-            $el.fileupload('add',{files:[opts.file]})
+            $el.fileupload('send',{files:[opts.file]})
         }
         
-        this.do_blob_upload = function(options) {
-            var empty = function() {}
-
-            if (!options.blob) throw new Error("No blob to upload!")
-            console.log('Uploading blob!')
-
-            var opts = _.extend({},{
-                multipart:true,
-                paramName:'file',
-                formData:{},
-                type:'POST',
-                url:PilesIO.App.FILE_POST_URL,
-                progress:empty,
-                fail:empty,
-                done:empty,
-            },options)
-
-
-            //  formData:get_form_data(form),
-
-            $el.fileupload(opts)
-            $el.fileupload('send',{blob:opts.blob})
-        }
     }
     var fuc = new FileUploadController($('<div></div>'))
 
@@ -362,8 +345,8 @@
                     policy: self.get('thumb_policy')
                 })
 
-    		    fuc.do_blob_upload({
-    		        blob:blob,
+    		    fuc.do_file_upload({
+    		        file:blob,
     		        formData:formdata,
     		        progress:function(e,data) { console.log('Thumb upload: '+ parseInt(data.loaded / data.total * 100) ) },
     		        done:function() { console.log('Thumb upload done') },

@@ -4,6 +4,9 @@ from bottle import route, run, request, abort, redirect, static_file, template
 import shutil
 import logging
 logger = logging.getLogger('piles_io.api')
+from StringIO import StringIO
+from PIL import Image
+from base64 import b64encode, b64decode
 
 from utils import app_meta
 
@@ -19,8 +22,22 @@ def file_post():
     print "Simulated file post"
     print request.forms.items()
     print "Reading file with name %s..." % request.files['file'].filename,
-    fileread = request.files['file'].file.read()
-    print fileread
+    try:
+        fileread = request.files['file'].file.read()
+        print "Read file successfully"
+    except:
+        print "Failed to read file!"
+        
+    try:
+        im = Image.open(StringIO(fileread))
+        print "Got image: %s" % im
+    except:
+        from traceback import print_exc
+        print_exc()
+        print "================================================"
+        print fileread #b64encode(fileread)
+        print "================================================"
+        
     print "...done reading."
     
 
