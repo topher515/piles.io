@@ -26,17 +26,20 @@ class S3Store(object):
         self.bucket = bucket
     
     def add_storage_info(self,entity):
-        policy,signature = self.build_policy_doc(entity['path'])
+        
+        disp = 'inline;' if entity['type'].startswith('image') else 'attachment;'
+        
+        policy,signature = self.build_policy_doc(entity['path'], content_type=entity['type'], content_disposition=disp )
         entity['policy'] = policy
         entity['signature'] = signature
         
         if entity.get('thumb'):
-            policy,signature = self.build_policy_doc(entity['thumb'],'public-read')
+            policy,signature = self.build_policy_doc(entity['thumb'], content_type=entity['image/png'], content_disposition='inline; ', acl='public-read')
             entity['thumb_policy'] = policy
             entity['thumb_signature'] = signature
         return entity
     
-    def build_policy_doc(self,key,acl=''):
+    def build_policy_doc(self,key,content_type,content_disposition,acl=''):
         if not acl:
             acl = settings('APP_BUCKET_ACL')
         
@@ -46,6 +49,8 @@ class S3Store(object):
                 {'acl':acl},
                 {'bucket':self.bucket},
                 {'key': key},
+                {'Content-Type':content_type},
+                {'Content-Disposition':content_disposition},
                 # <hack> This is a hack to allow SWF based uploads to the bucket as described here: 
                 #        https://forums.aws.amazon.com/thread.jspa?messageID=77198
                 # Basically flash adds a...    
