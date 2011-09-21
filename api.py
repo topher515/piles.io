@@ -245,7 +245,8 @@ valid_file_attrs = {
     'name':{'type':unicode},
     'path':{'type':unicode},  # aws s3 key
     'x':{'type':float},
-    'y':{'type':float}
+    'y':{'type':float},
+    'thumb':{'type':unicode},
 }
 
 
@@ -265,6 +266,8 @@ def files_post(pid):
     entity['pid'] = pid
     entity['_id'] = fid
     entity['path'] = '%s/%s/%s' % (pid,fid,name)
+    if entity.get('type') in ['image/jpeg','image/gif','image/png']:
+        entity['thumb'] = '%s/%s/thumb.png' % (pid,fid)
     db.files.save(entity)
     
     # Build policy and signature information 

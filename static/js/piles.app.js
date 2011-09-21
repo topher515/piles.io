@@ -2,6 +2,8 @@
 	
 	window.PilesIO ? console.log('PilesIO already in global scope') : window.PilesIO = {}
 	
+	jQuery.event.props.push("dataTransfer");
+	
 	var get_icon = window.get_icon = function(ext) {
 		var img_icons = {
 			aac:'aac_icon.png',
@@ -163,71 +165,107 @@
      * Controllers 
      **************/
      /// FYI Currently most M<-->V communication is direct; only the complex fileupload functionality has a controller.
-
-    var FileUploadController = function() {
-        var filemodel_stack = [];
+     
+    var FileUploadController = function($el) {
         
-        this.get_form_data = function() {
-            var filemodel_ = _.last(filemodel_stack)
-            fdata = {
-                AWSAccessKeyId: PilesIO.App.AWS_ACCESS_KEY_ID,
-    		    acl: PilesIO.App.APP_BUCKET_ACL,
-    		    key: filemodel_.get('path'),
-    		    signature: filemodel_.get('signature'),
-    		    policy: filemodel_.get('policy')
-            }
+        var self = this;
+        
+        // Convert object to tuple
+        this.obj2tuple = function(formobj) {
             newfdata = []
-            for (key in fdata) {
+            for (key in formobj) {
                 newfdata.push({
                     name:key,
-                    value:fdata[key]
+                    value:formobj[key]
                 })
             }
             return newfdata;
-        },
+        }
+                
+        /* Perform the fileupload */
+        this.do_file_upload = function(options) {
+            //file,form,url
+            var empty = function() {}
+            
+            if (!options.file) throw new Error("No file to upload!")
+            console.log('Uploading file: '+ options.file.name)
+            
+            var opts = _.extend({},{
+                multipart:true,
+                paramName:'file',
+                formData:{},
+                type:'POST',
+                url:PilesIO.App.FILE_POST_URL,
+                progress:empty,
+                fail:empty,
+                done:empty,
+            },options)
+            
+            
+		  //  formData:get_form_data(form),
+            
+            $el.fileupload(opts)
+            $el.fileupload('add',{files:[opts.file]})
+        }
         
-        this.setup_upload = function($fileuploader, filemodel, filedata) {
-            
-            //filemodel.filedata = filedata;
-            //filedata.filemodel = filemodel;
-            
-            var savesuccesscallback = function(filemodel) {
-                // Unbind this function so its not called when we save the file again in the future
-                // e.g., when we move it around the pile
-				filemodel.unbind('savesuccess',savesuccesscallback)
-				// Start the file upload
-                filemodel.trigger('startworking')
-                filedata.url = PilesIO.App.FILE_POST_URL
-                filedata.filemodel = filemodel
-                filemodel_stack.push(filemodel)
-                filedata.submit()
-                filemodel_stack.pop()
-            }
-            
-            var fileuploaddonecallback = function(e, data) {
-                $fileuploader.unbind('fileuploaddone',fileuploaddonecallback)
-				notify('info','File upload successful!')
-				// Unbind model
-				data.filemodel.trigger('uploadsuccess')
-				data.filemodel.trigger('stopworking')
-			}
-			
-			var fileuploadprogresscallback = function(e, data) {
-                data.filemodel.trigger('uploadprogress',parseInt(data.loaded / data.total * 100))
-            }
-            
-            var fileuploadfailcallback = function(e, data) {
-			    data.filemodel.trigger('uploaderror', data)
-			    data.filemodel.delete()
-			}
-            
-            $fileuploader.bind('fileuploadprogress',fileuploadprogresscallback)
-            $fileuploader.bind('fileuploaddone', fileuploaddonecallback)
-			$fileuploader.bind('fileuploadfail', fileuploadfailcallback)
-			filemodel.bind('savesuccess',savesuccesscallback)
+        this.do_blob_upload = function(options) {
+            var empty = function() {}
+
+            if (!options.blob) throw new Error("No blob to upload!")
+            console.log('Uploading blob!')
+
+            var opts = _.extend({},{
+                multipart:true,
+                paramName:'file',
+                formData:{},
+                type:'POST',
+                url:PilesIO.App.FILE_POST_URL,
+                progress:empty,
+                fail:empty,
+                done:empty,
+            },options)
+
+
+            //  formData:get_form_data(form),
+
+            $el.fileupload(opts)
+            $el.fileupload('send',{blob:opts.blob})
         }
     }
-    var file_upload_controller = new FileUploadController()
+    var fuc = new FileUploadController($('<div></div>'))
+
+    var Thumbnailer = function() {
+         
+        this.create = function(file,callback) {
+            
+            var dfr = $.Deferred();
+                          
+            if (this.thumbnailable(file)) {
+                filereader = new FileReader
+                filereader.onload = function(e) {
+                    Resample(this.result, 48, null, dfr.resolve );
+                };
+                filereader.onabort = null;
+                filereader.onerror = null;
+                filereader.readAsDataURL(file);
+            } else {    
+                dfr.reject();
+            }
+            return dfr.promise();
+        }
+         
+        this.thumbnailable = function(file) {
+            thumbnailable = {
+                'image/jpeg':true,
+                'image/png':true,
+                'image/gif':true
+            }[file.type]
+
+            return thumbnailable ? true : false;
+        }
+    }
+    
+    
 	
 
 	/*************
@@ -242,6 +280,7 @@
 			y:0,
 			pub:false,
 			type:'Unknown File',
+			thumb:'',
 		},
 		initialize: function() {
 		    
@@ -256,19 +295,12 @@
 			this.bind('change', function(model,collection) {
 				var prevattrs = model.previousAttributes(),
 					self = this,
-					attrs = model.attributes
+					attrs = model.attributes;
 					
-				console.log('Saving File model: '+this.id)
-				self.trigger('startworking')
+				console.log('Saving File model: '+this.id);
+				self.trigger('startworking');
 				model.save({},{
 					success:function(model,response) {
-						/*if (self.content_to_upload) {
-							self.content_to_upload.url = model.url()+'/content'
-							self.content_to_upload.submit()
-							self.trigger('startworking')
-							console.log('Uploading file data!')
-							self.content_to_upload = null;
-						} else {*/
 						self.trigger('stopworking')
 						self.trigger('savesuccess',model)
 						//}
@@ -290,9 +322,61 @@
 				
 			}, this);
 		},
+		
+		associate_content: function(file) {
+		    
+		    var self=this;
+		    
+		    
+		    /* Prepare file form data */
+		    var formdata = fuc.obj2tuple({
+                AWSAccessKeyId: PilesIO.App.AWS_ACCESS_KEY_ID,
+                acl: PilesIO.App.APP_BUCKET_ACL,
+                key: self.get('path'),
+                signature: self.get('signature'),
+                policy: self.get('policy')
+            })
+            
+		    /* Send file data */
+		    fuc.do_file_upload({
+		        file:file,
+		        formData:formdata,
+		        progress:function(e,data) { self.trigger('uploadprogress',parseInt(data.loaded / data.total * 100)); },
+		        done:function() { self.trigger('uploadsuccess'); self.trigger('stopworking'); },
+		        fail:function() { self.trigger('uploaderror'); self.trigger('stopworking');  },
+		    });
+		    
+		    /* Create the thumbnail and upload it */
+		    (new Thumbnailer).create(file).done(function(dataUrl,blob) {
+
+                self.trigger('localthumb',dataUrl)
+
+                /* Prepare thumbnail form data */
+    		    formdata = fuc.obj2tuple({
+                    AWSAccessKeyId: PilesIO.App.AWS_ACCESS_KEY_ID,
+                    acl: PilesIO.App.APP_BUCKET_ACL,
+                    key: self.get('thumb'),
+                    signature: self.get('thumb_signature'),
+                    policy: self.get('thumb_policy')
+                })
+
+    		    fuc.do_blob_upload({
+    		        blob:blob,
+    		        formData:formdata,
+    		        progress:function(e,data) { console.log('Thumb upload: '+ parseInt(data.loaded / data.total * 100) ) },
+    		        done:function() { console.log('Thumb upload done') },
+    		        fail:function() { console.log('Thumb upload failed') },
+    		    })
+		        
+		    }).fail(function() {
+		        self.set({thumb:''})
+		    })
+		},
+		
 		download_url: function() {
 			return 'http://' + PilesIO.App.APP_DOMAIN + '/piles/' + this.get('pid') + '/files/' + this.get('id') + '/content'
 		},
+		
 		delete: function() {
 			var self = this;
 			this.trigger('startworking')
@@ -397,7 +481,7 @@
 			});
 			this.files.bind('add',function(model,collection) {
 			    model.bind('uploadsuccess',function() {
-			        self.fetch() // This is to refresh usage statistics
+			        self.usage.fetch()
 			    })
 			})
 		},
@@ -431,7 +515,6 @@
 			this.$el = $el;
 			
 			// Bind the view elem for draggability
-			
 			$el.draggable({
 			    distance:15,
 				containment: '.file-collection', 
@@ -443,38 +526,18 @@
 				stop: function() { $(this).toggle() }
 			});
 		
-			if (this.model.get('pub')) $el.addClass('pub')
+			if (this.model.get('pub')) $el.addClass('pub');
 			
-			/* Hover animations */
-			/*$el.hover(
-				function() {
-					if ($el.hasClass('working')) return
-					if (!$el.prev_height) {
-						$el.prev_height = $el.height()
-						$el.prev_width = $el.width()
-					}
-					if (!$el.auto_height) {
-						$el.css({height:'auto'}) // ,width:'auto'})  <--- Let's not set the width as an experiment
-						$el.auto_height = $el.height()
-						$el.auto_width = $el.width()
-						$el.css({height:$el.prev_height,width:$el.prev_width})
-					}
-					$el.animate({height:$el.auto_height,width:$el.auto_width})
-				},
-				function() {
-					if ($el.hasClass('working')) return
-					$el.animate({height:$el.prev_height,width:$el.prev_width})
-				}
-			)*/
+			this.model.bind('destroy', this.doremove, this);
+			this.model.bind('uploadprogress', this.updateprogress, this);
+			this.model.bind('uploadsuccess', this.uploadsuccess, this);
+			this.model.bind('uploaderror', this.uploaderror, this);
+			this.model.bind('startworking', this.startworking, this);
+			this.model.bind('stopworking', this.stopworking, this);
+			this.model.bind('savesuccess', this.savesuccess, this);
+			this.model.bind('saveerror', this.saveerror, this);
 			
-			this.model.bind('destroy', this.doremove, this)
-			this.model.bind('uploadprogress', this.updateprogress, this)
-			this.model.bind('uploadsuccess', this.uploadsuccess, this)
-			this.model.bind('uploaderror', this.uploaderror, this)
-			this.model.bind('startworking', this.startworking, this)
-			this.model.bind('stopworking', this.stopworking, this)
-			this.model.bind('savesuccess', this.savesuccess, this)
-			this.model.bind('saveerror', this.saveerror, this)
+			this.model.bind('localthumb', this.set_thumb_src, this);
 		},
 		
 		domodal:function() {
@@ -490,11 +553,15 @@
 		},
 		
 		startworking:function() {
-			$(this.el).addClass('working').draggable('option','disabled',true)
+			this.$el.addClass('working').draggable('option','disabled',true)
 		},
 		
 		stopworking:function() {
-			$(this.el).removeClass('working').draggable('option','disabled',false)
+			this.$el.removeClass('working').draggable('option','disabled',false)
+		},
+		
+		set_thumb_src:function(newsrc) {
+		    this.$el.find('img.icon').attr('src',newsrc)
 		},
 		
 		savesuccess:function(model) {
@@ -550,13 +617,19 @@
 		
 		render: function() {
 			c = _.template($('#file-tpl').html())
-			var $el = $(this.el)
+			var $el = $(this.el),
+			    self = this;
 			$el.css('position','absolute')
 			$el.css('left',this.model.get('x')+'%')
 			$el.css('top',this.model.get('y')+'%')
 			tpl_vals = this.model.toJSON()
 			tpl_vals.ext || (tpl_vals.ext = '')
 			$el.html(c(tpl_vals))
+			
+			
+			$el.find('img.icon').error(function(e) {
+			    $(this).attr('src',get_icon(self.model.get('ext')))
+			})
 			
 			return this;
 		}
@@ -611,6 +684,7 @@
 				$win = $(window)
 			this.$el = $el;
 				
+			/* Handle resizing */
 			$el.height($win.height())
 			$win.resize(function() {
 				$el.height($win.height())
@@ -634,7 +708,24 @@
 				}
 			});
 			
-			/* Setup searcher */
+            this._init_searcher()
+			
+            /* Setup tooltip thingy */
+			this.twipsy = new TwipsyView({model:new Backbone.Model({tip:''})})
+			this.twipsy.$el.hide()
+			
+			/* Handle renames */
+			//this.model.bind('renamesuccess', this.renamedone, this);
+			this.model.bind('renamefailure', function(err) { notify('error',err)}, this);
+						
+            /* Setup uploader */
+            this._init_dropper();
+			
+		},
+		
+		_init_searcher: function() {
+		    var self=this;
+		    /* Setup searcher */
 			this.$el.find('.searcher input').live('keyup', function(e) {
 			    self.filefilter($(this).val())
 			}).live('blur', function(e) {
@@ -646,58 +737,56 @@
 			        $(this).val('')
 			    }
 			})
-			
-            /* Setup tooltip thingy */
-			this.twipsy = new TwipsyView({model:new Backbone.Model({tip:''})})
-			this.twipsy.$el.hide()
-			
-			/* Handle renames */
-			//this.model.bind('renamesuccess', this.renamedone, this);
-			this.model.bind('renamefailure', function(err) { notify('error',err)}, this);
-						
-
-			// Setup fileuploader
-			$el.fileupload({
-				add:function(e, data) {
+		},
+		
+		_init_dropper: function() {
+		    
+		    var self=this;
+		    
+		    $(document).bind('dragover dragend', function(e) { return false; })
+		    
+		    $(document).bind('drop', function(e) {
+		        
+		        e.preventDefault();
+        		//e.stopPropagation();
+        		
+        		if (!e.dataTransfer) {
+        		    // This is not a file-drop event, so we can ignore it.
+        		    return
+    		    }
+		        
+		        var fileobj = e.dataTransfer.files[0],
+			        filename = fileobj.name || fileobj.fileName,
+				    namearray = filename.split('.'),
+				 	ext = namearray.length>1 ? _.last(namearray) : '',
+				 	
+				 	// Figure out which elem this was dropped on
+					$landed_elem = $(e.srcElement),
+					
+					// Calculate percent position of file elem
+				    x = (e.offsetX-25)/$landed_elem.width()*100, // Subtract 15px so its more at center of mouse
+				    y = (e.offsetY-25)/$landed_elem.height()*100,
 				    
-				    if (data.files.length != 1) {
-				        console.log('WARNING! Somehow got more than one file in add file');
-			        }
-				    
-				    var fileobj = data.files[0],
-				        filename = fileobj.name || fileobj.fileName,
-					    namearray = filename.split('.'),
-					 	ext = namearray.length>1 ? _.last(namearray) : '',
-					 	
-					 	// Figure out which elem this was dropped on
-						$landed_elem = $(e.srcElement),
-						
-						// Calculate percent position of file elem
-					    x = (e.offsetX-25)/$landed_elem.width()*100, // Subtract 15px so its more at center of mouse
-					    y = (e.offsetY-25)/$landed_elem.height()*100,
-					    
-					    // Build the file model
-					    filemodel = new File({
-		    				x:x,
-							y:y,
-							name:filename,
-							size:fileobj.size,
-							type:fileobj.type,
-							ext:ext,
-							pub:$landed_elem.hasClass('public')
-						});
-    					
-					file_upload_controller.setup_upload($el,filemodel,data)
-                    
-					self.model.files.add(filemodel)
-					filemodel.save()
-				},    
-			    formData: file_upload_controller.get_form_data,
-                multipart:true,
-				paramName:'file',
-				type:'POST',
-				//forceIframeTransport:true,
-			})
+				    // Build the file model
+				    filemodel = new File({
+	    				x:x,
+						y:y,
+						name:filename,
+						size:fileobj.size,
+						type:fileobj.type,
+						ext:ext,
+						pub:$landed_elem.hasClass('public')
+					});	
+					
+				self.model.files.add(filemodel)
+				filemodel.save({},{
+				    success:function() {
+				        filemodel.associate_content(fileobj)
+				    },
+				})
+				
+				return false;
+		    })
 		},
 		
 		_do_percent_calculation: function($container,$elem,elem_offset) {
@@ -861,12 +950,6 @@
             })
 		},
 		
-		/*add: function(file_model) {
-			this.counter += 1;
-			this.model.files.add(file_model)
-			this.render();
-		},*/
-		
 	});
 	
 	
@@ -885,6 +968,12 @@
 				attrs = this.model.toJSON(),
 			    self = this;
 			$el.html(tpl(attrs))
+			
+			
+			$el.find('img.icon').error(function(e) {
+			    $(this).attr('src',get_icon(self.model.get('ext')))
+			})
+			
 			return this
 		},
 		postrender:function() {

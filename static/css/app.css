@@ -74,6 +74,9 @@ a.btn {
 			left: 7px;
 			font-size: 1.9em;
 		}
+		.file-view .icon-display img.icon {
+	        height:48px;
+	    }
 .file-view:hover {
 	box-shadow: 0 0 5px rgba(0, 0, 255, .5);
 	overflow:visible;

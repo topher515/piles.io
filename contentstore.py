@@ -29,6 +29,11 @@ class S3Store(object):
         policy,signature = self.build_policy_doc(entity['path'])
         entity['policy'] = policy
         entity['signature'] = signature
+        
+        if entity.get('thumb'):
+            policy,signature = self.build_policy_doc(entity['thumb'])
+            entity['thumb_policy'] = policy
+            entity['thumb_signature'] = signature
         return entity
     
     def build_policy_doc(self,key):
@@ -154,6 +159,13 @@ class S3Store(object):
 
 class FakeStore(object):
     def add_storage_info(self,entity):
+        policy,signature = ('kittens_are_great','John Hancock')
+        entity['policy'] = policy
+        entity['signature'] = signature
+        if entity.get('thumb'):
+            policy,signature = ('kittens_are_great_thumbnail','John Hancock_thumbnail')
+            entity['thumb_policy'] = policy
+            entity['thumb_signature'] = signature
         print "Pretending to append storage info."
     def public_get_url(self,name):
         print "Generating fake public get url"

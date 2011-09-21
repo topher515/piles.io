@@ -1,5 +1,6 @@
 %from settings import settings
 
+
 <script>
 $(function() {
 	

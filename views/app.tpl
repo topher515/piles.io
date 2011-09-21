@@ -12,6 +12,7 @@
     <script type="text/javascript" src="/static/js/mod.csstransforms.min.js"></script>
     <script type="text/javascript" src="/static/js/circle.player.js"></script>
     <script type="text/javascript" src="/static/js/piles.app.js" ></script>
+    <script type="text/javascript" src="/static/js/piles.resample.js" ></script>
 %end
 
 
@@ -47,6 +48,7 @@
 		    },
 		    error: error,
 		})
+		
 	})
   </script>
 	
@@ -56,7 +58,7 @@
 	<div class="icon-display" alt="Double click to download">
 		<!-- div class="ext"><%= ext %></div -->
 		<img class="working" src="/static/img/loading.gif" />
-		<img class="icon" src="<%= get_icon(ext) %>" height="48" />
+		<img class="icon" src="<%= thumb || get_icon(ext) %>" />
 		<img class="info" src="/static/img/info.png">
 	</div>
 	<div class="progressbar"></div>
@@ -73,11 +75,11 @@
 	</div>
 	<div class="usage-big good">
 		    <img src="/static/img/box_xsmall.png" />
-			<span class="usage-sto"><%= human_size(storage_current_bytes) %></span><br>
+			<span class="usage-sto"><%= PilesIO.human_size(storage_current_bytes) %></span><br>
   		<img src="/static/img/arrow_up_xsmall.png" />
-  		<span class="usage-put"><%= human_size(usage_put_this_month_bytes) %></span><br>
+  		<span class="usage-put"><%= PilesIO.human_size(usage_put_this_month_bytes) %></span><br>
   		<img src="/static/img/arrow_down_xsmall.png" />
-  		<span class="usage-get"><%= human_size(usage_get_this_month_bytes) %></span><br>
+  		<span class="usage-get"><%= PilesIO.human_size(usage_get_this_month_bytes) %></span><br>
   		<span>Click for more info.</span><br>
   		<span style="font-size:.7em;">(Can have 30+ min delay).</span>
 	</div>
@@ -147,7 +149,7 @@
 			</div>
 		<div class="modal-body">
 	
-			<img class="icon" src="<%= get_icon(ext) %>" />
+			<img class="icon <% if (thumb){ %>preview<%}%>" src="<%= thumb || get_icon(ext) %>" />
 			<ul>
 				<li>Size: <%= human_size(size) %></li>
 				<li>Type: <%= type %></li>
