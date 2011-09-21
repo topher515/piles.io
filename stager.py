@@ -19,7 +19,8 @@ def file_post():
     print "Simulated file post"
     print request.forms.items()
     print "Reading file with name %s..." % request.files['file'].filename,
-    request.files['file'].file.read()
+    fileread = request.files['file'].file.read()
+    print fileread
     print "...done reading."
     
 

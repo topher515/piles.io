@@ -172,10 +172,10 @@ class FakeStore(object):
         print "Pretending to append storage info."
     def public_get_url(self,name):
         print "Generating fake public get url"
-        return "http://placekitten.com/200/200#Public-Kitten-URL"
+        return "http://placekitten.com/200/200?Public-Kitten-URL=true"
     def authed_get_url(self,name):
         print "Generating fake authed get url"
-        return "http://placekitten.com/300/200#Privately-Authed-URL"
+        return "http://placekitten.com/300/200?Privately-Authed-URL=true"
     def put(self,fp,name):
         print "Pretend putting %s with name %s to content storage." % (repr(fp),name)
     def delete(self,name):

@@ -328,7 +328,13 @@ def file_put(pid,fid):
 def file_delete(pid,fid):
     
     entity = db.files.find_one({'pid':pid,'_id':fid})
-    Store().delete(entity['path'])
+    store = Store()
+    store.delete(entity['path'])
+    
+    # If there's a thumbnail, delete it as well!
+    if entity.get('thumb'):
+        store.delete(entity['thumb'])
+    
     db.files.remove(entity)
     
     # File was successfully deleted, so remove it from usage stats
@@ -418,8 +424,13 @@ def get_file_content(pid,fid):
     um = usage.UsageMeter()
     if um.over_limit(pid):
         abort(402,"This Pile is over it's limit. The owner must pay for additional bandwidth before downloading is enabled.")
-    
+        
     authed_url = Store().authed_get_url(f['path'])
+    
+    if f['type'].startswith('image'):
+        authed_url += '&response-content-disposition=inline;%%20%s' % (f['path'])
+        authed_url += '&response-content-type=%s' % (f['type'])
+        
     return redirect(authed_url)
 
 
