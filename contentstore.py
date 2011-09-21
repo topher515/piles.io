@@ -34,7 +34,7 @@ class S3Store(object):
         entity['signature'] = signature
         
         if entity.get('thumb'):
-            policy,signature = self.build_policy_doc(entity['thumb'], content_type=entity['image/png'], content_disposition='inline; ', acl='public-read')
+            policy,signature = self.build_policy_doc(entity['thumb'], content_type='image/png', content_disposition='inline; ', acl='public-read')
             entity['thumb_policy'] = policy
             entity['thumb_signature'] = signature
         return entity
