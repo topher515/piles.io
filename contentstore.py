@@ -48,9 +48,9 @@ class S3Store(object):
             'conditions': [
                 {'acl':acl},
                 {'bucket':self.bucket},
-                {'key': key},
-                {'Content-Type':content_type},
-                {'Content-Disposition':content_disposition},
+                {'key': key}, # Key must match our key *Exactly*
+                ["starts-with", "$Content-Type", ""], # Content-type can be anything
+                ["starts-with", "$Content-Disposition", ""], # Content-disposition can be anything
                 # <hack> This is a hack to allow SWF based uploads to the bucket as described here: 
                 #        https://forums.aws.amazon.com/thread.jspa?messageID=77198
                 # Basically flash adds a...    
