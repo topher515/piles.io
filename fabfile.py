@@ -14,7 +14,7 @@ import StringIO, glob
 import pickle
 import datetime
 
-import stager
+from piles_static import import stager
 
 from utils import app_meta
 

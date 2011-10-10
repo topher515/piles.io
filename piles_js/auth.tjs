@@ -1,0 +1,17 @@
+exports = exports || {} 
+
+var db = require('db')
+;
+
+exports.doLogin = function(req,user,piles) {
+    req.session.authenticated = {user:user}
+    if (piles) {
+        req.session.authenticated.piles = piles
+    } else {
+        var err,items; await {
+            db.collection('piles').find({emails:user.email}).toArray(defer(err,items))
+        }
+        if (err) console.log(err) 
+        req.session.authenticated.piles = items
+    }
+}

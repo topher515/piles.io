@@ -1,5 +1,7 @@
 (function($) {
 	
+	var onClient = typeof(exports) === 'undefined'
+	
 	window.PilesIO ? console.log('PilesIO already in global scope') : window.PilesIO = {}
 	
 	jQuery.event.props.push("dataTransfer");
@@ -121,7 +123,7 @@
     /***************
      * Backbone overrides
      ***************/
-     Backbone.sync = function(method, model, options) {
+     PilesIO.jsonpSync = function(method, model, options) {
          var type = {
             'create': 'POST',
             'update': 'PUT',
@@ -159,6 +161,7 @@
          // Make the request.
          return $.ajax(params);
     };
+    
     
     
     /*************
@@ -515,24 +518,24 @@
 		
 		initialize: function() {
 			var model = this.model,
-				$el = $(this.el),
 				self = this;
 			this.el.view = this; // Add a reference to this view to this element
-			this.$el = $el;
+			this.$el = $(this.el);
 			
 			// Bind the view elem for draggability
-			$el.draggable({
+			this.$el.draggable({
 			    distance:15,
 				containment: '.file-collection', 
 				opacity: .75,
 				helper:'clone',
 				zIndex:600,
 				appendTo: '.file-collection',
-				start: function() { $(this).toggle() },
-				stop: function() { $(this).toggle() }
+				start: _.bind(this.startDrag, this),
+				stop: _.bind(this.stopDrag, this),
+				drag: _.bind(this.onDrag, this),
 			});
 		
-			if (this.model.get('pub')) $el.addClass('pub');
+			if (this.model.get('pub')) this.$el.addClass('pub');
 			
 			this.model.bind('destroy', this.doremove, this);
 			this.model.bind('uploadprogress', this.updateprogress, this);
@@ -544,6 +547,18 @@
 			this.model.bind('saveerror', this.saveerror, this);
 			
 			this.model.bind('change:thumb', this.set_thumb_src, this);
+		},
+		
+		onDrag:function() {
+		    
+		},
+		
+		startDrag:function() {
+		    $(this).toggle();
+		},
+		
+		stopDrag:function() {
+		    $(this).toggle()
 		},
 		
 		domodal:function() {
