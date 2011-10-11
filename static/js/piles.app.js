@@ -162,6 +162,9 @@
          return $.ajax(params);
     };
     
+    // Replace normal sync with Socket.IO enabled Socketbone
+    socketboner = Socketbone.Client(PilesIO.App.SOCKETBONER_URL);
+    Backbone.sync = socketboner.sync;
     
     
     /*************

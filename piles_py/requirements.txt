@@ -5,3 +5,5 @@ beaker
 hurry.filesize
 #-e hg+https://bitbucket.org/bbangert/beaker/@v1.5.4#egg=beaker
 apachelog
+pyyaml
+pystache

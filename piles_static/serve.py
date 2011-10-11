@@ -1,6 +1,7 @@
 from stager import stage
 
-from bottle import route,
+import bottle
+from bottle import route, run, request, abort, redirect, static_file, template
 
 @route('/', method='POST')
 def file_post():
