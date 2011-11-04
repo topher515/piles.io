@@ -14,7 +14,7 @@ import StringIO, glob
 import pickle
 import datetime
 
-from piles_static import import stager
+from piles_static import stager
 
 from utils import app_meta
 
@@ -135,6 +135,11 @@ class S3Deployer(Deployer):
             else:
                 print "...Uploaded %s files." % count
             
+
+def bootstrap():
+    local("./piles_js/bootstrap.sh")
+    local("source ./env/bin/activate")
+    local("pip install -r ./piles_py/requirements.txt")
 
 
 def wfdeploy(branch='master'):
