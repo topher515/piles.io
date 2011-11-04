@@ -1,5 +1,10 @@
+cache
+env
+.Python
 *.pyc
 .DS_Store
 *.log
 *.db
-.Python
+.Pythoncache
+*.pickle
+staged
