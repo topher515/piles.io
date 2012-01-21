@@ -1,0 +1,50 @@
+<html>
+<head>
+    {{#settings}}
+    <script src="http://localhost:9090/static/js/jquery-1.7.1.min.js"></script>
+    <script src="http://localhost:9090/static/js/jquery-ui.min.js"></script>
+    <script src="http://localhost:9090/static/js/underscore.js"></script>
+    <script src="http://localhost:9090/static/js/backbone.js"></script>
+    <script src="http://localhost:9090/static/js/piles.lib.js"></script>
+    <script src="http://localhost:9090/static/js/piles.dropper.js"></script>
+    <script>
+    (function() {
+    	pid = window.location.hash.slice(1)
+    	if (!pid) {
+    		return window.location = 'http://{{APP_DOMAIN}}/'
+        }
+        Piles.Settings = {APP_DOMAIN:'{{APP_DOMAIN}}'}
+        Piles.dropperApp({pile:{id:pid}})
+    })()
+    </script>
+    {{/settings}}
+    <style>
+    body {
+        margin:0;
+        padding:0;
+    }
+    #content {
+        position:absolute;
+        left:0;
+        right:0;
+        top:0;
+        bottom:0;
+    }
+    #dropper {
+        position:absolute;
+        left:0;
+        right:0;
+        top:0;
+        bottom:0;
+    }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <div id="dropper">
+            <h2>Drag your files here to upload</h2>
+            <div class="box" style="background-color:#454;width:100px;height:100px;">This is a box!</div>
+        </div>
+    </div>
+</body>
+</html>

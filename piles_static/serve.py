@@ -1,5 +1,3 @@
-from stager import stage
-
 import bottle
 from bottle import route, run, request, abort, redirect, static_file, template
 
@@ -13,15 +11,14 @@ def file_post():
         print "Read file successfully"
     except:
         print "Failed to read file!"
-        
     try:
         im = Image.open(StringIO(fileread))
         print "Got image: %s" % im
     except:
         from traceback import print_exc
-        print_exc()
-        
+        print_exc()    
     print "...done reading."
+    
 
 @route('/:path#.+#')
 def server_static(path):
@@ -31,8 +28,7 @@ def server_static(path):
 
 def serve():
     app = bottle.default_app()
-    stage()
-    run(host='localhost', port=9090, app=app, reloader=True)
+    run(host='localhost', port=9090, app=app, reloader=False)
 
 if __name__ == '__main__':
     serve()

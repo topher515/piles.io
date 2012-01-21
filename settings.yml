@@ -16,7 +16,7 @@ LOG_BUCKET: "dev.piles.io-logging"
 LOG_BUCKET_PREFIX: "dev.piles.io-access-log-"
 FILE_POST_URL: "http://dev.piles.io"
 # The domain on which the application logic and API lives
-APP_DOMAIN: "localhost:7070"
+APP_DOMAIN: "localhost:8080"
 # The domain on which the application and user content lives
 CONTENT_DOMAIN: "localhost:9090"
 ### Database settings
@@ -28,5 +28,6 @@ EMAIL_BOX_NAME: ""
 EMAIL_BOX_PWD: ""
 EMAIL_SMTP_HOST: "localhost"
 EMAIL_FROM_ADDR: "robot@piles.io"
-DEPLOYED: False # This should be true in the `local_settings.py` file of the API server
+DEPLOYED: false # This should be true in the `local_settings.py` file of the API server
 SECRET_KEY: "my-@wes0me_sexY_secret+key"
+TEMPLATE_PATHS: ["/Users/cwilcox/Projects/piles.io/templates/"]

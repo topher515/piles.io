@@ -1,0 +1,8 @@
+#!/bin/bash
+ 
+#coffee -w -c -o piles_js/node_modules/piles.io/ piles_js/node_modules/piles.coffee/ # watch cmd
+#coffee  -c -o piles_js/node_modules/piles.io/ piles_js/node_modules/piles.coffee/
+#node piles_js/node_modules/piles.io/app.js
+
+source ./env/bin/activate
+PYTHONPATH=piles_py:. python piles_py/dropper.py #app.py

@@ -9,8 +9,8 @@ import logging
 logger = logging.getLogger()
 from smtplib import SMTP
 
-
-from settings import settings
+import settings
+settings = settings.env('development')
 
 ### Utils ###
 
@@ -56,22 +56,6 @@ def send_email(to_addrs,msg):
     s.connect(EMAIL_SMTP_HOST)
     s.login(EMAIL_BOX_NAME,EMAIL_BOX_PWD)
     s.sendmail(EMAIL_FROM_ADDR, to_addrs, msg)
-
-
-def get_app_context():
-    return {
-        'app_meta':{
-            'BUCKET_NAME':settings('APP_BUCKET'),
-            'AWS_ACCESS_KEY_ID':settings('AWS_ACCESS_KEY_ID'),
-            'APP_DOMAIN':settings('APP_DOMAIN'),
-            'FILE_POST_URL':settings('FILE_POST_URL'),
-            'APP_BUCKET_ACL':settings('APP_BUCKET_ACL'),
-            'CONTENT_DOMAIN':settings('CONTENT_DOMAIN'),
-            'SOCKETBONER_URL':'http://localhost:7070'
-        },
-        'ms2js':ms2js,
-        'm2j':m2j
-    }
 
 
 ## Formatting

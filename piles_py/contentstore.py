@@ -11,18 +11,18 @@ logger = logging.getLogger()
 from settings import settings #DIRNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, APP_BUCKET, APP_BUCKET_ACL, CONTENT_DOMAIN
 
 ## S3
-public_acp_xml = open(os.path.join(settings('DIRNAME'),'resources/public-acp.xml')).read()
-private_acp_xml = open(os.path.join(settings('DIRNAME'),'resources/private-acp.xml')).read()
+public_acp_xml = open(os.path.join(settings['DIRNAME'],'resources/public-acp.xml')).read()
+private_acp_xml = open(os.path.join(settings['DIRNAME'],'resources/private-acp.xml')).read()
 
 
 class S3Store(object):
     
     def __init__(self,s3conn=None,bucket=None):
         if not s3conn:
-            s3conn = S3.AWSAuthConnection(settings('AWS_ACCESS_KEY_ID'),settings('AWS_SECRET_ACCESS_KEY'))
+            s3conn = S3.AWSAuthConnection(settings['AWS_ACCESS_KEY_ID'],settings['AWS_SECRET_ACCESS_KEY'])
         self.s3conn = s3conn
         if not bucket:
-            bucket = settings('APP_BUCKET')
+            bucket = settings['APP_BUCKET']
         self.bucket = bucket
     
     def add_storage_info(self,entity):
@@ -41,7 +41,7 @@ class S3Store(object):
     
     def build_policy_doc(self,key,content_type,content_disposition,acl=''):
         if not acl:
-            acl = settings('APP_BUCKET_ACL')
+            acl = settings['APP_BUCKET_ACL']
         
         policy = {
             'expiration':(datetime.datetime.now()+datetime.timedelta(1)).strftime('%Y-%m-%dT%H:%M:%S.000Z'), # Valid for one day. This means the user MUST refresh the page once a day to do uploads
@@ -61,7 +61,7 @@ class S3Store(object):
             ]
         }
         policy_doc = base64.b64encode(json.dumps(policy))
-        sig = base64.b64encode(hmac.new(settings('AWS_SECRET_ACCESS_KEY'),policy_doc,sha1).digest())
+        sig = base64.b64encode(hmac.new(settings['AWS_SECRET_ACCESS_KEY'],policy_doc,sha1).digest())
         return policy_doc,sig
     
     
@@ -77,7 +77,7 @@ class S3Store(object):
         return urlquote(b64sig,safe='')
     
     def public_get_url(self,path):
-        return 'http://%s/%s' % (settings('CONTENT_DOMAIN'),path)
+        return 'http://%s/%s' % (settings['CONTENT_DOMAIN'],path)
 
     def _authed_get_url(self,path,expires=None):
         bucket = self.bucket
@@ -87,7 +87,7 @@ class S3Store(object):
         ## DEBUG:
         #expires = datetime.datetime.fromtimestamp(1141889120)
         expires_epoch_str = str(int(time.mktime(expires.timetuple())))
-        sig_str = build_auth_sig('GET', path='/'+bucket+'/'+path, expiration=expires, secret_key=settings('AWS_SECRET_ACCESS_KEY'))
+        sig_str = build_auth_sig('GET', path='/'+bucket+'/'+path, expiration=expires, secret_key=settings['AWS_SECRET_ACCESS_KEY'])
     
         url = ['http://s3.amazonaws.com',
                 '/',bucket,'/',path,'?',
@@ -99,7 +99,7 @@ class S3Store(object):
     def authed_get_url(self,path):   
         path = path.strip('/') # Normalize path by dropping extra begin/end slashes
 
-        auth_gen = S3.QueryStringAuthGenerator(settings('AWS_ACCESS_KEY_ID'),settings('AWS_SECRET_ACCESS_KEY'), is_secure=False) #PP_BUCKET)
+        auth_gen = S3.QueryStringAuthGenerator(settings['AWS_ACCESS_KEY_ID'],settings['AWS_SECRET_ACCESS_KEY'], is_secure=False) #PP_BUCKET)
         
         # if not expires:
         #    expires = datetime.datetime.now() + datetime.timedelta(0,60*10) # In 10 min

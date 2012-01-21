@@ -1,41 +1,26 @@
 import os
 import yaml
 
-class Settings(object):
-    def __init__(self):
-        self.conf_set = set()
-        self.confs = []
-        self.ignores = []
-        self.requires = []
+
+defaults = yaml.load(open('settings.yml','r'))
+production = {}
+production.update(defaults)
+production.update(yaml.load(open('settings_production.yml','r')))
+development = {}
+development.update(defaults)
+
+settings = None
+
+
+def env(env_name):
+    global settings
+    if not settings:
+        settings = globals()[env_name]
         
-    def ignore(self,conf_name):
-        self.ignores.append(conf_name)
+    return settings
         
-    def require(self,conf_name):
-        self.requires.append(conf_name)
-        
-    def add_conf(self,conf,conf_name):
-        if conf_name in self.conf_set:
-            return
-        self.conf_set.add(conf_name)
-        self.confs.append((conf,conf_name))
     
-    def __call__(self,name):
-        for conf,conf_name in reversed(self.confs):
-            if conf_name in self.ignores:
-                continue
-            if len(self.requires) > 0 and conf_name not in self.requires:
-                continue
-                
-            if conf.get(name,None) is not None:
-                return conf[name]
-        raise AttributeError
-settings = Settings()
-
-settings.add_conf(yaml.load(open('settings.yml','r')),'global')    
-
-try:
-	from local_settings import conf
-	settings.add_conf(conf,'local')
-except ImportError:
-	pass # It's cool if there's no local_Settings module
+    
+    
+   
+    

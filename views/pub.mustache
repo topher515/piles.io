@@ -1,0 +1,26 @@
+{{#settings}}
+
+<script type="text/javascript" src="http://{{CONTENT_DOMAIN}}/static/js/piles.lib.js" ></script>
+<script type="text/javascript" src="http://{{CONTENT_DOMAIN}}/static/js/piles.pub.js" ></script>
+<script>
+Piles.bootstrapPublic()
+</script>
+
+<script id="verifier-tpl" type="text/template">    
+</script>
+
+<script id="pub-file-view-tpl" type="text/template">
+    <div class="meta">
+        <div class="name"><%= name %></div>
+    </div>
+    <div class="progress-bar"></div>
+</script>
+
+<div class="layout">
+    
+    <div id="public-session"></div>
+    
+</div>
+
+<noscript>Piles only works when Javascript is turned on!</noscript>
+{{/settings}}

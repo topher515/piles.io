@@ -1,3 +1,4 @@
+fabric
 pymongo
 bottle
 requests
@@ -6,4 +7,5 @@ hurry.filesize
 #-e hg+https://bitbucket.org/bbangert/beaker/@v1.5.4#egg=beaker
 apachelog
 pyyaml
-pystache
+#pystache
+-e git://github.com/defunkt/pystache.git#egg=pystache

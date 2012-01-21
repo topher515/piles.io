@@ -7,7 +7,7 @@ from settings import settings
 import logging
 logger = logging.getLogger('piles_io.api')
 from utils import *
-if settings('DEPLOYED'):
+if settings['DEPLOYED']:
     print "Importing real S3 content store."
     from contentstore import S3Store as Store
 else:
@@ -275,6 +275,7 @@ def files_post(pid):
     return m2j(entity)
 
 
+
 # /piles/:pid/files # GET
 @auth_json
 @jsonp
@@ -285,6 +286,9 @@ def files_get(pid):
 
 @route('/piles/:pid/files', method='ANY')
 def files(pid):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return files_post(pid)
+    
     areq = AgnosticReq(request)
     if areq.method == 'POST':
         return files_post(pid)

@@ -1,3 +1,0 @@
-#!/bin/bash
-source ./env/bin/activate
-PYTHONPATH=. python ./piles_static/stager.py

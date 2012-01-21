@@ -233,16 +233,7 @@ def pile(pilename):
     if not pile:
         abort(404,'That Pile does not exist.')
     
-    s = session(request)
-    if s.get('authenticated') and not request.GET.get('public'):
-        authed_piles = [ p['_id'] for p in s['authenticated']['piles'] ]
-        if pile['_id'] in authed_piles:
-            return redirect('http://'+settings('CONTENT_DOMAIN') +'/app#'+pile['id'])
-            #files = db.files.find({'pid':pile['_id']})
-            #return template('app',{'pile':pile,'files':files,'app_meta':app_meta()})
-    
-    files = db.files.find({'pid':pile['_id'],'pub':True})
-    return template('app_public',pile=pile,files=list(files),authenticated=s.get('authenticated',{}))
+    return redirect('http://'+settings['CONTENT_DOMAIN'] +'/dropper#'+pile['_id'])
 
 
 

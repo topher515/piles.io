@@ -1,5 +1,6 @@
-Socketbone = Socketbone || {};
-console = console || {log:function() {}}
+(function() {
+window.Socketbone = window.Socketbone || {};
+window.console = window.console || {log:function() {}}
 
 
 // parseUri 1.2.2
@@ -40,24 +41,24 @@ parseUri.options = {
 Socketbone.Client = function(url,timeout) {
     
     var url = url,
-        parsedUri = parseUri(url)
+        parsedUri = parseUri(url),
         socket = io.connect(url),
         syncEventCounter = 0,
-        syncEventCallbacks = {},
-        timeout = timeout ? timeout : 10000,
+        syncEventOptions = {},
+        timeout = timeout ? timeout : 10000;
     
     socket.on('sync:success', function(resp, syncEventId) {
         syncEventCallbacks[syncEventId].success(resp)
-        delete syncEventCallbacks[syncEventId]
+        delete syncEventOptions[syncEventId]
     })
     
     socket.on('sync:error', function(resp, syncEventId) {
         syncEventCallbacks[syncEventId].error(resp)
-        delete syncEventCallbacks[syncEventId]
+        delete syncEventOptions[syncEventId]
     })
     
     socket.on('sync:ack', function(syncEventId) {
-        delete syncEventCallbacks[syncEventId]
+        delete syncEventOptions[syncEventId]
     })
     
     socket.on('connect', function() {
@@ -68,16 +69,17 @@ Socketbone.Client = function(url,timeout) {
         var uri = model.url instanceof Function ? model.url() : model.url;
         
         if (options.success || options.error) {
-            var syncEventId = ''+syncEventCounter++
+            var syncEventId = ''+syncEventCounter++;
             syncEventOptions[syncEventId] = {
                 success:options.success || function() {},
                 error:options.error || function() {},
             }
         }
         
-        socket.emit('sync', method, uri
-            method == 'create' || method == 'update' ? model.toJSON() : null,
+        socket.emit('sync', method, uri,
+            (method == 'create' || method == 'update') ? model.toJSON() : null,
             syncEventId)
 
     }
 }
+})()
