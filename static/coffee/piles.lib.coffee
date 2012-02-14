@@ -50,17 +50,16 @@ Piles.IconGetter = ()->
     return @base + "/icons/" + img_icons[ext.toLowerCase()]  if img_icons[ext.toLowerCase()]
     return @default
  
-Piles.Pile = Backbone.Model.extend()
+Piles.Pile = Backbone.Model.extend
+  initialize: (options)->
+    files = new Piles.FileCollection(url:'/piles/'+@.get('id')+'/files/')
+    
     
 Piles.File = Backbone.Model.extend
   defaults:
     size: 0
-    pid: null
     icon: "/static/img/file.png" # Remove this, this is display!
     ext: ""
-    x: 0
-    y: 0
-    pub: false
     type: "Unknown File"
     thumb: ""
     progress: 0

@@ -9,7 +9,9 @@
       this.bounceAnim = _.throttle((__bind(function() {
         return this.$box.effect('bounce');
       }, this)), 1000);
-      this.files = new Piles.FileCollection;
+      this.files = new Piles.FileCollection.extend({
+        url: '/piles/' + this.model.get('pid') + '/files'
+      });
       return this.initDropper();
     },
     initDropper: function() {
@@ -67,11 +69,10 @@
     if (!options.pile) {
       throw "You must specify an `options.pile` object";
     }
-    $(function() {
-      return new Piles.DropperView;
+    return $(function() {
+      return new Piles.DropperView({
+        model: new Piles.Pile(options.pile)
+      });
     });
-    return {
-      model: new Pile(options.pile)
-    };
   };
 }).call(this);

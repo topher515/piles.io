@@ -54,16 +54,19 @@
       return this["default"];
     };
   };
-  Piles.Pile = Backbone.Model.extend();
+  Piles.Pile = Backbone.Model.extend({
+    initialize: function(options) {
+      var files;
+      return files = new Piles.FileCollection({
+        url: '/piles/' + this.get('id') + '/files/'
+      });
+    }
+  });
   Piles.File = Backbone.Model.extend({
     defaults: {
       size: 0,
-      pid: null,
       icon: "/static/img/file.png",
       ext: "",
-      x: 0,
-      y: 0,
-      pub: false,
       type: "Unknown File",
       thumb: "",
       progress: 0,
