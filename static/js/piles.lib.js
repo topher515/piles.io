@@ -54,14 +54,6 @@
       return this["default"];
     };
   };
-  Piles.Pile = Backbone.Model.extend({
-    initialize: function(options) {
-      var files;
-      return files = new Piles.FileCollection({
-        url: '/piles/' + this.get('id') + '/files/'
-      });
-    }
-  });
   Piles.File = Backbone.Model.extend({
     defaults: {
       size: 0,
@@ -94,39 +86,37 @@
       if (pos.x || pos.y) {
         this.save(pos);
       }
-      this.uploadController = options.uploadController;
+      this.uploadController = new (options.uploadController || Piles.FileUploadController);
       return this.unset('uploadController', {
         silent: true
       });
     },
     save: function(attributes, options) {
-      var opts, stopwork;
+      var opts;
       options || (options = {});
       this.trigger("persist:start");
       this.trigger("work:start");
-      stopwork = __bind(function() {
-        return this.trigger("work:stop");
-      }, this);
-      opts = {};
-      opts.success = function(m, r) {
-        stopwork();
-        this.trigger("persist:success", m);
-        return options != null ? options.success() : void 0;
+      opts = {
+        success: __bind(function(m, r) {
+          this.trigger("work:stop");
+          this.trigger("persist:success", m);
+          return options.success && options.success();
+        }, this),
+        error: __bind(function(m, r) {
+          this.trigger("work:stop");
+          this.trigger("persist:error");
+          return options.error && options.error();
+        }, this)
       };
-      opts.error = function(m, r) {
-        stopwork();
-        this.trigger("persist:error");
-        return options != null ? options.error() : void 0;
-      };
-      return Backbone.Model.prototype.save.call(this, attributes, _.extend({}, options, opts));
+      return Backbone.Model.prototype.save.call(this, attributes, opts);
     },
     formData: function() {
       return {
-        key: self.get("path"),
-        signature: self.get("signature"),
-        policy: self.get("policy"),
-        "Content-Type": self.get("type"),
-        "Content-Disposition": (self.get("type").slice(0, 5) === "image" ? "inline;" : "attachment;")
+        key: this.get("path"),
+        signature: this.get("signature"),
+        policy: this.get("policy"),
+        "Content-Type": this.get("type"),
+        "Content-Disposition": (this.get("type").slice(0, 5) === "image" ? "inline;" : "attachment;")
       };
     },
     startUpload: function() {
@@ -138,7 +128,8 @@
     associateContent: function(file) {
       this.fileUploader = new this.uploadController.FileUploader({
         file: file,
-        formdata: this.formData()
+        formdata: this.formData(),
+        url: '/'
       });
       this.fileUploader.bind('all', __bind(function() {
         return this.trigger.apply(this, arguments);
@@ -166,19 +157,33 @@
   Piles.FileCollection = Backbone.Collection.extend({
     model: Piles.File
   });
+  Piles.Pile = Backbone.Model.extend({
+    initialize: function() {
+      var self;
+      self = this;
+      this.files = new Piles.FileCollection;
+      return this.files.url = __bind(function() {
+        return self.url() + '/files/';
+      }, this);
+    },
+    urlRoot: function() {
+      return 'http://' + Piles.Settings.APP_DOMAIN + '/piles/';
+    }
+  });
   Piles.FileUploadController = function(options) {
     /* Performs AJAX uploads
     
     ``options.formdata`` specifies POST data
     ``options.file`` is the HTML5 FileObject representing the file data to upload
     */
-    var $el, defaultFormData, postUrl, self;
+    var $el, defaultFormData, fuc, postUrl;
+    options || (options = {});
     $el = $(options.el || '<div/>');
     postUrl = options.uploadUrl;
-    self = this;
+    fuc = this;
     defaultFormData = {
-      AWSAccessKeyId: Piles.App.AWS_ACCESS_KEY_ID,
-      acl: Piles.App.APP_BUCKET_ACL
+      AWSAccessKeyId: Piles.Settings.AWS_ACCESS_KEY_ID,
+      acl: Piles.Settings.APP_BUCKET_ACL
     };
     this.obj2tuple = __bind(function(formobj) {
       var key, newfdata;
@@ -192,24 +197,23 @@
       }
       return newfdata;
     }, this);
-    return this.FileUploader = Backbone.Model.extend({
+    this.FileUploader = Backbone.Model.extend({
       /* A File uploader for one file
       */
       initialize: function(options) {
-        var empty, opts;
+        var empty;
         empty = function() {};
         if (!options) {
           throw new Error("No file to upload!");
         }
         console.log("Uploading file: " + options.file.name);
-        options.formdata = this.obj2tuple(_.extend(defaultFormData(options.formdata)));
-        opts = _.extend({}, {
+        options.formdata = fuc.obj2tuple(_.extend(defaultFormData, options.formdata));
+        this.opts = _.extend({}, {
           multipart: true,
           paramName: "file",
           formata: {},
           type: "POST",
-          url: uploadUrl,
-          progress: __bind(function() {
+          progress: __bind(function(data) {
             return this.trigger("upload:progress", parseInt(data.loaded / data.total * 100));
           }, this),
           fail: __bind(function() {
@@ -222,16 +226,17 @@
             return this.trigger("work:stop");
           }, this)
         }, options);
-        return $el.fileupload(opts);
+        return $el.fileupload(this.opts);
       },
       stop: function() {
         return this.jqXHR.abort();
       },
       start: function() {
         return this.jqXHR = $el.fileupload("send", {
-          files: [opts.file]
+          files: [this.opts.file]
         });
       }
     });
+    return this;
   };
 }).call(this);

@@ -1,3 +1,5 @@
+import Image
+
 import bottle
 from bottle import route, run, request, abort, redirect, static_file, template
 

@@ -9,9 +9,6 @@
       this.bounceAnim = _.throttle((__bind(function() {
         return this.$box.effect('bounce');
       }, this)), 1000);
-      this.files = new Piles.FileCollection.extend({
-        url: '/piles/' + this.model.get('pid') + '/files'
-      });
       return this.initDropper();
     },
     initDropper: function() {
@@ -33,10 +30,10 @@
         ext: ext,
         pub: false
       });
-      this.files.add(filemodel);
+      this.model.files.add(filemodel);
       filemodel.save({}, {
         success: function() {
-          return filemodel.associate_content(fileobj);
+          return filemodel.associateContent(fileobj);
         }
       });
       return false;
@@ -65,14 +62,16 @@
       return false;
     }
   });
-  Piles.dropperApp = function(options) {
-    if (!options.pile) {
-      throw "You must specify an `options.pile` object";
+  Piles.dropperBootstrap = function(options) {
+    var pid;
+    pid = window.location.hash.slice(1);
+    if (!pid) {
+      return window.location = 'http://localhost:8080/';
     }
-    return $(function() {
-      return new Piles.DropperView({
-        model: new Piles.Pile(options.pile)
-      });
+    return window.dropperView = new Piles.DropperView({
+      model: new Piles.Pile({
+        id: pid
+      })
     });
   };
 }).call(this);

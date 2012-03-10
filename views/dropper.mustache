@@ -3,18 +3,20 @@
     {{#settings}}
     <script src="http://localhost:9090/static/js/jquery-1.7.1.min.js"></script>
     <script src="http://localhost:9090/static/js/jquery-ui.min.js"></script>
+    <script src="http://localhost:9090/static/js/jquery.fileupload.js"></script>
     <script src="http://localhost:9090/static/js/underscore.js"></script>
     <script src="http://localhost:9090/static/js/backbone.js"></script>
     <script src="http://localhost:9090/static/js/piles.lib.js"></script>
     <script src="http://localhost:9090/static/js/piles.dropper.js"></script>
     <script>
     (function() {
-    	pid = window.location.hash.slice(1)
-    	if (!pid) {
-    		return window.location = 'http://{{APP_DOMAIN}}/'
-        }
-        Piles.Settings = {APP_DOMAIN:'{{APP_DOMAIN}}'}
-        Piles.dropperApp({pile:{id:pid}})
+	    Piles.Settings = {
+	      APP_DOMAIN:'localhost:8080',
+	      STATIC_DOMAIN:'localhost:9090',
+		  AWS_ACCESS_KEY_ID:'{{AWS_ACCESS_KEY_ID}}',
+		  APP_BUCKET_ACL:'{{APP_BUCKET_ACL}}'
+	    } 
+    	Piles.dropperBootstrap()
     })()
     </script>
     {{/settings}}

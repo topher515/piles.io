@@ -3,7 +3,7 @@ import datetime, hashlib, random, string, os
 import bottle
 import requests
 import uuid
-from bottle import route, run, request, abort, redirect, static_file, template, post, get
+from bottle import route, run, request, abort, redirect, static_file, template, post, get, response
 import logging
 logger = logging.getLogger('piles_io.app')
 
@@ -23,6 +23,14 @@ from db import db, DESCENDING, ASCENDING
 
 ### Misc ###
 
+def cors(fn):
+    def wrap(*args,**kwargs):
+        response.set_header('Access-Control-Allow-Origin','*')
+        response.set_header('Access-Control-Allow-Method','POST, GET, OPTIONS');  
+        response.set_header('Access-Control-Allow-Headers','Content-Type');
+        return fn(*args,**kwargs)
+    return wrap
+
 @route('/favicon.ico')
 def favicon():
     return static_file('img/pile_32.png', root='static')
@@ -38,13 +46,21 @@ valid_file_attrs = {
     'thumb':{'type':unicode},
 }
 
-@get('/piles/:pid/files')
+@route('/piles/:pid/files/', method='OPTIONS')
+@cors
+def files_options(pid):
+    pass
+
+
+@get('/piles/:pid/files/')
+@cors
 def files_get(pid):
     files = db.files.find({'pid':pid})
     return ms2js(files)
 
 
-@post('/piles/:pid/files')
+@post('/piles/:pid/files/')
+@cors
 def files_post(pid):
     _entity = json.loads(request.body.read())
     entity = {}
@@ -62,6 +78,9 @@ def files_post(pid):
     Store().add_storage_info(entity)
     return m2j(entity)
 
+@get('/')
+def root():
+    redirect('http://'+settings['CONTENT_DOMAIN']+'/dropper#AABBCC')
 
 def getapp():
     session_opts = {

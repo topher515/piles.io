@@ -49,11 +49,7 @@ Piles.IconGetter = ()->
 
     return @base + "/icons/" + img_icons[ext.toLowerCase()]  if img_icons[ext.toLowerCase()]
     return @default
- 
-Piles.Pile = Backbone.Model.extend
-  initialize: (options)->
-    files = new Piles.FileCollection(url:'/piles/'+@.get('id')+'/files/')
-    
+
     
 Piles.File = Backbone.Model.extend
   defaults:
@@ -80,7 +76,7 @@ Piles.File = Backbone.Model.extend
     if pos.x or pos.y
       @save pos
 
-    @uploadController = options.uploadController
+    @uploadController = new (options.uploadController or Piles.FileUploadController)
     @unset 'uploadController', silent:true
 
 
@@ -89,27 +85,25 @@ Piles.File = Backbone.Model.extend
     @trigger "persist:start"
     @trigger "work:start"
   
-    stopwork = ()=> @trigger "work:stop"
-    opts = {}
-    opts.success = (m, r) ->
-      stopwork()
-      @trigger "persist:success", m
-      options?.success()
-
-    opts.error = (m, r) ->
-      stopwork()
-      @trigger "persist:error"
-      options?.error()
+    opts = 
+      success:(m, r) =>
+        @trigger "work:stop"
+        @trigger "persist:success", m
+        options.success && options.success()
+      error: (m, r) =>
+        @trigger "work:stop"
+        @trigger "persist:error"
+        options.error && options.error()
    
-    Backbone.Model::save.call this, attributes, (_.extend {},options,opts)
+    Backbone.Model::save.call this, attributes, opts
 
   
   formData: ->
-    key: self.get("path")
-    signature: self.get("signature")
-    policy: self.get("policy")
-    "Content-Type": self.get("type")
-    "Content-Disposition": (if self.get("type").slice(0, 5) is "image" then "inline;" else "attachment;")
+    key: @get("path")
+    signature: @get("signature")
+    policy: @get("policy")
+    "Content-Type": @get("type")
+    "Content-Disposition": (if @get("type").slice(0, 5) is "image" then "inline;" else "attachment;")
 
   startUpload:->
     @fileUploader.start()
@@ -121,6 +115,7 @@ Piles.File = Backbone.Model.extend
     @fileUploader = new @uploadController.FileUploader 
       file:file
       formdata: @formData()
+      url: '/'
     # Proxy the fileUploader's events through this file
     @fileUploader.bind 'all', ()=>
       @trigger.apply this, arguments
@@ -143,19 +138,30 @@ Piles.File = Backbone.Model.extend
 Piles.FileCollection = Backbone.Collection.extend
   model: Piles.File
 
+Piles.Pile = Backbone.Model.extend
+  initialize:()->
+    self = @
+    @files = new Piles.FileCollection
+    @files.url = ()=>
+      self.url() + '/files/'
+    
+  urlRoot:()->
+    'http://' + Piles.Settings.APP_DOMAIN + '/piles/'
+
+
 Piles.FileUploadController = (options)->
   ### Performs AJAX uploads
   
   ``options.formdata`` specifies POST data
   ``options.file`` is the HTML5 FileObject representing the file data to upload
   ###
-  
+  options or= {}
   $el = $(options.el || '<div/>')
   postUrl = options.uploadUrl
-  self = this
+  fuc = this
   defaultFormData = 
-    AWSAccessKeyId: Piles.App.AWS_ACCESS_KEY_ID
-    acl: Piles.App.APP_BUCKET_ACL
+    AWSAccessKeyId: Piles.Settings.AWS_ACCESS_KEY_ID
+    acl: Piles.Settings.APP_BUCKET_ACL
 
   @obj2tuple = (formobj)=>
     newfdata = []
@@ -174,17 +180,16 @@ Piles.FileUploadController = (options)->
       throw new Error("No file to upload!")  unless options
       console.log "Uploading file: " + options.file.name
 
-      options.formdata = @obj2tuple (_.extend defaultFormData options.formdata)
+      options.formdata = fuc.obj2tuple (_.extend defaultFormData, options.formdata)
 
-      opts = _.extend({},
+      @opts = _.extend({},
         multipart: true
         paramName: "file"
         formata: {}
         type: "POST"
-        url: uploadUrl
 
         # Setup event bindings for this jquery plugin to our system
-        progress:=>
+        progress:(data)=>
           @trigger "upload:progress", parseInt(data.loaded / data.total * 100)
         fail:=>
           @trigger "upload:error"
@@ -196,12 +201,12 @@ Piles.FileUploadController = (options)->
         
       , options)
 
-      $el.fileupload opts
+      $el.fileupload @opts
     
     stop:->
       @jqXHR.abort()
     
     start:->
-      @jqXHR = $el.fileupload "send", files: [ opts.file ]
-
+      @jqXHR = $el.fileupload "send", files: [ @opts.file ]
+  @
 )

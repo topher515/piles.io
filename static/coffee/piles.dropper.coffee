@@ -10,7 +10,6 @@ Piles.DropperView = Backbone.View.extend
         @$box.effect('bounce')
       ), 1000
     
-    @files = new Piles.FileCollection.extend url:'/piles/' + @model.get('pid') + '/files'
     @initDropper()
   initDropper: ->
     self = this
@@ -28,10 +27,10 @@ Piles.DropperView = Backbone.View.extend
       type: fileobj.type
       ext: ext
       pub: false
-    @files.add filemodel
+    @model.files.add filemodel
     filemodel.save {},
       success: ->
-        filemodel.associate_content fileobj
+        filemodel.associateContent fileobj
     false
 
   drop:(e)->
@@ -48,9 +47,9 @@ Piles.DropperView = Backbone.View.extend
     $('body').css('background-color','white')
     false
 
-Piles.dropperApp = (options)->
-  if not options.pile
-    throw "You must specify an `options.pile` object"
-  $ ->
-    new Piles.DropperView
-      model:(new Piles.Pile(options.pile))
+Piles.dropperBootstrap = (options)->
+  pid = window.location.hash.slice(1) 
+  if not pid
+    return window.location = 'http://localhost:8080/'
+  
+  window.dropperView = new Piles.DropperView model:(new Piles.Pile id:pid)
