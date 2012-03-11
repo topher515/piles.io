@@ -1,16 +1,36 @@
-window.Piles = window.Piles or {}
+window.Piles or= {}
 
-Piles.DropperView = Backbone.View.extend
-  el:"#dropper"
+fileRowTpl = _.template '
+<tr>
+  <td><%= name %></td>
+  <td><%= type %></td>
+  <td><%= size %></td>
+  <td><div class="progress progress-info progress-striped active"><div class="bar" style="width: 0%;"></div></div></td>
+</tr>'
+
+Piles.FileTableView = Backbone.View.extend
+  initialize:->
+    @model.bind 'upload:progress', (x)=>
+      @$('.progress').addClass('active')
+      @$('.bar').animate width: x+'%'
+    @model.bind 'upload:success', (x)=>
+      @$('.progress').removeClass('active')
+      @$('.bar').animate width: '100%'
+      
+  render:->
+    @setElement (fileRowTpl @model.attributes)
+    @
+
+Piles.DropperApp = Backbone.View.extend
+  el:'#content'
   initialize: ->
+    self = @
     @$doc = $(document)
-    @$box = @$('.box')
-    
-    @bounceAnim = _.throttle (=>
-        @$box.effect('bounce')
-      ), 1000
-    
+    @model.files.bind 'add', (filemodel)=>
+      self.$('#info').css(height:'auto').slideDown()
+      self.$('#info tbody').append (new Piles.FileTableView model:filemodel).render().el
     @initDropper()
+    
   initDropper: ->
     self = this
     @$doc.on "dragover", _.bind @dragover, @
@@ -40,7 +60,6 @@ Piles.DropperView = Backbone.View.extend
     @handleFile file for file in dataTransfer.files
       
   dragover:(e)->
-    @bounceAnim()
     false
   
   dragend:(e)->
@@ -51,5 +70,5 @@ Piles.dropperBootstrap = (options)->
   pid = window.location.hash.slice(1) 
   if not pid
     return window.location = 'http://localhost:8080/'
-  
-  window.dropperView = new Piles.DropperView model:(new Piles.Pile id:pid)
+  $ ->
+    window.dropperApp = new Piles.DropperApp model:(new Piles.Pile id:pid)

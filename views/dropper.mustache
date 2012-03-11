@@ -1,24 +1,26 @@
 <html>
 <head>
     {{#settings}}
-    <script src="http://localhost:9090/static/js/jquery-1.7.1.min.js"></script>
-    <script src="http://localhost:9090/static/js/jquery-ui.min.js"></script>
-    <script src="http://localhost:9090/static/js/jquery.fileupload.js"></script>
-    <script src="http://localhost:9090/static/js/underscore.js"></script>
-    <script src="http://localhost:9090/static/js/backbone.js"></script>
-    <script src="http://localhost:9090/static/js/piles.lib.js"></script>
-    <script src="http://localhost:9090/static/js/piles.dropper.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery-1.7.1.min.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery-ui.min.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/bootstrap.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery.fileupload.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/underscore.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/backbone.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/piles.lib.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/piles.dropper.js"></script>
     <script>
     (function() {
 	    Piles.Settings = {
-	      APP_DOMAIN:'localhost:8080',
-	      STATIC_DOMAIN:'localhost:9090',
+	      APP_DOMAIN:'{{APP_DOMAIN}}',
+	      STATIC_DOMAIN:'{{CONTENT_DOMAIN}}',
 		  AWS_ACCESS_KEY_ID:'{{AWS_ACCESS_KEY_ID}}',
 		  APP_BUCKET_ACL:'{{APP_BUCKET_ACL}}'
 	    } 
     	Piles.dropperBootstrap()
     })()
     </script>
+	<link rel="stylesheet" type="text/css" href="http://{{CONTENT_DOMAIN}}/static/css/bootstrap.min.css" />
     {{/settings}}
     <style>
     body {
@@ -32,21 +34,39 @@
         top:0;
         bottom:0;
     }
+	#info {
+		position:relative;
+		height:0;
+		display:none;
+		overflow:hidden;
+	}
     #dropper {
-        position:absolute;
-        left:0;
-        right:0;
-        top:0;
-        bottom:0;
+        position:relative;
+		min-height:150px;
+		overflow:hidden;
     }
     </style>
+	
 </head>
 <body>
+	
     <div id="content">
-        <div id="dropper">
-            <h2>Drag your files here to upload</h2>
-            <div class="box" style="background-color:#454;width:100px;height:100px;">This is a box!</div>
-        </div>
+		<table id="info" class="table table-striped table-condensed">
+			<thead>
+				<tr>
+					<th>Name</th><th>Type</th><th>Size</th><th>Progress</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+        <div id="dropper" class="alert alert-info">
+			<h2>Drag your files here...</h2>
+			<form>
+				<p>...or click to upload.</p>
+				<input type="file" />
+			</form>
+		</div>
     </div>
 </body>
 </html>

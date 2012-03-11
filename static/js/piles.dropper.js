@@ -1,14 +1,24 @@
 (function() {
+  var fileRowTpl;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-  window.Piles = window.Piles || {};
-  Piles.DropperView = Backbone.View.extend({
-    el: "#dropper",
+  window.Piles || (window.Piles = {});
+  fileRowTpl = _.template("<tr>  <td><%= name %></td><td><%= type %></td><td><%= size %></td></tr>");
+  Piles.FileTableView = Backbone.View.extend({
+    render: function() {
+      this.el = fileRowTpl(this.model.attributes);
+      return this;
+    }
+  });
+  Piles.DropperApp = Backbone.View.extend({
+    el: "#content",
     initialize: function() {
+      this.$el = $(this.el);
       this.$doc = $(document);
-      this.$box = this.$('.box');
-      this.bounceAnim = _.throttle((__bind(function() {
-        return this.$box.effect('bounce');
-      }, this)), 1000);
+      this.model.files.bind('add', __bind(function(filemodel) {
+        return this.$('tbody').append((new Piles.FileTableView({
+          model: filemodel
+        })).render());
+      }, this));
       return this.initDropper();
     },
     initDropper: function() {
@@ -54,7 +64,6 @@
       return _results;
     },
     dragover: function(e) {
-      this.bounceAnim();
       return false;
     },
     dragend: function(e) {
@@ -68,7 +77,7 @@
     if (!pid) {
       return window.location = 'http://localhost:8080/';
     }
-    return window.dropperView = new Piles.DropperView({
+    return window.dropperApp = new Piles.DropperApp({
       model: new Piles.Pile({
         id: pid
       })

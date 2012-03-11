@@ -1,22 +1,26 @@
 (function() {
-  var bootstrap, buildIframe;
-  buildIframe = function(id, src, options) {
+  var Extern;
+  window.Piles || (window.Piles = {});
+  Extern = Piles.Extern = {};
+  Extern.resize = function(width, height) {
+    Piles.Extern.pileframe.style.width = parseInt(width) + 'px';
+    return Piles.Extern.pileframe.style.height = parseInt(height) + 'px';
+  };
+  Extern.buildIframe = function(id, src, options) {
     var el;
     el = document.createElement("iframe");
     el.setAttribute("id", id);
     el.setAttribute("src", src);
     el.style.border = '1px solid #DDD';
-    el.style.width = (options != null ? options.width : void 0) || '400px';
-    el.style.height = (options != null ? options.height : void 0) || '300px';
+    el.style.width = (options != null ? options.width : void 0) || '640px';
+    el.style.height = (options != null ? options.height : void 0) || '360px';
     return el;
   };
-  bootstrap = function(options) {
+  Extern.bootstrap = function(options) {
     var ifr;
-    ifr = buildIframe(options.id, options.src);
+    ifr = Extern.buildIframe('pileframe', 'http://localhost:9090/dropper');
+    Extern.pileframe = ifr;
     return document.body.appendChild(ifr);
   };
-  bootstrap({
-    id: 'pileframe',
-    src: 'http://localhost:9090/dropper'
-  });
+  Extern.bootstrap();
 }).call(this);
