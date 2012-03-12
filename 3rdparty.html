@@ -2,6 +2,15 @@
 <head><title>Generic 3rd Party</title></head>
 <body>
 	<h2>Some 3rd Party Bullshit</h2>
-	<script src="http://localhost:9090/static/js/piles.extern.js"></script>
+	<!-- script src="http://localhost:9090/static/js/piles.extern.js" -->
+	<script>
+	(function() {
+	    var el = document.createElement("iframe"); pid = 'AABBCC'
+	    el.setAttribute("id", 'pileframe'); el.setAttribute("src", 'http://localhost:9090/dropper#'+pid);
+	    el.style.border = '1px solid #DDD'; window.pilesResize = function(w,h) {el.style.width = w, el.style.height = h};
+		pilesResize('640px','360px');
+		document.body.appendChild(el);
+	})()
+	</script>
 </body>
 </html>

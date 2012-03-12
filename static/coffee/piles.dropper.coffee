@@ -10,12 +10,14 @@ fileRowTpl = _.template '
 
 Piles.FileTableView = Backbone.View.extend
   initialize:->
+    self = @
     @model.bind 'upload:progress', (x)=>
       @$('.progress').addClass('active')
       @$('.bar').animate width: x+'%'
     @model.bind 'upload:success', (x)=>
-      @$('.progress').removeClass('active')
-      @$('.bar').animate width: '100%'
+      @$('.bar').animate width: '100%', ()->
+        self.$('.progress').removeClass('active')
+        
       
   render:->
     @setElement (fileRowTpl @model.attributes)

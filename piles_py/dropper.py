@@ -23,6 +23,14 @@ from db import db, DESCENDING, ASCENDING
 
 ### Misc ###
 
+
+def utrack(fn):
+    def wrap(*args,**kwargs):
+        s = session(request)
+        if not s.get('uid'):
+            s['uid'] = uuid.uuid4().hex
+    return wrap
+
 def cors(fn):
     def wrap(*args,**kwargs):
         response.set_header('Access-Control-Allow-Origin','*')
@@ -44,23 +52,36 @@ valid_file_attrs = {
     'icon':{'type':unicode},
     'name':{'type':unicode},
     'thumb':{'type':unicode},
+    'uploader':{'type':unicode}
 }
+
+
+@post('/piles/')
+@utrack
+def piles_create():
+    db.piles.save()
+
 
 @route('/piles/:pid/files/', method='OPTIONS')
 @cors
+@utrack
 def files_options(pid):
     pass
 
 
 @get('/piles/:pid/files/')
 @cors
+@utrack
 def files_get(pid):
-    files = db.files.find({'pid':pid})
+    uid = session(request)['uid']
+    if uid
+    files = db.files.find({'pid':pid,'uploader':})
     return ms2js(files)
 
 
 @post('/piles/:pid/files/')
 @cors
+@utrack
 def files_post(pid):
     _entity = json.loads(request.body.read())
     entity = {}
@@ -69,6 +90,7 @@ def files_post(pid):
     fid = uuid.uuid4().hex
     #valid,invalid_char = valid_chars(name)
     entity['pid'] = pid
+    entity['uploader'] = session(request)['uid']
     entity['_id'] = fid
     #entity['path'] = '%s/%s/%s' % (pid,fid,name)
     #if entity.get('type') in ['image/jpeg','image/gif','image/png']:
@@ -79,8 +101,11 @@ def files_post(pid):
     return m2j(entity)
 
 @get('/')
+@utrack
 def root():
     redirect('http://'+settings['CONTENT_DOMAIN']+'/dropper#AABBCC')
+
+
 
 def getapp():
     session_opts = {
