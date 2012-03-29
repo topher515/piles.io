@@ -10,39 +10,18 @@ from os.path import join as pjoin
 import glob
 import shutil
 import pystache
-    
-from piles_static import serve as static_serve
 
 from settings import env
 settings = env('development')
 
-staged_dir = os.path.join(settings['DIRNAME'],'staged')
-orig_static_dir = os.path.join(settings['DIRNAME'],'static')
+STAGE_DIR = 'staged/'
 
-
-
-def render(viewname=None):
-    '''Render all the template files!'''
-    print("### Rendering template files... ")
-    
-    if not os.path.isdir(staged_dir):
-        os.mkdir(staged_dir)
-        
-    def do_render(view,context,_renderer):
-        print(view, end=", ")
-        html = _renderer(view, context)
-        open(os.path.join(staged_dir,view),'w').write(html)
-        
-    if viewname:
-        v = views_to_stage.get(viewname)
-        if not v:
-            print("Don't know how to render '%s'" % viewname)
-            return
-        do_render(viewname,v['context'],v['renderer'])
-    else:
-        for view,foo in views_to_stage.iteritems():
-            do_render(view,foo['context'],foo['renderer'])
-    print()
+def ensure_dir(outfile):
+    try:
+        os.makedirs(os.path.dirname(outfile))
+    except OSError as e:
+        if '[Errno 17]' not in str(e):
+            raise
 
 
 def stache_compile(inpath,outpath):
@@ -60,7 +39,7 @@ def glob_recurse_dirs(to_examine_paths, glob_suffix='*'):
     return found
 
 
-def compile(compile_ts={}):
+def stage(compile_ts={}):
     """ Compile files. `compile_ts` is a dictionary whos keys are the paths to files and
     there last compile time (as returned by `os.stat(...).st_mtime) if the file's
     current `st_mtime` is greater than the one listed in `compile_ts` then the file is recompiled.
@@ -73,13 +52,19 @@ def compile(compile_ts={}):
         if x > (compile_ts.get(filename) or 0):
             compile_ts[filename] = x  
             if filename.endswith('.less'):
-                local('node_modules/less/bin/lessc %s %s' % (filename,'staged/'+filename.replace('.less','.css')))
+                local('lessc %s %s' % (filename,STAGE_DIR+filename\
+                    .replace('assets/','').replace('.less','.css')))
             elif filename.endswith('.coffee'):
-                local('coffee -c -o %s %s' % (os.path.dirname('staged/'+filename).replace('coffee','js'), filename) )
+                local('coffee -c -o %s %s' % (os.path.dirname(STAGE_DIR+filename)\
+                    .replace('assets/','').replace('coffee','js'), filename) )
             elif filename.endswith('.mustache'):
-                stache_compile(filename,'staged/' + filename.split('/')[-1][:-9])
+                outfile = STAGE_DIR + filename.replace('assets/','')[:-9]
+                ensure_dir(outfile)
+                stache_compile(filename, outfile)
             else:
-                open(os.path.join(staged_dir,filename),'w').write(open(filename,'r').read())
+                outfile = os.path.join(STAGE_DIR,filename).replace('assets/','')
+                ensure_dir(outfile)
+                open(outfile,'w').write(open(filename,'r').read())
     return compile_ts
                 
                 
@@ -87,10 +72,6 @@ def compile(compile_ts={}):
 def watch():
     compile_ts = {}
     while True:
-        compile_ts = compile(compile_ts)
+        compile_ts = stage(compile_ts)
         time.sleep(1)
 
-
-def serve():
-    poll({})
-    static_serve.serve()
