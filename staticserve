@@ -1,4 +1,3 @@
 #!/bin/bash
 source ./env/bin/activate
-PYTHONPATH=. fab stage
 PYTHONPATH=. python ./static_host/serve.py

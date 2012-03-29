@@ -1,12 +1,14 @@
 (->
 if not window.Backbone 
-  throw "Piles requires the Backbone.js framework" 
+  throw "XDFile requires the Backbone.js framework" 
 if not window._
-  throw "Piles requires the Underscore.js utility library"
+  throw "XDFile requires the Underscore.js utility library"
   
-window.Piles = window.Piles || {}
- 
-Piles.IconGetter = ()->
+window.XDFile = window.XDFile || {}
+
+XDFile.Settings = {}
+
+XDFile.IconGetter = ()->
   
   @base = "/static/img/"
   @default = @base + "file.png"
@@ -51,7 +53,7 @@ Piles.IconGetter = ()->
     return @default
 
     
-Piles.File = Backbone.Model.extend
+XDFile.File = Backbone.Model.extend
   defaults:
     size: 0
     icon: "/static/img/file.png" # Remove this, this is display!
@@ -76,7 +78,7 @@ Piles.File = Backbone.Model.extend
     if pos.x or pos.y
       @save pos
 
-    @uploadController = new (options.uploadController or Piles.FileUploadController)
+    @uploadController = new (options.uploadController or XDFile.FileUploadController)
     @unset 'uploadController', silent:true
 
   trash: ()->
@@ -131,7 +133,7 @@ Piles.File = Backbone.Model.extend
     ).fail ->###
 
   downloadUrl: ->
-    "http://" + Piles.Settings.APP_DOMAIN + "/piles/" + @get("pid") + "/files/" + @get("id") + "/content"
+    "http://" + XDFile.Settings.APP_DOMAIN + "/XDFile/" + @get("pid") + "/files/" + @get("id") + "/content"
 
   delete: ->
     @trigger "work:start"
@@ -139,21 +141,20 @@ Piles.File = Backbone.Model.extend
       success:=> @trigger "work:stop"
       error:=> notify "error", "Failed to delete file."
 
-Piles.FileCollection = Backbone.Collection.extend
-  model: Piles.File
+XDFile.FileCollection = Backbone.Collection.extend
+  model: XDFile.File
 
-Piles.Pile = Backbone.Model.extend
+XDFile.Bucket = Backbone.Model.extend
   initialize:()->
     self = @
-    @files = new Piles.FileCollection
+    @files = new XDFile.FileCollection
     @files.url = ()=>
       self.url() + '/files/'
     
   urlRoot:()->
-    'http://' + Piles.Settings.APP_DOMAIN + '/piles/'
+    XDFile.Settings.APP_URL + '/buckets/'
 
-
-Piles.FileUploadController = (options)->
+XDFile.FileUploadController = (options)->
   ### Performs AJAX uploads
   
   ``options.formdata`` specifies POST data
@@ -164,8 +165,8 @@ Piles.FileUploadController = (options)->
   postUrl = options.uploadUrl
   fuc = this
   defaultFormData = 
-    AWSAccessKeyId: Piles.Settings.AWS_ACCESS_KEY_ID
-    acl: Piles.Settings.APP_BUCKET_ACL
+    AWSAccessKeyId: XDFile.Settings.AWS_ACCESS_KEY_ID
+    acl: XDFile.Settings.APP_BUCKET_ACL
 
   @obj2tuple = (formobj)=>
     newfdata = []

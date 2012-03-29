@@ -1,4 +1,4 @@
-window.Piles or= {}
+window.ShinyBox or= {}
 
 fileRowTpl = _.template '<tr>
   <td><%= name %></td>
@@ -8,7 +8,7 @@ fileRowTpl = _.template '<tr>
   <td><button class="delete btn btn-danger btn-mini">Delete</button></td>
 </tr>'
 
-Piles.FileTableView = Backbone.View.extend
+ShinyBox.FileTableView = Backbone.View.extend
   events:
     "click .delete":"trash"  
 
@@ -28,14 +28,14 @@ Piles.FileTableView = Backbone.View.extend
     @setElement (fileRowTpl @model.attributes)
     @
 
-Piles.DropperApp = Backbone.View.extend
+ShinyBox.DropperApp = Backbone.View.extend
   el:'#content'
   initialize: ->
     self = @
     @$doc = $(document)
     @model.files.bind 'add', (filemodel)=>
       self.$('#info').css(height:'auto').slideDown()
-      self.$('#info tbody').append (new Piles.FileTableView model:filemodel).render().el
+      self.$('#info tbody').append (new ShinyBox.FileTableView model:filemodel).render().el
     @initDropper()
     
   initDropper: ->
@@ -48,7 +48,7 @@ Piles.DropperApp = Backbone.View.extend
     filename = fileobj.name or fileobj.fileName
     namearray = filename.split(".")
     ext = (if namearray.length > 1 then _.last(namearray) else "")
-    filemodel = new Piles.File
+    filemodel = new ShinyBox.File
       name: filename
       size: fileobj.size
       type: fileobj.type
@@ -73,9 +73,17 @@ Piles.DropperApp = Backbone.View.extend
     $('body').css('background-color','white')
     false
 
-Piles.dropperBootstrap = (options)->
+ShinyBox.dropperBootstrap = (options)->
   pid = window.location.hash.slice(1) 
   if not pid
     return window.location = 'http://localhost:8080/'
   $ ->
-    window.dropperApp = new Piles.DropperApp model:(new Piles.Pile id:pid)
+    window.dropperApp = new ShinyBox.DropperApp model:(new ShinyBox.Bucket id:)
+
+ShinyBox.onMessage = (message,origin)->
+
+ShinyBox.xdmBootstrap = ()->
+  socket = new easyXDM.Socket
+    onMessage: ShinyBox.onMessage
+  
+  

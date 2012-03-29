@@ -1,8 +1,8 @@
 <html>
 <head>
     {{#settings}}
-	<link rel="stylesheet" type="text/css" href="http://{{CONTENT_DOMAIN}}/static/css/bootstrap.min.css" />
-	{{/settings}}
+    <link rel="stylesheet" type="text/css" href="http://{{CONTENT_DOMAIN}}/css/bootstrap.min.css" />
+    {{/settings}}
     <style>
     body {
         margin:5px;
@@ -15,65 +15,69 @@
         top:0;
         bottom:0;
     }
-	#info {
-		position:relative;
-		height:0;
-		display:none;
-		overflow:hidden;
-	}
+    #info {
+        position:relative;
+        height:0;
+        display:none;
+        overflow:hidden;
+    }
     #dropper {
         position:relative;
-		min-height:150px;
-		overflow:hidden;
+        min-height:150px;
+        overflow:hidden;
     }
-	
+    
     </style>
-	
+    
 </head>
 <body>
-	
+    
     <div id="content">
-		<table id="info" class="table table-striped table-condensed">
-			<thead>
-				<tr>
-					<th>Name</th><th>Type</th><th>Size</th><th>Progress</th>
-				</tr>
-			</thead>
-			<tbody>
-			</tbody>
-		</table>
+        <table id="info" class="table table-striped table-condensed">
+            <thead>
+                <tr>
+                    <th>Name</th><th>Type</th><th>Size</th><th>Progress</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
         <div id="dropper" class="alert alert-info">
-			<h2>Drag your files here...</h2>
-			<form>
-				<p>...or click to upload.</p>
-				<input type="file" />
-			</form>
-			<p>Fil</p>
-		</div>
+            <h2>Drag your files here...</h2>
+            <form>
+                <p>...or click to upload.</p>
+                <input type="file" />
+            </form>
+            <p>Fil</p>
+        </div>
     </div>
-	
-	<!-- Scripts -->
+    
+    <!-- Scripts -->
     {{#settings}}
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery-1.7.1.min.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery-ui.min.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/bootstrap.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery.fileupload.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/underscore.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/backbone.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/shinybox.lib.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/shinybox.dropper.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/js/jquery-1.7.1.min.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/js/jquery-ui.min.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/js/bootstrap.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/js/jquery.fileupload.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/js/underscore.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/js/backbone.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/js/xdfile.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/js/easyXDM.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/js/shinybox.dropper.js"></script>
     <script>
     (function() {
-	    Piles.Settings = {
-	      APP_DOMAIN:'{{APP_DOMAIN}}',
-	      STATIC_DOMAIN:'{{CONTENT_DOMAIN}}',
-		  AWS_ACCESS_KEY_ID:'{{AWS_ACCESS_KEY_ID}}',
-		  APP_BUCKET_ACL:'{{APP_BUCKET_ACL}}'
-	    } 
-    	Piles.dropperBootstrap()
+        _.extend(XDFile.Settings, {
+		  APP_URL:'{{ APP_URL }}',
+          AWS_ACCESS_KEY_ID:'{{AWS_ACCESS_KEY_ID}}',
+          APP_BUCKET_ACL:'{{APP_BUCKET_ACL}}'
+          })
+        _.extend(Piles.Settings, {
+          APP_DOMAIN:'{{APP_DOMAIN}}',
+          STATIC_DOMAIN:'{{CONTENT_DOMAIN}}',
+        })
+        Piles.dropperBootstrap()
     })()
     </script>
     {{/settings}}
-	<!-- End Script -->
+    <!-- End Script -->
 </body>
 </html>

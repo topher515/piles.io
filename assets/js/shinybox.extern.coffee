@@ -22,7 +22,7 @@ Extern.bootstrap = (options)->
         height: '80px'
 
 opts = {}
-for key,val in (window._shiny or [])
-  opts[key] = val
+for e in (window._shiny or [])
+  opts[e[0]] = e[1]
 Extern.bootstrap(opts)
   

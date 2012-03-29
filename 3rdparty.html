@@ -5,7 +5,7 @@
 	
 	<script type="text/javascript">
 	(function() {
-	    var window._shiny = window._shiny || [];
+	    window._shiny = window._shiny || [];
 	    _shiny.push(['domain', location.host]);
 		_shiny.push(['remote','http://localhost:9090/html/dropper.html'])
 	    _shiny.push(['container', 'shinybox'])
@@ -17,9 +17,9 @@
 	        var s = document.getElementsByTagName('script')[0];
 	        s.parentNode.insertBefore(sc, s);
 	    }
-	    newScr("http://localhost:9090/js/easyXDM.min.js")
+	    newScr("http://localhost:9090/js/easyXDM.js")
 	    newScr("http://localhost:9090/js/shinybox.extern.js")
-	})
+	})()
 	</script>
 
 	<div id="shinybox"></div>
