@@ -8,8 +8,8 @@ import time
 import os, yaml
 from os.path import join as pjoin
 import glob
-from pystache import loader, view
 import shutil
+import pystache
     
 from piles_static import serve as static_serve
 
@@ -20,33 +20,6 @@ staged_dir = os.path.join(settings['DIRNAME'],'staged')
 orig_static_dir = os.path.join(settings['DIRNAME'],'static')
 
 
-## Rendering templates ###  
-def renderer(viewname,context):
-    ctx = dict(context)
-    view.View.template_path = settings['DIRNAME']+'/templates_precompile'
-    
-    v = view.View(context=ctx)
-    v.template_name = viewname
-    inner = v.render()
-    # Add to context 
-    ctx.update({'body':inner,'yield':inner})
-    # Render layout
-    v = view.View(context=ctx)
-    v.template_name = 'layout'
-    return v.render()
-
-def simple_renderer(viewname, context):
-    view.View.template_path = settings['DIRNAME']+'/templates_precompile'
-    v = view.View(context=context)
-    v.template_name = viewname
-    return v.render()
-
-views_to_stage = {
-    'app':{'context':{'settings':[settings]},'renderer':renderer},
-    'pub':{'context':{'settings':[settings]},'renderer':renderer},
-    'dropper':{'context':{'settings':[settings]},'renderer':simple_renderer},
-    'nodeexp':{'context':{'settings':[settings]},'renderer':renderer}
-}
 
 def render(viewname=None):
     '''Render all the template files!'''
@@ -72,6 +45,9 @@ def render(viewname=None):
     print()
 
 
+def stache_compile(inpath,outpath):
+    out = pystache.render(open(inpath,'r').read(),{'settings':settings})
+    open(outpath,'w').write(out)
 
 ### Watching ###
 def glob_recurse_dirs(to_examine_paths, glob_suffix='*'):
@@ -101,7 +77,7 @@ def compile(compile_ts={}):
             elif filename.endswith('.coffee'):
                 local('coffee -c -o %s %s' % (os.path.dirname('staged/'+filename).replace('coffee','js'), filename) )
             elif filename.endswith('.mustache'):
-                render(filename.split('/')[-1][:-9])
+                stache_compile(filename,'staged/' + filename.split('/')[-1][:-9])
             else:
                 open(os.path.join(staged_dir,filename),'w').write(open(filename,'r').read())
     return compile_ts
