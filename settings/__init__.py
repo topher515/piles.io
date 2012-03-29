@@ -2,10 +2,10 @@ import os
 import yaml
 
 
-defaults = yaml.load(open('settings.yml','r'))
+defaults = yaml.load(open('settings/base.yml','r'))
 production = {}
 production.update(defaults)
-production.update(yaml.load(open('settings_production.yml','r')))
+production.update(yaml.load(open('settings/production.yml','r')))
 development = {}
 development.update(defaults)
 

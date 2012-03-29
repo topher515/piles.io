@@ -25,8 +25,11 @@ def ensure_dir(outfile):
 
 
 def stache_compile(inpath,outpath):
-    out = pystache.render(open(inpath,'r').read(),{'settings':settings})
-    open(outpath,'w').write(out)
+    try:
+        out = pystache.render(open(inpath,'r').read(),{'settings':settings})
+        open(outpath,'w').write(out)
+    except Exception as e:
+        print('Compile error: ' + str(e))
 
 ### Watching ###
 def glob_recurse_dirs(to_examine_paths, glob_suffix='*'):

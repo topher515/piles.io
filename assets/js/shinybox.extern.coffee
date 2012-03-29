@@ -10,18 +10,19 @@ Extern.resize = (width,height)->
 Extern.onMessage = (message,origin)->
 
 Extern.bootstrap = (options)->
-  options.remote = 'http://localhost:9090/dropper'
-  
   # Setup `consumer`--container document
   socket = new easyXDM.Socket
     remote: options.remote
     onMessage: Extern.onMessage
-    container: 'shinybox'
+    container: options.container
     props: 
       style: 
         border: "1px solid #DDD"
         width: '300px'
         height: '80px'
-    
-Extern.bootstrap()
+
+opts = {}
+for key,val in (window._shiny or [])
+  opts[key] = val
+Extern.bootstrap(opts)
   

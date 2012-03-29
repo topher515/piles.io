@@ -2,11 +2,13 @@
 <head><title>Generic 3rd Party</title></head>
 <body>
 	<h2>Some 3rd Party Bullshit</h2>
+	
 	<script type="text/javascript">
 	(function() {
 	    var window._shiny = window._shiny || [];
-	    _shiny.push(['_domain', location.host]);
-	    _shiny.push(['_btnId', 'shinybox'])
+	    _shiny.push(['domain', location.host]);
+		_shiny.push(['remote','http://localhost:9090/html/dropper.html'])
+	    _shiny.push(['container', 'shinybox'])
 	    var newScr = function(src) {
 	        var sc = document.createElement('script');
 	        sc.type = 'text/javascript';
@@ -15,10 +17,12 @@
 	        var s = document.getElementsByTagName('script')[0];
 	        s.parentNode.insertBefore(sc, s);
 	    }
-	    newScr("http://{{CONTENT_DOMAIN}}/static/js/easyXDM.min.js")
-	    newScr("http://{{CONTENT_DOMAIN}}/static/js/shinybox.extern.js")
+	    newScr("http://localhost:9090/js/easyXDM.min.js")
+	    newScr("http://localhost:9090/js/shinybox.extern.js")
 	})
 	</script>
+
+	<div id="shinybox"></div>
 
 </body>
 </html>

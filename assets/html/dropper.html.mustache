@@ -1,27 +1,8 @@
 <html>
 <head>
     {{#settings}}
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery-1.7.1.min.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery-ui.min.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/bootstrap.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery.fileupload.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/underscore.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/backbone.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/piles.lib.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/static/js/piles.dropper.js"></script>
-    <script>
-    (function() {
-	    Piles.Settings = {
-	      APP_DOMAIN:'{{APP_DOMAIN}}',
-	      STATIC_DOMAIN:'{{CONTENT_DOMAIN}}',
-		  AWS_ACCESS_KEY_ID:'{{AWS_ACCESS_KEY_ID}}',
-		  APP_BUCKET_ACL:'{{APP_BUCKET_ACL}}'
-	    } 
-    	Piles.dropperBootstrap()
-    })()
-    </script>
 	<link rel="stylesheet" type="text/css" href="http://{{CONTENT_DOMAIN}}/static/css/bootstrap.min.css" />
-    {{/settings}}
+	{{/settings}}
     <style>
     body {
         margin:5px;
@@ -70,5 +51,29 @@
 			<p>Fil</p>
 		</div>
     </div>
+	
+	<!-- Scripts -->
+    {{#settings}}
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery-1.7.1.min.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery-ui.min.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/bootstrap.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/jquery.fileupload.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/underscore.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/backbone.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/shinybox.lib.js"></script>
+    <script src="http://{{CONTENT_DOMAIN}}/static/js/shinybox.dropper.js"></script>
+    <script>
+    (function() {
+	    Piles.Settings = {
+	      APP_DOMAIN:'{{APP_DOMAIN}}',
+	      STATIC_DOMAIN:'{{CONTENT_DOMAIN}}',
+		  AWS_ACCESS_KEY_ID:'{{AWS_ACCESS_KEY_ID}}',
+		  APP_BUCKET_ACL:'{{APP_BUCKET_ACL}}'
+	    } 
+    	Piles.dropperBootstrap()
+    })()
+    </script>
+    {{/settings}}
+	<!-- End Script -->
 </body>
 </html>
