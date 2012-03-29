@@ -59,10 +59,12 @@ def stage(compile_ts={}):
                     .replace('assets/','').replace('coffee','js'), filename) )
             elif filename.endswith('.mustache'):
                 outfile = STAGE_DIR + filename.replace('assets/','')[:-9]
+                print("mustache compile: %s to %s" % (filename,outfile))
                 ensure_dir(outfile)
                 stache_compile(filename, outfile)
             else:
                 outfile = os.path.join(STAGE_DIR,filename).replace('assets/','')
+                print("copy asset: %s to %s" % (filename,outfile))
                 ensure_dir(outfile)
                 open(outfile,'w').write(open(filename,'r').read())
     return compile_ts

@@ -2,7 +2,6 @@ window.ShinyBox or= {}
 
 
 ShinyBox.onMessage = (message,origin)->
-  
 
 ShinyBox.setupXDM = (options)->
   # Setup `provider`--inner iframe document
