@@ -2,7 +2,7 @@ from django import forms
 
 from django.contrib.auth.models import User
 
-class PileForm(forms.Form):
+class StartForm(forms.Form):
     domain = forms.CharField(max_length=256)
     email  = forms.EmailField(label="Your Email")
     password = forms.CharField( widget=forms.PasswordInput, label="Password" )

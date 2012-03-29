@@ -12,36 +12,42 @@ from django.shortcuts import get_object_or_404
    
 from forms import *
 from models import *
-     
-     
-def ensure_session(request,pile=None):
-    if not request.user.is_authenticated:
-        return
-    if not request.session.get('pile'):
-        request.session['pile'] = pile or \
-            get_object_or_404(Pile, Q(admins=request.user) || Q(participants=request.user))
    
 
-class CreatePileView(FormView):
-    template_name = 'pile_create.html'
-    form_class = PileForm
+
+class StartView(FormView):
+    template_name = 'shinybox_start.html'
+    form_class = StartForm
     def form_valid(self,form):
         data=form.cleaned_data
         user = User.objects.create_user(username=data['email'], email=data['email'], password=data['password'])
-        pile = Pile(domain=data['domain'])
-        pile.save()
-        pile.admins.add(user)
-        pile.save()
+        box = ShinyBox(domain=data['domain'],admin=user)
+        box.save()
         user = authenticate(username=data['email'], password=data['password'])
         assert(user)
         login(request, user)
-        ensure_session(request,pile)
-        return HttpResponseRedirect(reverse('pile-manage',data['domain']))
+        return HttpResponseRedirect(reverse('shinybox-deploy'))
         
-class PileManageView(TemplateView):
-    template_name = 'pile_manage.html'
+ 
+class DeployView(FormView):
+    template_name = 'shinybox_deploy.html'
+    form_class = DeployForm
+    def form_valid(self,form):
+        data=form.cleaned_data
+        user = User.objects.create_user(username=data['email'], email=data['email'], password=data['password'])
+        box = ShinyBox(domain=data['domain'],admin=user)
+        box.save()
+        user = authenticate(username=data['email'], password=data['password'])
+        assert(user)
+        login(request, user)
+        return HttpResponseRedirect(reverse('shinybox-deploy'))
+
+        
+        
+class ManageView(TemplateView):
+    template_name = 'shinybox_manage.html'
     def get_context_data(self, pile_domain, *args, **kwargs):
         return {
-            'pile':get_object_or_404(Pile,domain=pile_domain)
+            'shiny_box':get_object_or_404(ShinyBox,domain=pile_domain)
         }
         
