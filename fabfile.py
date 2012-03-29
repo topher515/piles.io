@@ -75,5 +75,5 @@ def watch():
     compile_ts = {}
     while True:
         compile_ts = stage(compile_ts)
-        time.sleep(1)
+        time.sleep(2)
 

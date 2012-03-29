@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+    {{block.super}}
+    <link rel href="{{ STATIC_URL }}css/blackboard.css" />
+    <script src="{{ STATIC_URL }}js/rainbow-custom.min.js" ></script>
+{% endblock %}
+
+{% block content %}
+<h3>Copy and paste this code into your webpage to start using Shinybox</h3>
+<pre><code data-language="javscript">
+
+/* Leaving code out of here because I'm deving it in '3rd_party.html' */
+
+</code></pre>
+{% endblock %}

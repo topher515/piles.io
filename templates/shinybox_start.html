@@ -1,12 +1,9 @@
-<html>
-	<head><title>Pile Create</title></head>
-	<body>
-		<div>
-			<form action="." method="post">
-			{% csrf_token %}
-			{{form}}
-			<input type="submit">
-			</form>
-		</div>
-	</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<form action="." method="post">
+    {% csrf_token %}
+    {{form}}
+    <input type="submit">
+</form>
+{% endblock %}

@@ -17,8 +17,10 @@ LOG_BUCKET_PREFIX: "dev.piles.io-access-log-"
 FILE_POST_URL: "http://dev.piles.io"
 # The domain on which the application logic and API lives
 APP_DOMAIN: "localhost:8080"
+APP_URL: "http://localhost:8080/"
 # The domain on which the application and user content lives
 CONTENT_DOMAIN: "localhost:9090"
+STATIC_URL: "http://localhost:9090/"
 ### Database settings
 MONGO_HOST: "localhost"
 MONGO_PORT: 27017

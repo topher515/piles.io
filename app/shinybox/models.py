@@ -6,7 +6,7 @@ class Uploader(models.Model):
     
 
 class ShinyBox(models.Model):
-    admin = models.ForeignKey('auth.User', related_name='admin_piles')
+    admin = models.ForeignKey('auth.User')
     domain = models.CharField(max_length=256,unique=True)
         
 

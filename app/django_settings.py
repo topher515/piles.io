@@ -1,10 +1,15 @@
 import os
 
-DEBUG = True
+DJANGOROOT = os.path.dirname(__file__)
+ROOTDIR = os.path.abspath(os.path.join(DJANGOROOT,'..'))
+#ROOTSETTINGS = os.path.join(ROOTDIR,'settings')
+
+from settings import env
+settings = env()
+
+DEBUG = settings['DEBUG']
 TEMPLATE_DEBUG = DEBUG
 
-ROOTDIR = os.path.dirname(__file__)
-PILESDIR = os.path.abspath(os.path.join(ROOTDIR,'..'))
 
 ADMINS = (
     ('Chris Wilcox', 'ckwilcox@gmail.com')
@@ -63,7 +68,7 @@ STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+STATIC_URL = settings['STATIC_URL']
 
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
@@ -119,7 +124,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PILESDIR,'templates'),
+    os.path.join(ROOTDIR,'templates'),
 )
 
 INSTALLED_APPS = (
