@@ -59,9 +59,9 @@ Piles.File = Backbone.Model.extend
     type: "Unknown File"
     thumb: ""
     progress: 0
-    uploaded: false
-    uploadedDate: null
-    createdDate: null
+    createdts: null
+    successts: null
+    path:""
 
   initialize: (options)->
     pos = {}
@@ -79,7 +79,11 @@ Piles.File = Backbone.Model.extend
     @uploadController = new (options.uploadController or Piles.FileUploadController)
     @unset 'uploadController', silent:true
 
-
+  trash: ()->
+    @set path:".trash"
+    
+    
+    
   save: (attributes, options) ->
     options or (options = {})
     @trigger "persist:start"

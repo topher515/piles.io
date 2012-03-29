@@ -1,14 +1,17 @@
 window.Piles or= {}
 
-fileRowTpl = _.template '
-<tr>
+fileRowTpl = _.template '<tr>
   <td><%= name %></td>
   <td><%= type %></td>
   <td><%= size %></td>
   <td><div class="progress progress-info progress-striped active"><div class="bar" style="width: 0%;"></div></div></td>
+  <td><button class="delete btn btn-danger btn-mini">Delete</button></td>
 </tr>'
 
 Piles.FileTableView = Backbone.View.extend
+  events:
+    "click .delete":"trash"  
+
   initialize:->
     self = @
     @model.bind 'upload:progress', (x)=>
@@ -17,7 +20,9 @@ Piles.FileTableView = Backbone.View.extend
     @model.bind 'upload:success', (x)=>
       @$('.bar').animate width: '100%', ()->
         self.$('.progress').removeClass('active')
-        
+    
+  trash:->
+    @model.trash()   
       
   render:->
     @setElement (fileRowTpl @model.attributes)

@@ -2,15 +2,23 @@
 <head><title>Generic 3rd Party</title></head>
 <body>
 	<h2>Some 3rd Party Bullshit</h2>
-	<!-- script src="http://localhost:9090/static/js/piles.extern.js" -->
-	<script>
+	<script type="text/javascript">
 	(function() {
-	    var el = document.createElement("iframe"); pid = 'AABBCC'
-	    el.setAttribute("id", 'pileframe'); el.setAttribute("src", 'http://localhost:9090/dropper#'+pid);
-	    el.style.border = '1px solid #DDD'; window.pilesResize = function(w,h) {el.style.width = w, el.style.height = h};
-		pilesResize('640px','360px');
-		document.body.appendChild(el);
-	})()
+	    var window._shiny = window._shiny || [];
+	    _shiny.push(['_domain', location.host]);
+	    _shiny.push(['_btnId', 'shinybox'])
+	    var newScr = function(src) {
+	        var sc = document.createElement('script');
+	        sc.type = 'text/javascript';
+	        //sc.async = true;
+	        sc.src = src;
+	        var s = document.getElementsByTagName('script')[0];
+	        s.parentNode.insertBefore(sc, s);
+	    }
+	    newScr("http://{{CONTENT_DOMAIN}}/static/js/easyXDM.min.js")
+	    newScr("http://{{CONTENT_DOMAIN}}/static/js/shinybox.extern.js")
+	})
 	</script>
+
 </body>
 </html>
