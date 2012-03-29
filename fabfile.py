@@ -48,51 +48,6 @@ views_to_stage = {
     'nodeexp':{'context':{'settings':[settings]},'renderer':renderer}
 }
 
-
-def render(viewname=None):
-    '''Render all the template files!'''
-    print("### Rendering template files... ")
-    
-    if not os.path.isdir(staged_dir):
-        os.mkdir(staged_dir)
-        
-    def do_render(view,context,_renderer):
-        print(view, end=", ")
-        html = _renderer(view, context)
-        open(os.path.join(staged_dir,view),'w').write(html)
-        
-    if viewname:
-        v = views_to_stage.get(viewname)
-        if not v:
-            print("Don't know how to render '%s'" % viewname)
-            return
-        do_render(viewname,v['context'],v['renderer'])
-    else:
-        for view,foo in views_to_stage.iteritems():
-            do_render(view,foo['context'],foo['renderer'])
-    print()
-
-
-
-### Compiling static files ###
-def compile_coffee(watch=False):
-    print(".coffee files", end=", ")
-    local('coffee -c%s -o static/js/ static/coffee' % ('w' if watch else ''))
-    print()
-
-def compile_less(watch=False):
-    print('.less files', end=", ")
-    for less_file in glob.glob('static/css/*.less'):
-        css_file = less_file.replace('.less','.css')
-        local('node_modules/less/bin/lessc %s %s' % (less_file,css_file))
-
-def compile():   
-    print('### Compiling static files...')  
-    #local('sass --watch static/css/:static/css/ &')
-    compile_less()
-    compile_coffee()
-
-
     
     
 def stage(prep=True):
@@ -122,12 +77,19 @@ def glob_recurse_dirs(to_examine_paths, glob_suffix='*'):
             found.append(path)
     return found
 
-def poll(mods):
+
+def compile(compile_ts={}):
+    """ Compile files. `compile_ts` is a dictionary whos keys are the paths to files and
+    there last compile time (as returned by `os.stat(...).st_mtime) if the file's
+    current `st_mtime` is greater than the one listed in `compile_ts` then the file is recompiled.
+    
+    Returns the modified dict `compile_ts`.
+    """
     for filename in glob_recurse_dirs(['static','views']):
         #print(filename)
         x = os.stat(filename).st_mtime
-        if x > (mods.get(filename) or 0):
-            mods[filename] = x  
+        if x > (compile_ts.get(filename) or 0):
+            compile_ts[filename] = x  
             if filename.endswith('.less'):
                 local('node_modules/less/bin/lessc %s %s' % (filename,'staged/'+filename.replace('.less','.css')))
             elif filename.endswith('.coffee'):
@@ -136,17 +98,17 @@ def poll(mods):
                 render(filename.split('/')[-1][:-9])
             else:
                 open(os.path.join(staged_dir,filename),'w').write(open(filename,'r').read())
-    return mods
+    return compile_ts
                 
                 
     
 def watch():
-    mods = {}
+    compile_ts = {}
     while True:
-        mods = poll(mods)
+        compile_ts = compile(compile_ts)
         time.sleep(1)
 
 
 def serve():
-    stage()
+    poll({})
     static_serve.serve()
