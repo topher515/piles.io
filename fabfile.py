@@ -23,7 +23,7 @@ orig_static_dir = os.path.join(settings['DIRNAME'],'static')
 ## Rendering templates ###  
 def renderer(viewname,context):
     ctx = dict(context)
-    view.View.template_path = settings['DIRNAME']+'/views'
+    view.View.template_path = settings['DIRNAME']+'/templates_precompile'
     
     v = view.View(context=ctx)
     v.template_name = viewname
@@ -36,7 +36,7 @@ def renderer(viewname,context):
     return v.render()
 
 def simple_renderer(viewname, context):
-    view.View.template_path = settings['DIRNAME']+'/views'
+    view.View.template_path = settings['DIRNAME']+'/templates_precompile'
     v = view.View(context=context)
     v.template_name = viewname
     return v.render()
@@ -48,23 +48,29 @@ views_to_stage = {
     'nodeexp':{'context':{'settings':[settings]},'renderer':renderer}
 }
 
+def render(viewname=None):
+    '''Render all the template files!'''
+    print("### Rendering template files... ")
     
-    
-def stage(prep=True):
-    '''Stage all the necessary static'''
-    if prep:
-        compile()
-        render()
-    
-    print('### Staging static files...')
-    if not os.path.isdir(orig_static_dir):
-        print("Couldn't find the static files dir...")
-        return
-    local('rsync -uvr %s %s' % (orig_static_dir, staged_dir))
-    
-    print("...Done Staging")
-    
-    #shutil.copytree(orig_static_dir,staged_static_dir)
+    if not os.path.isdir(staged_dir):
+        os.mkdir(staged_dir)
+        
+    def do_render(view,context,_renderer):
+        print(view, end=", ")
+        html = _renderer(view, context)
+        open(os.path.join(staged_dir,view),'w').write(html)
+        
+    if viewname:
+        v = views_to_stage.get(viewname)
+        if not v:
+            print("Don't know how to render '%s'" % viewname)
+            return
+        do_render(viewname,v['context'],v['renderer'])
+    else:
+        for view,foo in views_to_stage.iteritems():
+            do_render(view,foo['context'],foo['renderer'])
+    print()
+
 
 
 ### Watching ###
@@ -85,7 +91,7 @@ def compile(compile_ts={}):
     
     Returns the modified dict `compile_ts`.
     """
-    for filename in glob_recurse_dirs(['static','views']):
+    for filename in glob_recurse_dirs(['assets']):
         #print(filename)
         x = os.stat(filename).st_mtime
         if x > (compile_ts.get(filename) or 0):
