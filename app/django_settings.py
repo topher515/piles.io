@@ -9,6 +9,9 @@ from settings import settings
 DEBUG = settings['DEBUG']
 TEMPLATE_DEBUG = DEBUG
 
+API_ACCESS_CONTROL_ALLOW_ORIGINS = (
+    settings['STATIC_URL'],
+)
 
 ADMINS = (
     ('Chris Wilcox', 'ckwilcox@gmail.com')

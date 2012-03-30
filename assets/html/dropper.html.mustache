@@ -1,7 +1,7 @@
 <html>
 <head>
     {{#settings}}
-    <link rel="stylesheet" type="text/css" href="http://{{CONTENT_DOMAIN}}/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="http://{{STATIC_DOMAIN}}/css/bootstrap.min.css" />
     {{/settings}}
     <style>
     body {
@@ -45,15 +45,15 @@
     
     <!-- Scripts -->
     {{#settings}}
-    <script src="http://{{CONTENT_DOMAIN}}/js/jquery-1.7.1.min.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/js/jquery-ui.min.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/js/bootstrap.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/js/jquery.fileupload.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/js/underscore.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/js/backbone.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/js/xdfile.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/js/easyXDM.js"></script>
-    <script src="http://{{CONTENT_DOMAIN}}/js/shinybox.dropper.js"></script>
+    <script src="http://{{STATIC_DOMAIN}}/js/jquery-1.7.1.min.js"></script>
+    <script src="http://{{STATIC_DOMAIN}}/js/jquery-ui.min.js"></script>
+    <script src="http://{{STATIC_DOMAIN}}/js/bootstrap.js"></script>
+    <script src="http://{{STATIC_DOMAIN}}/js/jquery.fileupload.js"></script>
+    <script src="http://{{STATIC_DOMAIN}}/js/underscore.js"></script>
+    <script src="http://{{STATIC_DOMAIN}}/js/backbone.js"></script>
+    <script src="http://{{STATIC_DOMAIN}}/js/xdfile.js"></script>
+    <script src="http://{{STATIC_DOMAIN}}/js/easyXDM.js"></script>
+    <script src="http://{{STATIC_DOMAIN}}/js/shinybox.dropper.js"></script>
     <script>
     (function() {
         _.extend(XDFile.Settings, {
@@ -62,10 +62,12 @@
           APP_BUCKET_ACL:'{{APP_BUCKET_ACL}}'
           })
         _.extend(ShinyBox.Settings, {
+		  APP_URL:'{{ APP_URL }}',
           APP_DOMAIN:'{{APP_DOMAIN}}',
-          STATIC_DOMAIN:'{{CONTENT_DOMAIN}}',
+          STATIC_DOMAIN:'{{STATIC_DOMAIN}}',
         })
         ShinyBox.xdmBootstrap()
+		
     })()
     </script>
     {{/settings}}

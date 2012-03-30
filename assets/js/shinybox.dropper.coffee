@@ -76,22 +76,52 @@ ShinyBox.DropperApp = Backbone.View.extend
     $('body').css('background-color','white')
     false
 
+
+getValue = (object, prop) ->
+  return null  unless object and object[prop]
+  (if _.isFunction(object[prop]) then object[prop]() else object[prop])
+
 ShinyBox.bootstrap = (options)->
+  
+  _.defer ->
+    # Setup so that ajax requests to the `APP_URL` are proxied through xdbackone
+    jqAjax = $.ajax
+    appUrl = ShinyBox.Settings.APP_URL
+    xdbackbone = new easyXDM.Rpc {
+        isHost: true
+        remote: appUrl + 'xdbackbone.html'
+        onReady: ()->
+          $.ajax = ()->
+            if typeof arguments[0] == 'string'
+              url = arguments[0]
+            else if arguments[0].url
+              url = arguments[0].url
+            
+            if url and url.slice(0, appUrl.length) == appUrl
+              return xdbackbone.ajax.apply @, arguments
+            else
+              jqAjax.apply @, arguments
+      },
+      {
+        remote: {
+          ajax: {}
+        }
+      }
+  
   $ ->
-    window.dropperApp = new ShinyBox.DropperApp model:(new XDFile.Bucket id:options.domain)
-    if options.rpc
-      rpc = options.rpc
+    window.dropperApp = new ShinyBox.DropperApp model:(new XDFile.Bucket id:options.externDomain)
+    if options.externRpc
       dropperApp.on 'fileactivity:stop fileactivity:start', ()->
         w = Math.max dropperApp.$el.width(), dropperApp.$('table').width()
-        rpc.resize w, dropperApp.$el.height()
+        options.externRpc.resize w, dropperApp.$el.height()
 
 ShinyBox.xdmBootstrap = ()->
-  rpc = new easyXDM.Rpc {},
+  externRpc = new easyXDM.Rpc {},
     {
       local:
         setDomain: (domain)->
           _.defer ()->
-            ShinyBox.bootstrap domain:domain, rpc:rpc
+            ShinyBox.bootstrap externDomain:domain, externRpc:externRpc
       remote:
         resize: {}
           

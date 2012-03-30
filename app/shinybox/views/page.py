@@ -14,7 +14,6 @@ from shinybox.forms import *
 from shinybox.models import *
    
 
-
 class StartView(FormView):
     template_name = 'shinybox_start.html'
     form_class = StartForm

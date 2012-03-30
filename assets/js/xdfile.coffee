@@ -165,7 +165,8 @@ XDFile.Bucket = Backbone.Model.extend
     @files.on 'filepersist:stop', actMinus
     
   urlRoot:()->
-    XDFile.Settings.APP_URL + '/buckets/'
+    XDFile.Settings.APP_URL + 'buckets/'
+	
 
 XDFile.FileUploadController = (options)->
   ### Performs AJAX uploads
