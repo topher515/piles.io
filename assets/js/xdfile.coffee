@@ -88,17 +88,16 @@ XDFile.File = Backbone.Model.extend
     
   save: (attributes, options) ->
     options or (options = {})
-    @trigger "persist:start"
-    @trigger "work:start"
+    @trigger "filepersist:start"
   
     opts = 
       success:(m, r) =>
-        @trigger "work:stop"
-        @trigger "persist:success", m
+        @trigger "filepersist:success", m
+        @trigger "filepersist:stop"
         options.success && options.success()
       error: (m, r) =>
-        @trigger "work:stop"
-        @trigger "persist:error"
+        @trigger "filepersist:error"
+        @trigger "filepersist:stop"
         options.error && options.error()
    
     Backbone.Model::save.call this, attributes, opts
@@ -136,9 +135,9 @@ XDFile.File = Backbone.Model.extend
     "http://" + XDFile.Settings.APP_DOMAIN + "/XDFile/" + @get("pid") + "/files/" + @get("id") + "/content"
 
   delete: ->
-    @trigger "work:start"
+    @trigger "filework:start"
     @destroy
-      success:=> @trigger "work:stop"
+      success:=> @trigger "filework:stop"
       error:=> notify "error", "Failed to delete file."
 
 XDFile.FileCollection = Backbone.Collection.extend
@@ -150,6 +149,20 @@ XDFile.Bucket = Backbone.Model.extend
     @files = new XDFile.FileCollection
     @files.url = ()=>
       self.url() + '/files/'
+    fileActivity = 0
+    actMinus = ->
+      fileActivity -= 1
+      if fileActivity == 0
+        self.trigger 'fileactivity:stop'
+    actPlus = ()->
+      fileActivity += 1
+      if fileActivity == 1
+        self.trigger 'fileactivity:start'
+        
+    @files.on 'fileupload:start', actPlus
+    @files.on 'fileupload:stop', actMinus
+    @files.on 'filepersist:start', actPlus
+    @files.on 'filepersist:stop', actMinus
     
   urlRoot:()->
     XDFile.Settings.APP_URL + '/buckets/'
@@ -195,14 +208,14 @@ XDFile.FileUploadController = (options)->
 
         # Setup event bindings for this jquery plugin to our system
         progress:(data)=>
-          @trigger "upload:progress", parseInt(data.loaded / data.total * 100)
+          @trigger "fileupload:progress", parseInt(data.loaded / data.total * 100)
         fail:=>
-          @trigger "upload:error"
-          @trigger "work:stop"
+          @trigger "fileupload:error"
+          @trigger "fileupload:stop"
         done:=> 
           $el.fileupload "destroy"
-          @trigger "upload:success"
-          @trigger "work:stop"
+          @trigger "fileupload:success"
+          @trigger "fileupload:stop"
         
       , options)
 
@@ -212,6 +225,7 @@ XDFile.FileUploadController = (options)->
       @jqXHR.abort()
     
     start:->
+      @trigger "fileupload:start"
       @jqXHR = $el.fileupload "send", files: [ @opts.file ]
   @
 )

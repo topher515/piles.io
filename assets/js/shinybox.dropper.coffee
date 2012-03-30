@@ -1,4 +1,5 @@
 window.ShinyBox or= {}
+ShinyBox.Settings or= {}
 
 fileRowTpl = _.template '<tr>
   <td><%= name %></td>
@@ -14,10 +15,10 @@ ShinyBox.FileTableView = Backbone.View.extend
 
   initialize:->
     self = @
-    @model.bind 'upload:progress', (x)=>
+    @model.on 'upload:progress', (x)=>
       @$('.progress').addClass('active')
       @$('.bar').animate width: x+'%'
-    @model.bind 'upload:success', (x)=>
+    @model.on 'upload:success', (x)=>
       @$('.bar').animate width: '100%', ()->
         self.$('.progress').removeClass('active')
     
@@ -33,9 +34,11 @@ ShinyBox.DropperApp = Backbone.View.extend
   initialize: ->
     self = @
     @$doc = $(document)
-    @model.files.bind 'add', (filemodel)=>
-      self.$('#info').css(height:'auto').slideDown()
+    @model.files.on 'add', (filemodel)=>
+      self.$('#info').css(height:'auto', display:'block').slideDown ()->
       self.$('#info tbody').append (new ShinyBox.FileTableView model:filemodel).render().el
+    @model.on 'all', =>
+      self.trigger.apply self, arguments
     @initDropper()
     
   initDropper: ->
@@ -48,7 +51,7 @@ ShinyBox.DropperApp = Backbone.View.extend
     filename = fileobj.name or fileobj.fileName
     namearray = filename.split(".")
     ext = (if namearray.length > 1 then _.last(namearray) else "")
-    filemodel = new ShinyBox.File
+    filemodel = new XDFile.File
       name: filename
       size: fileobj.size
       type: fileobj.type
@@ -73,17 +76,24 @@ ShinyBox.DropperApp = Backbone.View.extend
     $('body').css('background-color','white')
     false
 
-ShinyBox.dropperBootstrap = (options)->
-  pid = window.location.hash.slice(1) 
-  if not pid
-    return window.location = 'http://localhost:8080/'
+ShinyBox.bootstrap = (options)->
   $ ->
-    window.dropperApp = new ShinyBox.DropperApp model:(new ShinyBox.Bucket id:)
-
-ShinyBox.onMessage = (message,origin)->
+    window.dropperApp = new ShinyBox.DropperApp model:(new XDFile.Bucket id:options.domain)
+    if options.rpc
+      rpc = options.rpc
+      dropperApp.on 'fileactivity:stop fileactivity:start', ()->
+        w = Math.max dropperApp.$el.width(), dropperApp.$('table').width()
+        rpc.resize w, dropperApp.$el.height()
 
 ShinyBox.xdmBootstrap = ()->
-  socket = new easyXDM.Socket
-    onMessage: ShinyBox.onMessage
-  
+  rpc = new easyXDM.Rpc {},
+    {
+      local:
+        setDomain: (domain)->
+          _.defer ()->
+            ShinyBox.bootstrap domain:domain, rpc:rpc
+      remote:
+        resize: {}
+          
+    }
   

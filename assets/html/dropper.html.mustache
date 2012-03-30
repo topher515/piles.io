@@ -8,16 +8,8 @@
         margin:5px;
         padding:0;
     }
-    #content {
-        position:absolute;
-        left:0;
-        right:0;
-        top:0;
-        bottom:0;
-    }
     #info {
         position:relative;
-        height:0;
         display:none;
         overflow:hidden;
     }
@@ -43,12 +35,11 @@
             </tbody>
         </table>
         <div id="dropper" class="alert alert-info">
-            <h2>Drag your files here...</h2>
+            <h3>Drag your files here...</h3>
             <form>
                 <p>...or click to upload.</p>
                 <input type="file" />
             </form>
-            <p>Fil</p>
         </div>
     </div>
     
@@ -70,11 +61,11 @@
           AWS_ACCESS_KEY_ID:'{{AWS_ACCESS_KEY_ID}}',
           APP_BUCKET_ACL:'{{APP_BUCKET_ACL}}'
           })
-        _.extend(Piles.Settings, {
+        _.extend(ShinyBox.Settings, {
           APP_DOMAIN:'{{APP_DOMAIN}}',
           STATIC_DOMAIN:'{{CONTENT_DOMAIN}}',
         })
-        Piles.dropperBootstrap()
+        ShinyBox.xdmBootstrap()
     })()
     </script>
     {{/settings}}
