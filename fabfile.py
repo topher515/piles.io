@@ -1,6 +1,7 @@
 from __future__ import print_function
 
-from fabric.api import local #, abort, run, cd, env
+from fabric.api import local, env #, abort, run, cd, env
+from fabric.api import settings as fab_settings
 #from fabric.api import settings as fabsettings
 #from fabric.contrib.console import confirm
 
@@ -11,8 +12,7 @@ import glob
 import shutil
 import pystache
 
-from settings import env
-settings = env('development')
+from settings import settings
 
 STAGE_DIR = 'staged/'
 
@@ -49,27 +49,28 @@ def stage(compile_ts={}):
     
     Returns the modified dict `compile_ts`.
     """
-    for filename in glob_recurse_dirs(['assets']):
-        #print(filename)
-        x = os.stat(filename).st_mtime
-        if x > (compile_ts.get(filename) or 0):
-            compile_ts[filename] = x  
-            if filename.endswith('.less'):
-                local('lessc %s %s' % (filename,STAGE_DIR+filename\
-                    .replace('assets/','').replace('.less','.css')))
-            elif filename.endswith('.coffee'):
-                local('coffee -c -o %s %s' % (os.path.dirname(STAGE_DIR+filename)\
-                    .replace('assets/','').replace('coffee','js'), filename) )
-            elif filename.endswith('.mustache'):
-                outfile = STAGE_DIR + filename.replace('assets/','')[:-9]
-                print("mustache compile: %s to %s" % (filename,outfile))
-                ensure_dir(outfile)
-                stache_compile(filename, outfile)
-            else:
-                outfile = os.path.join(STAGE_DIR,filename).replace('assets/','')
-                print("copy asset: %s to %s" % (filename,outfile))
-                ensure_dir(outfile)
-                open(outfile,'w').write(open(filename,'r').read())
+    with fab_settings(warn_only=True):
+        for filename in glob_recurse_dirs(['assets']):
+            #print(filename)
+            x = os.stat(filename).st_mtime
+            if x > (compile_ts.get(filename) or 0):
+                compile_ts[filename] = x  
+                if filename.endswith('.less'):
+                    local('lessc %s %s' % (filename,STAGE_DIR+filename\
+                        .replace('assets/','').replace('.less','.css')))
+                elif filename.endswith('.coffee'):
+                    local('coffee -c -o %s %s' % (os.path.dirname(STAGE_DIR+filename)\
+                        .replace('assets/','').replace('coffee','js'), filename))
+                elif filename.endswith('.mustache'):
+                    outfile = STAGE_DIR + filename.replace('assets/','')[:-9]
+                    print("mustache compile: %s to %s" % (filename,outfile))
+                    ensure_dir(outfile)
+                    stache_compile(filename, outfile)
+                else:
+                    outfile = os.path.join(STAGE_DIR,filename).replace('assets/','')
+                    print("copy asset: %s to %s" % (filename,outfile))
+                    ensure_dir(outfile)
+                    open(outfile,'w').write(open(filename,'r').read())
     return compile_ts
                 
                 
