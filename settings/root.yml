@@ -1,0 +1,5 @@
+### Email settings
+EMAIL_BOX_NAME: ""
+EMAIL_BOX_PWD: ""
+EMAIL_SMTP_HOST: "localhost"
+EMAIL_FROM_ADDR: "robot@piles.io"

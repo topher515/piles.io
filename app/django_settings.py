@@ -4,8 +4,7 @@ DJANGOROOT = os.path.dirname(__file__)
 ROOTDIR = os.path.abspath(os.path.join(DJANGOROOT,'..'))
 #ROOTSETTINGS = os.path.join(ROOTDIR,'settings')
 
-from settings import env
-settings = env()
+from settings import settings
 
 DEBUG = settings['DEBUG']
 TEMPLATE_DEBUG = DEBUG
@@ -85,9 +84,9 @@ STATICFILES_DIRS = (
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #'django.contrib.staticfiles.finders.FileSystemFinder',
+    #'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -115,17 +114,12 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.media",
     "django.core.context_processors.static",
     "django.contrib.messages.context_processors.messages",
-    "piles.context_processors.piles_settings",
+    "shinybox.context_processors.settings",
 )
 
-ROOT_URLCONF = 'piles_dj.urls'
+ROOT_URLCONF = 'urls'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(ROOTDIR,'templates'),
-)
+TEMPLATE_DIRS = settings['TEMPLATE_PATHS']
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -140,7 +134,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     
     'south',
-    'piles',
+    'shinybox',
 )
 
 # A sample logging configuration. The only tangible logging
