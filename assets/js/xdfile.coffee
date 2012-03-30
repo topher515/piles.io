@@ -58,7 +58,7 @@ XDFile.File = Backbone.Model.extend
     size: 0
     icon: "/static/img/file.png" # Remove this, this is display!
     ext: ""
-    type: "Unknown File"
+    filetype: "Unknown File"
     thumb: ""
     progress: 0
     createdts: null

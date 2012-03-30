@@ -3,7 +3,7 @@ ShinyBox.Settings or= {}
 
 fileRowTpl = _.template '<tr>
   <td><%= name %></td>
-  <td><%= type %></td>
+  <td><%= filetype %></td>
   <td><%= size %></td>
   <td><div class="progress progress-info progress-striped active"><div class="bar" style="width: 0%;"></div></div></td>
   <td><button class="delete btn btn-danger btn-mini">Delete</button></td>
@@ -28,6 +28,7 @@ ShinyBox.FileTableView = Backbone.View.extend
   render:->
     @setElement (fileRowTpl @model.attributes)
     @
+
 
 ShinyBox.DropperApp = Backbone.View.extend
   el:'#content'
@@ -54,7 +55,7 @@ ShinyBox.DropperApp = Backbone.View.extend
     filemodel = new XDFile.File
       name: filename
       size: fileobj.size
-      type: fileobj.type
+      filetype: fileobj.type
       ext: ext
       pub: false
     @model.files.add filemodel

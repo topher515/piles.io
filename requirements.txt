@@ -8,3 +8,4 @@ apachelog
 pyyaml
 #pystache
 -e git://github.com/defunkt/pystache.git#egg=pystache
+django-piston

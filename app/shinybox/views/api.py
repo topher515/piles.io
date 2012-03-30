@@ -15,18 +15,18 @@ from shinybox.forms import *
 from shinybox.models import *
 
 from django.core.serializers import serialize
-from django.utils.simplejson import dumps, loads, JSONEncoder
+import django.utils.simplejson as json
 from django.db.models.query import QuerySet
 from django.utils.functional import curry
-class DjangoJSONEncoder(JSONEncoder):
+class DjangoJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, QuerySet):
-            return loads(serialize('json', obj))
-        return JSONEncoder.default(self,obj)
-dumps = curry(dumps, cls=DjangoJSONEncoder)
+            return json.loads(serialize('json', obj))
+        return json.JSONEncoder.default(self,obj)
+dumps = curry(json.dumps, cls=DjangoJSONEncoder)
 
 
-class APIView(FormView):
+class APIMixin(object):
     
     allowed_methods = []
     
@@ -49,6 +49,12 @@ class APIView(FormView):
             raise
         return box[0]
     
+    def ensure_uploader(self, request):
+        if not request.session.get('uploader'):
+            u = Uploader()
+            u.save()
+            request.session['uploader'] = u
+    
     def get_cors_response(self, *args, **kwargs):
         h = HttpResponse()
         #allowed_origins = [x.strip('/') for x in settings.API_ACCESS_CONTROL_ALLOW_ORIGINS]
@@ -61,23 +67,61 @@ class APIView(FormView):
         return self.get_cors_response()
 
 
-class Files(APIView):
+class Files(FormView, APIMixin):
     
     allowed_methods = ['POST','GET','OPTIONS']
     
     def get(self, request, domain, *args, **kwargs):
+        self.ensure_uploader(request)
         r = self.get_cors_response()
         return r.write(dumps(self.box_w_auth(request,domain).files.all()))
         
-    def post(self, request):
-        box = self.box_no_auth(domain)
+    def post(self, request, domain, *args, **kwargs):
+        self.ensure_uploader(request)
+        box = self.box_no_auth(request,domain)
         r = self.get_cors_response()
-        file_form = FileForm(request.POST)
+        file_form = FileForm(json.load(request))
         if file_form.is_valid():
-            _file = file_form.save()
+            _file = file_form.save(commit=False)
+            _file.uploader = request.session['uploader']
+            _file.bucket = box
+            _file.save()
             r.write(dumps(_file))
         else:
-            r.status=400
+            r.status_code=400
+            r.write(dumps(file_form.errors))
         return r
-            
+
+
+import re
+from piston.handler import BaseHandler
+from piston.utils import rc, throttle
+
+class FilesHandler(BaseHandler, APIMixin):
+
+    allowed_methods = ('GET', 'POST')
+    #fields = ('name','filetype','size')
+    exclude = ('id','bucket','uploader')
+    model = File
+    
+    def read(self,request,domain):
+        self.ensure_uploader(request)
+        r = self.get_cors_response()
+        return self.box_w_auth(request,domain).files.all()
+          
+    def create(self,request,domain):
+        self.ensure_uploader(request)
+        box = self.box_no_auth(request,domain)
+        r = self.get_cors_response()
+        file_form = FileForm(json.load(request))
+        if file_form.is_valid():
+            _file = file_form.save(commit=False)
+            _file.uploader = request.session['uploader']
+            _file.bucket = box
+            _file.save()
+            return _file
+        else:
+            r = rc.BAD_REQUEST
+            r.write(dumps(file_form.errors))
+            return r
         
