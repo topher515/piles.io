@@ -1,6 +1,6 @@
 from django.db import models
-
-
+        
+        
 class Uploader(models.Model):
     uuid = models.CharField(max_length=64)
     
@@ -25,4 +25,4 @@ class File(models.Model):
     uploader = models.ForeignKey(Uploader,related_name='uploaders')
     started_ts = models.DateTimeField(auto_now_add=True)
     success_ts = models.DateTimeField(null=True,blank=True)
-    expires_ts = models.DateTimeField(db_index=True,null=True) 
+    expires_ts = models.DateTimeField(db_index=True,null=True)

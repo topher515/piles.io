@@ -132,7 +132,7 @@ XDFile.File = Backbone.Model.extend
     ).fail ->###
 
   downloadUrl: ->
-    "http://" + XDFile.Settings.APP_DOMAIN + "/XDFile/" + @get("pid") + "/files/" + @get("id") + "/content"
+    "http://" + XDFile.Settings.APP_DOMAIN + "/xdfile/" + @get("pid") + "/files/" + @get("id") + "/content"
 
   delete: ->
     @trigger "filework:start"

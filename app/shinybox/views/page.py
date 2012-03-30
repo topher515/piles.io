@@ -10,8 +10,8 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
    
-from forms import *
-from models import *
+from shinybox.forms import *
+from shinybox.models import *
    
 
 
