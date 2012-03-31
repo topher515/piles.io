@@ -15,10 +15,10 @@ ShinyBox.FileTableView = Backbone.View.extend
 
   initialize:->
     self = @
-    @model.on 'upload:progress', (x)=>
+    @model.on 'fileupload:progress', (x)=>
       @$('.progress').addClass('active')
       @$('.bar').animate width: x+'%'
-    @model.on 'upload:success', (x)=>
+    @model.on 'fileupload:success', (x)=>
       @$('.bar').animate width: '100%', ()->
         self.$('.progress').removeClass('active')
     
