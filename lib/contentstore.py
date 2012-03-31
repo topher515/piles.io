@@ -10,20 +10,38 @@ logger = logging.getLogger()
 
 from settings import settings
 
-## S3
-public_acp_xml = open(os.path.join(settings['RESOURCE_PATH'],'public-acp.xml')).read()
-private_acp_xml = open(os.path.join(settings['RESOURCE_PATH'],'private-acp.xml')).read()
+public_acp_xml_tpl = """<?xml version="1.0" encoding="UTF-8"?><AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>{%(id)s}</ID><DisplayName>{%(display_name)s}</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CanonicalUser"><ID>{%(id)s}</ID><DisplayName>{%(display_name)s}</DisplayName></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CanonicalUser"><ID>{%(id)s}</ID><DisplayName>{%(display_name)s}</DisplayName></Grantee><Permission>WRITE</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CanonicalUser"><ID>{%(id)s}</ID><DisplayName>{%(display_name)s}</DisplayName></Grantee><Permission>READ_ACP</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CanonicalUser"><ID>{%(id)s}</ID><DisplayName>{%(display_name)s}</DisplayName></Grantee><Permission>WRITE_ACP</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Group"><URI>http://acs.amazonaws.com/groups/global/AllUsers</URI></Grantee><Permission>READ</Permission></Grant></AccessControlList></AccessControlPolicy>"""
+private_acp_xml_tpl = """<?xml version="1.0" encoding="UTF-8"?><AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>{%(id)s}</ID><DisplayName>{%(display_name)s}</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CanonicalUser"><ID>{%(id)s}</ID><DisplayName>{%(display_name)s}</DisplayName></Grantee><Permission>READ</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CanonicalUser"><ID>{%(id)s}</ID><DisplayName>{%(display_name)s}</DisplayName></Grantee><Permission>WRITE</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CanonicalUser"><ID>{%(id)s}</ID><DisplayName>{%(display_name)s}</DisplayName></Grantee><Permission>READ_ACP</Permission></Grant><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CanonicalUser"><ID>{%(id)s}</ID><DisplayName>{%(display_name)s}</DisplayName></Grantee><Permission>WRITE_ACP</Permission></Grant></AccessControlList></AccessControlPolicy>"""
 
+
+class UnspecifiedCanonicalUserId(Exception):
+    pass
 
 class S3Store(object):
     
-    def __init__(self,s3conn=None,bucket=None):
-        if not s3conn:
-            s3conn = S3.AWSAuthConnection(settings['AWS_ACCESS_KEY_ID'],settings['AWS_SECRET_ACCESS_KEY'])
-        self.s3conn = s3conn
-        if not bucket:
-            bucket = settings['APP_BUCKET']
+    def __init__(self,s3conn,bucket,canonical_user={},bucket_acl='private'):
+        self.canonical_user = canonical_user
+        if isinstance(s3conn,S3.AWSAuthConnection):
+            self.s3conn = s3conn
+        else:
+            self.s3conn = S3.AWSAuthConnection(s3conn[0],s3conn[1])
         self.bucket = bucket
+    
+    def _get_public_acp_xml(self):
+        if not self.canonical_user:
+            raise UnspecifiedCanoncialUser
+    
+    def _get_private_acp_xml(self):
+        if not self.canonical_user:
+            raise UnspecifiedCanoncialUser
+        
+        
+    
+    public_acp_xml = property(_get_public_acp_xml)
+    private_acp_xml = property(_get_private_acp_xml)
+    
+    aws_secret_access_key = property(lambda s: s.s3conn.aws_secret_access_key)
+    aws_access_key_id = property(lambda s: s.s3conn.aws_access_key_id)
     
     def add_storage_info(self,entity):
         
@@ -41,7 +59,7 @@ class S3Store(object):
     
     def build_policy_doc(self,key,content_type,content_disposition,acl=''):
         if not acl:
-            acl = settings['APP_BUCKET_ACL']
+            acl = self.bucket_acl
         
         policy = {
             'expiration':(datetime.datetime.now()+datetime.timedelta(1)).strftime('%Y-%m-%dT%H:%M:%S.000Z'), # Valid for one day. This means the user MUST refresh the page once a day to do uploads
@@ -61,7 +79,7 @@ class S3Store(object):
             ]
         }
         policy_doc = base64.b64encode(json.dumps(policy))
-        sig = base64.b64encode(hmac.new(settings['AWS_SECRET_ACCESS_KEY'],policy_doc,sha1).digest())
+        sig = base64.b64encode(hmac.new(self.aws_secret_access_key,policy_doc,sha1).digest())
         return policy_doc,sig
     
     
@@ -75,9 +93,7 @@ class S3Store(object):
         to_sign = ''.join(to_sign)
         b64sig = base64.b64encode(hmac.new(secret_key,to_sign,sha1).digest()).strip()
         return urlquote(b64sig,safe='')
-    
-    def public_get_url(self,path):
-        return 'http://%s/%s' % (settings['CONTENT_DOMAIN'],path)
+        
 
     def _authed_get_url(self,path,expires=None):
         bucket = self.bucket
@@ -87,7 +103,7 @@ class S3Store(object):
         ## DEBUG:
         #expires = datetime.datetime.fromtimestamp(1141889120)
         expires_epoch_str = str(int(time.mktime(expires.timetuple())))
-        sig_str = build_auth_sig('GET', path='/'+bucket+'/'+path, expiration=expires, secret_key=settings['AWS_SECRET_ACCESS_KEY'])
+        sig_str = build_auth_sig('GET', path='/'+bucket+'/'+path, expiration=expires, secret_key=self.aws_secret_access_key)
     
         url = ['http://s3.amazonaws.com',
                 '/',bucket,'/',path,'?',
@@ -99,7 +115,7 @@ class S3Store(object):
     def authed_get_url(self,path):   
         path = path.strip('/') # Normalize path by dropping extra begin/end slashes
 
-        auth_gen = S3.QueryStringAuthGenerator(settings['AWS_ACCESS_KEY_ID'],settings['AWS_SECRET_ACCESS_KEY'], is_secure=False) #PP_BUCKET)
+        auth_gen = S3.QueryStringAuthGenerator(self.aws_access_key_id,self.aws_secret_access_key, is_secure=False) #PP_BUCKET)
         
         # if not expires:
         #    expires = datetime.datetime.now() + datetime.timedelta(0,60*10) # In 10 min
@@ -136,8 +152,10 @@ class S3Store(object):
 
     
     def setpub(self,name):
+        if not self.canonical_user_id:
+            raise UnspecifiedCanoncialUserId
         conn = self.s3conn
-        response = conn.put_acl(self.bucket,name,MyStringIO(public_acp_xml))
+        response = conn.put_acl(self.bucket,name,MyStringIO(self.public_acp_xml))
         #s3put(public_acp_xml,name+'?acl')
         status = response.http_response.status
         print response.http_response.status
@@ -147,9 +165,8 @@ class S3Store(object):
         return response
 
     def setpriv(self,name):
-    
         conn = self.s3conn
-        response = conn.put_acl(self.bucket,name,MyStringIO(private_acp_xml))
+        response = conn.put_acl(self.bucket,name,MyStringIO(self.private_acp_xml))
         #s3put(private_acp_xml,name+'?acl')
         status = response.http_response.status
         print response.http_response.status

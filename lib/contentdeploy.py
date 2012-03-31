@@ -55,13 +55,13 @@ class ContentDeployer(object):
     pass
 
 class S3Deployer(ContentDeployer):
-    def __init__(self,gather,bucket):
+    def __init__(self,gather,s3conn,bucket,acl='private'):
         self.bucket = bucket
         if isinstance(gather,isinstace(FileGatherer)):
             self.gatherer = gather
         else:
             self.gatherer = FileGatherer(gather)
-        self.store = S3Store()
+        self.store = S3Store(s3conn,bucket,acl=acl)
         try:
             f = open('deploy_tracker.pickle','r')
             self.change_tracker = pickle.load(f)
