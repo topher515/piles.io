@@ -39,10 +39,6 @@ class FileGatherer(object):
         
     @property
     def files(self):
-        # The app
-        app_html = template('app',app_meta=app_meta())
-        #print app_html
-        yield MyStringIO(app_html),'app','text/html'
         # All other static files
         for path,name in self.static_paths:
             fp = open(path,'r')
