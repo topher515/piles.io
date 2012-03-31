@@ -1,4 +1,4 @@
 #!/bin/bash
 
 source ./env/bin/activate
-PYTHONPATH=app:. python app/manage.py runserver
+PYTHONPATH=lib:app:. python app/manage.py runserver

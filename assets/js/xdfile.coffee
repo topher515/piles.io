@@ -6,7 +6,7 @@ if not window._
   
 window.XDFile = window.XDFile || {}
 
-XDFile.Settings = {}
+XDFile.Settings or= {}
 
 XDFile.IconGetter = ()->
   
@@ -120,7 +120,7 @@ XDFile.File = Backbone.Model.extend
     @fileUploader = new @uploadController.FileUploader 
       file:file
       formdata: @formData()
-      url: '/'
+      url: XDFile.Settings.FILE_UPLOAD_URL or '/'
     # Proxy the fileUploader's events through this file
     @fileUploader.bind 'all', ()=>
       @trigger.apply this, arguments
@@ -180,7 +180,7 @@ XDFile.FileUploadController = (options)->
   fuc = this
   defaultFormData = 
     AWSAccessKeyId: XDFile.Settings.AWS_ACCESS_KEY_ID
-    acl: XDFile.Settings.APP_BUCKET_ACL
+    acl: XDFile.Settings.STATIC_BUCKET_ACL
 
   @obj2tuple = (formobj)=>
     newfdata = []

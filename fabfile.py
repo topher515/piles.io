@@ -5,6 +5,8 @@ from fabric.api import settings as fab_settings
 #from fabric.api import settings as fabsettings
 #from fabric.contrib.console import confirm
 
+from contentdeploy import S3Deployer
+
 import time
 import os, yaml
 from os.path import join as pjoin
@@ -81,3 +83,7 @@ def watch():
         compile_ts = stage(compile_ts)
         time.sleep(2)
 
+def deployaws():
+    S3Deployer(STAGE_DIR,settings['STATIC_BUCKET'])
+    
+    
