@@ -83,9 +83,9 @@ def watch():
         compile_ts = stage(compile_ts)
         time.sleep(2)
 
-def deployaws():
+def awsdeploy():
     deployer = S3Deployer(STAGE_DIR,(settings['AWS_ACCESS_KEY_ID'],settings['AWS_SECRET_ACCESS_KEY']),
-        settings['STATIC_BUCKET'],acl=settings['STATIC_BUCKET_ACL'])
+        settings['STATIC_BUCKET'],bucket_acl=settings['STATIC_BUCKET_ACL'])
     deployer.deploy()
     
     

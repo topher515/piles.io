@@ -9,8 +9,6 @@ import logging
 logger = logging.getLogger()
 from smtplib import SMTP
 
-import settings
-settings = settings.env('development')
 
 ### Utils ###
 

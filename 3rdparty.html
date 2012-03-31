@@ -5,9 +5,10 @@
 	
 	<script type="text/javascript">
 	(function() {
+		var dom = 'shinybox.rlunch.webfactional.com'
 	    window._shiny = window._shiny || [];
 	    _shiny.push(['domain', location.host]);
-		_shiny.push(['remote','http://localhost:9090/html/dropper.html'])
+		_shiny.push(['remote','http://'+dom+'/html/dropper.html'])
 	    _shiny.push(['container', 'shinybox'])
 	    var newScr = function(src) {
 	        var sc = document.createElement('script');
@@ -17,8 +18,8 @@
 	        var s = document.getElementsByTagName('script')[0];
 	        s.parentNode.insertBefore(sc, s);
 	    }
-	    newScr("http://localhost:9090/js/easyXDM.js")
-	    newScr("http://localhost:9090/js/shinybox.extern.js")
+	    newScr("http://"+dom+"/js/easyXDM.js")
+	    newScr("http://"+dom+"/js/shinybox.extern.js")
 	})()
 	</script>
 

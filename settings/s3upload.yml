@@ -1,15 +1,15 @@
 # The name of the S3 bucket where the application"s user content and static files will live
-STATIC_BUCKET: "dev.piles.io"
+STATIC_BUCKET: "shinybox.rlunch.webfactional.com"
 # The default Access Control setting for new files
 STATIC_BUCKET_ACL: "private" #"bucket-owner-full-control"
 # Bucket where logs are stored
-LOG_BUCKET: "dev.piles.io-logging"
+LOG_BUCKET: "shinybox.rlunch.webfactional.com-logging"
 # Prefixed before all logs delivered to the above log bucket
-LOG_BUCKET_PREFIX: "dev.piles.io-access-log-"
+LOG_BUCKET_PREFIX: "shinybox.rlunch.webfactional.com-access-log-"
 # The domain on which the content lives
-STATIC_DOMAIN: "localhost:9090"
-STATIC_URL: "http://localhost:9090/"
-FILE_UPLOAD_URL: "http://shinybox.rlunch.webfactional.com"
+STATIC_DOMAIN: "shinybox.rlunch.webfactional.com"
+STATIC_URL: "http://shinybox.rlunch.webfactional.com/"
+FILE_UPLOAD_URL: "http://shinybox.rlunch.webfactional.com/"
 
 CANONICAL_USER_ID: 'd336bf1d7a6c0a3ee219cb51f063bea05662f20f6173578ff253fae3771bae98'
 CANONICAL_USER_DISPLAYNAME: 'shinybox'

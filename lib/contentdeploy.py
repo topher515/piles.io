@@ -25,7 +25,7 @@ class FileGatherer(object):
             if os.path.isdir(path):
                 path_search += glob.glob(path + '/*')
             else:
-                self.static_paths.append((path,path[prefix_len:]))
+                self.static_paths.append((path,path[prefix_len-1:]))
                 
     content_types = {
         '.js':'text/javascript',
@@ -55,13 +55,13 @@ class ContentDeployer(object):
     pass
 
 class S3Deployer(ContentDeployer):
-    def __init__(self,gather,s3conn,bucket,acl='private'):
+    def __init__(self,gather,s3conn,bucket,bucket_acl='private'):
         self.bucket = bucket
-        if isinstance(gather,isinstace(FileGatherer)):
+        if isinstance(gather,FileGatherer):
             self.gatherer = gather
         else:
             self.gatherer = FileGatherer(gather)
-        self.store = S3Store(s3conn,bucket,acl=acl)
+        self.store = S3Store(s3conn,bucket,bucket_acl=bucket_acl)
         try:
             f = open('deploy_tracker.pickle','r')
             self.change_tracker = pickle.load(f)
