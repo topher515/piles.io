@@ -95,11 +95,15 @@ ShinyBox.bootstrap = (options)->
           $.ajax = ()->
             if typeof arguments[0] == 'string'
               url = arguments[0]
+              obj = arguments[1]
             else if arguments[0].url
               url = arguments[0].url
+              obj = arguments[0]
             
             if url and url.slice(0, appUrl.length) == appUrl
-              return xdbackbone.ajax.apply @, arguments
+              # We call the xdbackbone ajax which takes callbacks appended to
+              # then end of the arguments
+              return xdbackbone.ajax.call @, url, obj, obj.success, obj.error
             else
               jqAjax.apply @, arguments
       },

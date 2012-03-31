@@ -108,7 +108,7 @@ XDFile.File = Backbone.Model.extend
     signature: @get("signature")
     policy: @get("policy")
     "Content-Type": @get("type")
-    "Content-Disposition": (if @get("type").slice(0, 5) is "image" then "inline;" else "attachment;")
+    "Content-Disposition": (if @get("filetype").slice(0, 5) is "image" then "inline;" else "attachment;")
 
   startUpload:->
     @fileUploader.start()
