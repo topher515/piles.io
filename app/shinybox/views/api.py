@@ -11,8 +11,11 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.conf import settings
   
+  
 from shinybox.forms import *
 from shinybox.models import *
+
+from contentstore import S3Store as ContentStore
 
 from django.core.serializers import serialize
 import django.utils.simplejson as json
@@ -86,7 +89,7 @@ class Files(FormView, APIMixin):
             _file.uploader = request.session['uploader']
             _file.bucket = box
             _file.save()
-            r.write(dumps(_file))
+            r.write(dumps(f))
         else:
             r.status_code=400
             r.write(dumps(file_form.errors))
@@ -119,7 +122,14 @@ class FilesHandler(BaseHandler, APIMixin):
             _file.uploader = request.session['uploader']
             _file.bucket = box
             _file.save()
-            return _file
+            f = dict(_file.__dict__)
+            f['key'] = f['uuid']
+            f = ContentStore(\
+                s3conn=(settings.AWS_ACCESS_KEY_ID,settings.AWS_SECRET_ACCESS_KEY),
+                bucket=settings.STATIC_BUCKET,
+                bucket_acl=settings.STATIC_BUCKET_ACL
+            ).add_storage_info(f)
+            return f
         else:
             r = rc.BAD_REQUEST
             r.write(dumps(file_form.errors))

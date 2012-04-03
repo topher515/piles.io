@@ -63,7 +63,7 @@ XDFile.File = Backbone.Model.extend
     progress: 0
     createdts: null
     successts: null
-    path:""
+    key:""
 
   initialize: (options)->
     pos = {}
@@ -82,7 +82,7 @@ XDFile.File = Backbone.Model.extend
     @unset 'uploadController', silent:true
 
   trash: ()->
-    @set path:".trash"
+    @set key:".trash"
     
     
     
@@ -104,7 +104,7 @@ XDFile.File = Backbone.Model.extend
 
   
   formData: ->
-    key: @get("path")
+    key: @get("key")
     signature: @get("signature")
     policy: @get("policy")
     "Content-Type": @get("type")

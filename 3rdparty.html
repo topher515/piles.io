@@ -10,16 +10,9 @@
 	    _shiny.push(['domain', location.host]);
 		_shiny.push(['remote','http://'+dom+'/html/dropper.html'])
 	    _shiny.push(['container', 'shinybox'])
-	    var newScr = function(src) {
-	        var sc = document.createElement('script');
-	        sc.type = 'text/javascript';
-	        //sc.async = true;
-	        sc.src = src;
-	        var s = document.getElementsByTagName('script')[0];
-	        s.parentNode.insertBefore(sc, s);
-	    }
-	    newScr("http://"+dom+"/js/easyXDM.js")
-	    newScr("http://"+dom+"/js/shinybox.extern.js")
+		function jsDynaLoad(b,c){function f(h,d){d=d||function(){};var a=document.createElement("script");a.type="text/javascript";if(a.readyState)a.onreadystatechange=function(){if(a.readyState==="loaded"||a.readyState==="complete"){a.onreadystatechange=null;d()}};else a.onload=function(){d()};a.src=h;document.getElementsByTagName("head")[0].appendChild(a)}c=c||function(){};if(typeof b==="string")f(b,c);else if(b instanceof Array){var e=0,i=b.length,g=function(){if(e>=i){c();return false}f(b[e],g);e++};
+		g()}};
+		jsDynaLoad(["http://"+dom+"/js/easyXDM.js","http://"+dom+"/js/shinybox.extern.js"])
 	})()
 	</script>
 

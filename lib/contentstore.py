@@ -24,6 +24,7 @@ class S3Store(object):
         else:
             self.s3conn = S3.AWSAuthConnection(s3conn[0],s3conn[1])
         self.bucket = bucket
+        self.bucket_acl = bucket_acl
     
     def _get_public_acp_xml(self):
         if not self.canonical_user:
@@ -42,10 +43,9 @@ class S3Store(object):
     aws_access_key_id = property(lambda s: s.s3conn.aws_access_key_id)
     
     def add_storage_info(self,entity):
+        disp = 'inline;' if entity['filetype'].startswith('image') else 'attachment;'
         
-        disp = 'inline;' if entity['type'].startswith('image') else 'attachment;'
-        
-        policy,signature = self.build_policy_doc(entity['path'], content_type=entity['type'], content_disposition=disp )
+        policy,signature = self.build_policy_doc(entity['key'], content_type=entity['filetype'], content_disposition=disp )
         entity['policy'] = policy
         entity['signature'] = signature
         

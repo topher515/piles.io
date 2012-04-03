@@ -6,6 +6,11 @@ ROOTDIR = os.path.abspath(os.path.join(DJANGOROOT,'..'))
 
 from settings import settings
 
+AWS_ACCESS_KEY_ID = settings['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = settings['AWS_SECRET_ACCESS_KEY']
+STATIC_BUCKET = settings['STATIC_BUCKET']
+STATIC_BUCKET_ACL = settings['STATIC_BUCKET_ACL']
+
 DEBUG = settings['DEBUG']
 TEMPLATE_DEBUG = DEBUG
 
