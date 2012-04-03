@@ -55,7 +55,7 @@ ShinyBox.DropperApp = Backbone.View.extend
     filemodel = new XDFile.File
       name: filename
       size: fileobj.size
-      filetype: fileobj.type
+      filetype: fileobj.type or 'unknown'
       ext: ext
       pub: false
     @model.files.add filemodel
