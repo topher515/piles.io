@@ -218,7 +218,7 @@ XDFile.FileUploadController = (options)->
     
       @opts.formData = ->
         f = (options?.formData() or {})
-        fuc.obj2tuple (_.extend defaultFormData, f)
+        fuc.obj2tuple (_.extend {}, defaultFormData, f)
 
       $el.fileupload @opts
     

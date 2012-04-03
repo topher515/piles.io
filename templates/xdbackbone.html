@@ -48,18 +48,17 @@
     xdbackbone = new easyXDM.Rpc({}, {
         local: {
             ajax: function() {
+				var url,obj;
 				if (typeof(arguments[0]) == 'string') {
-					url = arguments[0]
-					obj = arguments[1]
+					url = arguments[0];
+					obj = arguments[1];
 				} else if (arguments[0].url) {
-					url = arguments[0].url
-					obj = arguments[0]
+					url = arguments[0].url;
+					obj = arguments[0];
 				}
-				success = Array.prototype.slice.call(arguments,-2,-2)
-				error = Array.prototype.slice.call(arguments,-1,-1)
-				obj.success = success
-				obj.error = error
-				jQuery.ajax.apply(jQuery, url, obj)
+				obj.success = Array.prototype.slice.call(arguments,-2,-1)[0];
+				obj.error = Array.prototype.slice.call(arguments,-1)[0];
+				jQuery.ajax(url, obj);
 			}
         }
     });
