@@ -119,7 +119,7 @@ XDFile.File = Backbone.Model.extend
   associateContent: (file)->
     @fileUploader = new @uploadController.FileUploader 
       file:file
-      formdata: @formData()
+      formData: _.bind @formData, @
       url: XDFile.Settings.FILE_UPLOAD_URL or '/'
     # Proxy the fileUploader's events through this file
     @fileUploader.bind 'all', ()=>
@@ -166,12 +166,12 @@ XDFile.Bucket = Backbone.Model.extend
     
   urlRoot:()->
     XDFile.Settings.APP_URL + 'buckets/'
-	
+  
 
 XDFile.FileUploadController = (options)->
   ### Performs AJAX uploads
   
-  ``options.formdata`` specifies POST data
+  ``options.formData`` specifies POST data
   ``options.file`` is the HTML5 FileObject representing the file data to upload
   ###
   options or= {}
@@ -186,8 +186,8 @@ XDFile.FileUploadController = (options)->
     newfdata = []
     for key of formobj
       newfdata.push
-      name: key
-      value: formobj[key]
+        name: key
+        value: formobj[key]
     newfdata
 
   @FileUploader = Backbone.Model.extend
@@ -199,14 +199,10 @@ XDFile.FileUploadController = (options)->
       throw new Error("No file to upload!")  unless options
       console.log "Uploading file: " + options.file.name
 
-      options.formdata = fuc.obj2tuple (_.extend defaultFormData, options.formdata)
-
       @opts = _.extend({},
         multipart: true
         paramName: "file"
-        formata: {}
         type: "POST"
-
         # Setup event bindings for this jquery plugin to our system
         progress:(data)=>
           @trigger "fileupload:progress", parseInt(data.loaded / data.total * 100)
@@ -219,6 +215,10 @@ XDFile.FileUploadController = (options)->
           @trigger "fileupload:stop"
         
       , options)
+    
+      @opts.formData = ->
+        f = (options?.formData() or {})
+        fuc.obj2tuple (_.extend defaultFormData, f)
 
       $el.fileupload @opts
     
