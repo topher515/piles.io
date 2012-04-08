@@ -36,18 +36,17 @@ class APIMixin(object):
     def get_allowed_methods(self):
         return [x.upper() for x in self.allowed_methods]
     
-    def box_no_auth(self, request, domain):
+    def get_box(self, request, domain):
         domain = domain.lower()
         box = ShinyBox.objects.filter(domain=domain).select_related('files')
         if box.count() == 0:
             raise Http404
         return box[0]
-        
+    
+    box_no_auth = get_box
+    
     def box_w_auth(self, request, domain):
-        domain = domain.lower()
-        box = ShinyBox.objects.filter(domain=domain).select_related('files')
-        if box.count() == 0:
-            raise Http404
+        box = self.get_box(request, domain)
         if box[0].admin != request.user:
             raise
         return box[0]
@@ -100,12 +99,13 @@ import re
 from piston.handler import BaseHandler
 from piston.utils import rc, throttle
 
-class FilesHandler(BaseHandler, APIMixin):
+class BaseFilesHandler(BaseHandler, APIMixin):
 
     allowed_methods = ('GET', 'POST')
     #fields = ('name','filetype','size')
     exclude = ('id','bucket','uploader')
     model = File
+    
     
     def read(self,request,domain):
         self.ensure_uploader(request)
@@ -134,4 +134,15 @@ class FilesHandler(BaseHandler, APIMixin):
             r = rc.BAD_REQUEST
             r.write(dumps(file_form.errors))
             return r
+      
+class TempFilesHandler(BaseFilesHandler):
+    
+    def get_box(self):
         
+    
+class FilesHandler(BaseFilesHandler):
+    
+    model = File
+    
+    def 
+    
