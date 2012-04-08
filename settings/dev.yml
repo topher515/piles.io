@@ -2,11 +2,14 @@ DEBUG: true
 
 # The domain on which the application logic and API lives
 APP_DOMAIN: "localhost:8000"
-APP_URL: "http://localhost:8000/"
+APP_URL: "http://localhost:8000/1/"
 # The domain on which the content lives
 STATIC_DOMAIN: "localhost:9090"
 STATIC_URL: "http://localhost:9090/"
 FILE_UPLOAD_URL: "http://localhost:9090/"
+
+STATIC_BUCKET: "made-up-bucket"
+
 
 TEMPLATE_PATHS: ["/Users/cwilcox/Projects/shinybox/templates/"]
 RESOURCE_PATH: "/Users/cwilcox/Projects/shinybox/resources/"

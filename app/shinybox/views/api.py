@@ -99,7 +99,7 @@ import re
 from piston.handler import BaseHandler
 from piston.utils import rc, throttle
 
-class BaseFilesHandler(BaseHandler, APIMixin):
+class FilesHandler(BaseHandler, APIMixin):
 
     allowed_methods = ('GET', 'POST')
     #fields = ('name','filetype','size')
@@ -110,7 +110,9 @@ class BaseFilesHandler(BaseHandler, APIMixin):
     def read(self,request,domain):
         self.ensure_uploader(request)
         r = self.get_cors_response()
-        return self.box_w_auth(request,domain).files.all()
+        fs = self.box_w_auth(request,domain).files.all()
+        print fs
+        return fs 
           
     def create(self,request,domain):
         self.ensure_uploader(request)
@@ -134,15 +136,4 @@ class BaseFilesHandler(BaseHandler, APIMixin):
             r = rc.BAD_REQUEST
             r.write(dumps(file_form.errors))
             return r
-      
-class TempFilesHandler(BaseFilesHandler):
-    
-    def get_box(self):
-        
-    
-class FilesHandler(BaseFilesHandler):
-    
-    model = File
-    
-    def 
     

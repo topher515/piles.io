@@ -61,3 +61,4 @@ class File(models.Model):
     started_ts = models.DateTimeField(auto_now_add=True)
     success_ts = models.DateTimeField(null=True,blank=True)
     expires_ts = ExpiresDateTimeField(db_index=True,null=True)
+    path = models.CharField(max_length=1024, default='inbox')

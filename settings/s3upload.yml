@@ -1,7 +1,5 @@
 # The name of the S3 bucket where the application"s user content and static files will live
 STATIC_BUCKET: "shinybox.rlunch.webfactional.com"
-# The default Access Control setting for new files
-STATIC_BUCKET_ACL: "private" #"bucket-owner-full-control"
 # Bucket where logs are stored
 LOG_BUCKET: "shinybox.rlunch.webfactional.com-logging"
 # Prefixed before all logs delivered to the above log bucket

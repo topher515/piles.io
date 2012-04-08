@@ -64,6 +64,7 @@ XDFile.File = Backbone.Model.extend
     createdts: null
     successts: null
     key:""
+    path:""
 
   initialize: (options)->
     pos = {}
@@ -218,7 +219,7 @@ XDFile.FileUploadController = (options)->
     
       @opts.formData = ->
         f = (options?.formData() or {})
-        fuc.obj2tuple (_.extend {}, defaultFormData, f)
+        fuc.obj2tuple (_.extend defaultFormData, f)
 
       $el.fileupload @opts
     
@@ -229,4 +230,7 @@ XDFile.FileUploadController = (options)->
       @trigger "fileupload:start"
       @jqXHR = $el.fileupload "send", files: [ @opts.file ]
   @
+  
+
+  
 )

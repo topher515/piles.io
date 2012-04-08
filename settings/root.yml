@@ -1,4 +1,7 @@
 
+# The default Access Control setting for new files
+STATIC_BUCKET_ACL: "private" #"bucket-owner-full-control"
+
 ### API Keys
 CHARGIFY_API_KEY: "xxXPsiW-FGTHA6STZ6P0"
 AWS_ACCESS_KEY_ID: "AKIAJOFGRQCM76XI6ETQ"
