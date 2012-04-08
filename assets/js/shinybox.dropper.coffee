@@ -1,18 +1,21 @@
 window.ShinyBox or= {}
 ShinyBox.Settings or= {}
 
-fileRowTpl = _.template '<tr>
-  <td><%= name %></td>
-  <td><%= filetype %></td>
-  <td><%= size %></td>
-  <td><div class="progress progress-info progress-striped active"><div class="bar" style="width: 0%;"></div></div></td>
-  <td><button class="delete btn btn-danger btn-mini">Delete</button></td>
-</tr>'
+tpl = (id)->
+  $t = $('#'+id)
+  if $t.length == 0
+    throw "Template missing error: #" + id
+  return _.template t.html()
+
+
+ShinyBox.PublicFileRowView = Backbone.View.extend
+  template = tpl('pubilc-file-row-tpl')
+
 
 ShinyBox.FileTableView = Backbone.View.extend
   events:
     "click .delete":"trash"  
-
+  template = tpl('file-row-tpl')
   initialize:->
     self = @
     @model.on 'fileupload:progress', (x)=>
@@ -26,12 +29,13 @@ ShinyBox.FileTableView = Backbone.View.extend
     @model.trash()   
       
   render:->
-    @setElement (fileRowTpl @model.attributes)
+    @setElement @template(@model.toJSON())
     @
 
 
 ShinyBox.DropperApp = Backbone.View.extend
-  el:'#content'
+  className: "alert alert-info"
+  template = tpl('dropper-app-tpl')
   initialize: ->
     self = @
     @$doc = $(document)
@@ -77,10 +81,45 @@ ShinyBox.DropperApp = Backbone.View.extend
     $('body').css('background-color','white')
     false
 
+  render:()->
+    @$el.html @template(@model.toJSON())
+    return @
 
-getValue = (object, prop) ->
-  return null  unless object and object[prop]
-  (if _.isFunction(object[prop]) then object[prop]() else object[prop])
+
+ShinyBox.ManagerApp = Backbone.View.extend
+  
+  initialize: ()->
+    @publicFileView = new ShinyBox.FileTableView model:model
+    @publicFileView = new ShinyBox.FileTableView model:model
+    
+  render:()->
+    @$el
+
+
+ShinyBox.Router = Backbone.Router.extend
+  routes: 
+    "dropper": "dropper"
+    "manager": "manager"
+
+ShinyBox.App = Backbone.View.extend
+  initialize: (options)->
+    @router = ShinyBox.Router()
+    @router.on 'route:dropper' _.bind setDropperMode, @
+    @router.on 'route:manager' _.bind setManagerMode, @
+  
+    @domain = options.domain
+    @bucket = new XDFile.Bucket id:@domain
+    @dropperApp = new ShinyBox.DropperApp model:@bucket
+    @managerApp = new ShinyBox.ManagerApp model:@bucket
+    
+  setDropperMode: ()->
+    @managerApp.remove()
+    @dropperApp.$el.appendTo $('#content')
+    
+  setManagerMode: ()->
+    @dropperApp.remove()
+    @managerApp.$el.appendTo $('#content')
+
 
 ShinyBox.bootstrap = (options)->
   
@@ -114,7 +153,7 @@ ShinyBox.bootstrap = (options)->
       }
   
   $ ->
-    window.dropperApp = new ShinyBox.DropperApp model:(new XDFile.Bucket id:options.externDomain)
+    window.shinyapp = ShinyBox.App domain:options.externDomain
     if options.externRpc
       dropperApp.on 'fileactivity:stop fileactivity:start', ()->
         w = Math.max dropperApp.$el.width(), dropperApp.$('table').width()

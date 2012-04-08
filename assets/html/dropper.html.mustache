@@ -20,12 +20,43 @@
     }
     
     </style>
+	
+	<script type="text/template" id="file-row-tpl">
+	<tr>
+	  <td><%= name %></td>
+	  <td><%= filetype %></td>
+	  <td><%= size %></td>
+	  <td><div class="progress progress-info progress-striped active"><div class="bar" style="width: 0%;"></div></div></td>
+	  <td><button class="delete btn btn-danger btn-mini">Delete</button></td>
+	</tr>
+	</script>
+	
+	<script type="text/template" id="public-file-row-tpl">
+	<tr>
+	  <td><%= name %></td>
+	  <td><%= filetype %></td>
+	  <td><%= size %></td>
+	  <td><div class="progress progress-info progress-striped active"><div class="bar" style="width: 0%;"></div></div></td>
+	  <td><button class="delete btn btn-danger btn-mini">Delete<i class="icon-trash"></i></button></td>
+	  <td><button class="save btn btn-success btn-mini">Save<i class="icon-arrow-right"></i></button></td>
+	</tr>
+	</script>
+	
+	
+	<script type="text/template" id="dropper-app-tpl">
+        <h3>Drag your files here...</h3>
+        <form>
+            <p>...or click to upload.</p>
+            <input type="file" />
+        </form>
+	</script>
+	
     
 </head>
 <body>
     
     <div id="content">
-        <table id="info" class="table table-striped table-condensed">
+        <table id="filter-info" class="table table-striped table-condensed">
             <thead>
                 <tr>
                     <th>Name</th><th>Type</th><th>Size</th><th>Progress</th>
@@ -34,13 +65,17 @@
             <tbody>
             </tbody>
         </table>
-        <div id="dropper" class="alert alert-info">
-            <h3>Drag your files here...</h3>
-            <form>
-                <p>...or click to upload.</p>
-                <input type="file" />
-            </form>
-        </div>
+        <table id="filter-info" class="table table-striped table-condensed">
+            <thead>
+                <tr>
+                    <th>Name</th><th>Type</th><th>Size</th><th>Progress</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+		
+		
     </div>
     
     <!-- Scripts -->
