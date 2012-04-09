@@ -4,7 +4,7 @@ from django.views.generic.base import View, TemplateView
 from django.views.generic.edit import CreateView, FormView
 #from django.views.generic.list_detail import object_list
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User, UserManager
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.core.urlresolvers import reverse
 from django.db.models import Q
@@ -47,9 +47,9 @@ class APIMixin(object):
     
     def box_w_auth(self, request, domain):
         box = self.get_box(request, domain)
-        if box[0].admin != request.user:
+        if box.admin != request.user:
             raise
-        return box[0]
+        return box
     
     def ensure_uploader(self, request):
         if not request.session.get('uploader'):
@@ -136,4 +136,31 @@ class FilesHandler(BaseHandler, APIMixin):
             r = rc.BAD_REQUEST
             r.write(dumps(file_form.errors))
             return r
+
+
+from tastypie.resources import ModelResource
+from tastypie.authentication import Authentication
+from tastypie import fields
+
+class AdminResource(ModelResource):
+    class Meta:
+        queryset = User.objects.all()
+        fields = ['username', 'first_name', 'last_name']
+        allowed_methods = ['get']
+
+class ShinyBoxResource(ModelResource):
+    class Meta:
+        resource_name = 'buckets'
+        queryset = ShinyBox.objects.all()
+    
+    admin = fields.ForeignKey(AdminResource, 'admin')
+
+class FilesResource(ModelResource):
+    class Meta:
+        resource_name = 'files'
+        queryset = File.objects.all()
+        authentication = Authentication()
+
+    bucket = fields.ForeignKey(ShinyBoxResource, 'bucket')
+
     

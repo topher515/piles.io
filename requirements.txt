@@ -8,4 +8,7 @@ apachelog
 pyyaml
 #pystache
 -e git://github.com/defunkt/pystache.git#egg=pystache
-django-piston
+#django-piston
+mimeparse>=0.1.3
+python=dateutil>=2.1
+django-tastypie

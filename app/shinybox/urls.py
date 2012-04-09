@@ -22,14 +22,19 @@ urlpatterns = patterns('',
 #auth = HttpBasicAuthentication(realm="My Realm")
 #kwargs = { 'authentication': auth }
 
-#blogpost_resource = Resource(handler=BlogPostHandler, **ad)
-#arbitrary_resource = Resource(handler=ArbitraryDataHandler, **ad)
-#tempfiles_resource = Resource(handler=api.TempFilesHandler)
 files_resource = Resource(handler=api.FilesHandler)
 
 # API handlers
 urlpatterns += patterns('',
-    url(r'^1/buckets/(?P<domain>[^/]+)/files/$', files_resource),
-    #url(r'^posts/(?P<post_slug>[^/]+)/$', blogpost_resource), 
-    #url(r'^other/(?P<username>[^/]+)/(?P<data>.+)/$', arbitrary_resource), 
+    url(r'^2/buckets/(?P<domain>[^/]+)/files/$', files_resource),
+)
+
+from tastypie.api import Api
+v1_api = Api(api_name='1')
+v1_api.register(api.ShinyBoxResource())
+v1_api.register(api.FilesResource())
+v1_api.register(api.AdminResource())
+
+urlpatterns += patterns(''
+    url(r'^$', includes(v1_api.urls)),
 )
