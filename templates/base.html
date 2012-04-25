@@ -1,12 +1,14 @@
 <html>
 <head>
     <title>Shiny Box</title>
-    <link rel="stylesheet" type="text/css" href="http://{{STATIC_DOMAIN}}/static/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="http://{{STATIC_DOMAIN}}/css/bootstrap.min.css" />
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <div id="container">
-    {% block content %}{% endblock %}
+    <div id="content" class="container">
+    {% block content %}
+
+	{% endblock %}
     </div>
 </body>
 </html>
