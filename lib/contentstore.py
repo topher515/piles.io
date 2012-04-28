@@ -2,7 +2,6 @@ import json
 import datetime, base64, hmac, time, os
 from urllib import quote as urlquote
 from hashlib import sha1
-from bottle import request, abort
 from utils import MyStringIO
 import S3
 import logging

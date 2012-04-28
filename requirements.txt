@@ -10,5 +10,6 @@ pyyaml
 -e git://github.com/defunkt/pystache.git#egg=pystache
 #django-piston
 mimeparse>=0.1.3
-python=dateutil>=2.1
+python-dateutil>=2.1
 django-tastypie
+PIL

@@ -2,7 +2,6 @@ import json, yaml
 import datetime, base64, hmac, time, os, string
 from urllib import quote as urlquote
 from hashlib import sha1
-from bottle import request, abort
 import S3
 from StringIO import StringIO
 import logging
@@ -79,10 +78,7 @@ def ms2js(l):
     return json.dumps(ls,default=extra_json_serializers)
 
 def j2m(j):
-    try:
-        j = json.loads(j)
-    except ValueError:
-        abort(400,'Invalid JSON')
+    j = json.loads(j)
     j['_id'] = j['id']
     del j['id']
     return j
