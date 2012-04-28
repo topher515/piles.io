@@ -1,6 +1,7 @@
 import Image
 
 import bottle
+from StringIO import StringIO
 from bottle import route, run, request, abort, redirect, static_file, template
 
 @route('/', method='POST')

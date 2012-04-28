@@ -143,6 +143,8 @@ XDFile.File = Backbone.Model.extend
 
 XDFile.FileCollection = Backbone.Collection.extend
   model: XDFile.File
+  parse: (response)->
+	  return response.objects
 
 XDFile.Bucket = Backbone.Model.extend
   initialize:()->

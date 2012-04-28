@@ -45,6 +45,10 @@ class ShinyBox(models.Model):
     admin = models.ForeignKey('auth.User')
     domain = models.CharField(max_length=256,unique=True)
         
+    def __repr__(self):
+        return "ShinyBox(domain='%s')" % self.domain
+    def __str__(self):
+        return "Shinybox: %s" % self.domain
 
 class Password(models.Model):
     pile = models.ForeignKey(ShinyBox)

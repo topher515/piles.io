@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.conf import settings
 from django.conf.urls.defaults import url #patterns, include, 
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
   
 from shinybox.forms import *
 from shinybox.models import *
@@ -169,6 +170,8 @@ class FilesResource(ModelResource, MixMe):
         self._bucket_domain = kwargs.pop('bucket_domain',None)
         super(FilesResource,self).__init__(*args,**kwargs)
     
+    bucket = fields.ToOneField(ShinyBoxResource, 'bucket')
+    
     class Meta:
         resource_name = 'files'
         queryset = File.objects.all()
@@ -176,6 +179,7 @@ class FilesResource(ModelResource, MixMe):
         authorization = FilesAuthorization()
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'delete'] #'put',?
+
 
     filtering = {
     #    'bucket': ALL_WITH_RELATIONS,
@@ -195,6 +199,15 @@ class FilesResource(ModelResource, MixMe):
         self.ensure_uploader(request)
         return super(FilesResource,self).dispatch(request_type, request, **kwargs)
 
+    def obj_create(self, bundle, request, **kwargs):
+        #bundle.obj.bucket = ShinyBox.objects.get(domain=self._bucket_domain)
+        #bucket = ShinyBox.objects.get(domain=self._bucket_domain)
+        #print bundle.obj
+        #print bundle.data
+        #bundle.data['bucket_id'] = ShinyBox.objects.get(domain=self._bucket_domain).id
+        kwargs['bucket'] = ShinyBox.objects.get(domain=self._bucket_domain)
+        return super(FilesResource,self).obj_create(bundle, request, **kwargs)
+
     def alter_detail_data_to_serialize(self, request, data):
         if request.POST:
             data = ContentStore(\
@@ -204,10 +217,10 @@ class FilesResource(ModelResource, MixMe):
             ).add_storage_info(data)
         return super(FilesResource,self).alter_detail_data_to_serialize(request,data)
 
-    def post_list(self, request, **kwargs):
-        self.ensure_uploader(request)
-        #box = self.box_no_auth(request,domain)
-        return super(FilesResource,self).post_list(request,**kwargs)
+    #def post_list(self, request, **kwargs):
+    #    self.ensure_uploader(request)
+    #    #box = self.box_no_auth(request,domain)
+    #    return super(FilesResource,self).post_list(request,**kwargs)
         
 
 
