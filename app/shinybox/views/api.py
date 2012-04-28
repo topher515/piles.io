@@ -134,40 +134,39 @@ class ShinyBoxResource(ModelResource):
             content_types = {'json': 'application/json', 'jsonp': 'text/javascript'})
         #authentication = ApiKeyAuthentication()
         authorization = Authorization()
+        filtering = {
+            #'pub_date': ['exact', 'lt', 'lte', 'gte', 'gt'],
+            'domain': ALL
+        }
     
     admin = fields.ToOneField(AdminResource, 'admin', full=True)
     files = fields.ToManyField('shinybox.views.api.FilesResource', 'files')
-    
-    filtering = {
-        'files': ALL_WITH_RELATIONS,
-        #'pub_date': ['exact', 'lt', 'lte', 'gte', 'gt'],
-    }
     
     def override_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/(?P<domain>\w[\w-]*)/$" % self._meta.resource_name, 
                 self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
-            url(r"^(?P<resource_name>%s)/(?P<domain>\w[\w-]*)/files%s$" % (self._meta.resource_name, trailing_slash()), 
-                self.wrap_view('files_dispatch_list'), name="api_files_dispatch_list"),
+#            url(r"^(?P<resource_name>%s)/(?P<domain>\w[\w-]*)/files%s$" % (self._meta.resource_name, trailing_slash()), 
+#                self.wrap_view('files_dispatch_list'), name="api_files_dispatch_list"),
         ]
         
     
-    def files_dispatch_list(self, request, domain, **kwargs):
-        try:
-            obj = self.cached_obj_get(request=request, **self.remove_api_resource_names(kwargs))
-        except ObjectDoesNotExist:
-            return HttpGone()
-        except MultipleObjectsReturned:
-            return HttpMultipleChoices("More than one resource is found at this URI.")
-    
-        files_resource = FilesResource(bucket_domain=domain)
-        return files_resource.dispatch_list(request)
+#    def files_dispatch_list(self, request, domain, **kwargs):
+#        try:
+#            obj = self.cached_obj_get(request=request, **self.remove_api_resource_names(kwargs))
+#        except ObjectDoesNotExist:
+#            return HttpGone()
+#        except MultipleObjectsReturned:
+#            return HttpMultipleChoices("More than one resource is found at this URI.")
+#    
+#        files_resource = FilesResource(bucket_domain=domain)
+#        return files_resource.dispatch_list(request)
     
 
 class FilesResource(ModelResource, MixMe):
     
     def __init__(self,*args,**kwargs):
-        self._bucket_domain = kwargs.pop('bucket_domain',None)
+        #self._bucket_domain = kwargs.pop('bucket_domain',None)
         super(FilesResource,self).__init__(*args,**kwargs)
     
     bucket = fields.ToOneField(ShinyBoxResource, 'bucket')
@@ -180,10 +179,10 @@ class FilesResource(ModelResource, MixMe):
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'delete'] #'put',?
 
-
-    filtering = {
-    #    'bucket': ALL_WITH_RELATIONS,
-    }
+        filtering = {
+            'bucket': ALL_WITH_RELATIONS,
+            'name': ALL,
+        }
 
     #bucket = fields.ToOneField(ShinyBoxResource, 'bucket')
   
@@ -191,11 +190,12 @@ class FilesResource(ModelResource, MixMe):
     #    self._bucket_domain = kwargs.pop('domain')
     #    return super(FilesResource, self).dispatch_list(request,kwargs)
         
-    def get_object_list(self, request):
-        obj_list = super(FilesResource, self).get_object_list(request)
-        return obj_list.filter(bucket__domain=self._bucket_domain)
+    #def get_object_list(self, request):
+    #    obj_list = super(FilesResource, self).get_object_list(request)
+    #    return obj_list.filter(bucket__domain=self._bucket_domain)
   
     def dispatch(self, request_type, request, **kwargs):
+        print "File kwargs: %s" % kwargs
         self.ensure_uploader(request)
         return super(FilesResource,self).dispatch(request_type, request, **kwargs)
 
@@ -205,8 +205,18 @@ class FilesResource(ModelResource, MixMe):
         #print bundle.obj
         #print bundle.data
         #bundle.data['bucket_id'] = ShinyBox.objects.get(domain=self._bucket_domain).id
-        kwargs['bucket'] = ShinyBox.objects.get(domain=self._bucket_domain)
+        #print bundle
+        #print bundle.obj
+        #print bundle.data
+        #kwargs['bucket'] = ShinyBox.objects.get(domain=request.POST.get('bucket'))
+        
+        kwargs["path"] = "inbox"
         return super(FilesResource,self).obj_create(bundle, request, **kwargs)
+
+    def hydate(self, bundle):
+        bundle.obj.bucket = ShinyBox.objects.get(domain=bundle.data.pop('bucket'))
+        print bundle
+        return bundle
 
     def alter_detail_data_to_serialize(self, request, data):
         if request.POST:

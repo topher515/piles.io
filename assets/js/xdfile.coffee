@@ -64,7 +64,10 @@ XDFile.File = Backbone.Model.extend
     createdts: null
     successts: null
     key:""
-    path:""
+    path:"inbox"
+    bucket:null
+
+  idAttribute: "uuid"
 
   initialize: (options)->
     pos = {}
@@ -83,10 +86,10 @@ XDFile.File = Backbone.Model.extend
     @unset 'uploadController', silent:true
 
   trash: ()->
-    @set key:".trash"
-    
-    
-    
+    self = @
+    @destroy 
+      wait:true
+  
   save: (attributes, options) ->
     options or (options = {})
     @trigger "filepersist:start"
@@ -103,7 +106,6 @@ XDFile.File = Backbone.Model.extend
    
     Backbone.Model::save.call this, attributes, opts
 
-  
   formData: ->
     key: @get("key")
     signature: @get("signature")
@@ -135,23 +137,27 @@ XDFile.File = Backbone.Model.extend
   downloadUrl: ->
     "http://" + XDFile.Settings.APP_DOMAIN + "/xdfile/" + @get("pid") + "/files/" + @get("id") + "/content"
 
-  delete: ->
-    @trigger "filework:start"
-    @destroy
-      success:=> @trigger "filework:stop"
-      error:=> notify "error", "Failed to delete file."
+  #delete: ->
+  #  @trigger "filework:start"
+  #  @destroy
+  #    success:=> @trigger "filework:stop"
+  #    error:=> notify "error", "Failed to delete file."
 
 XDFile.FileCollection = Backbone.Collection.extend
   model: XDFile.File
   parse: (response)->
-	  return response.objects
+    return response.objects
+  url:()->
+    XDFile.Settings.APP_URL + 'files/'
+
 
 XDFile.Bucket = Backbone.Model.extend
   initialize:()->
     self = @
     @files = new XDFile.FileCollection
-    @files.url = ()=>
-      self.url() + '/files/'
+    @files.on "add", @_handleAdd, @
+    #@files.url = ()=>
+    #  self.url() + '/files/'
     fileActivity = 0
     actMinus = ->
       fileActivity -= 1
@@ -166,6 +172,11 @@ XDFile.Bucket = Backbone.Model.extend
     @files.on 'fileupload:stop', actMinus
     @files.on 'filepersist:start', actPlus
     @files.on 'filepersist:stop', actMinus
+    
+  _handleAdd: (model,collection)->
+    model.set "bucket", @get "domain" # @url()
+    
+  idAttribute: "domain"
     
   urlRoot:()->
     XDFile.Settings.APP_URL + 'buckets/'

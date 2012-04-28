@@ -24,12 +24,14 @@ class FilesAuthorization(Authorization):
 
     # Optional but useful for advanced limiting, such as per user.
     def apply_limits(self, request, object_list):
-        
+        print "Apply limits..."
         if request.user.is_authenticated():
             if request.method == 'DELETE':
+                print "Limiting DELETE"
                 # Only can delete files for which you are the bucket admin
                 return object_list.filter(bucket__admin=request.user)  
             if request.method == 'GET':
+                print "Limiting GET"
                 # Only can see files for which you are admin
                 return object_list.filter(Q(bucket__admin=request.user)) # TODO: Allow user to files he's uploaded
         

@@ -27,6 +27,7 @@ ShinyBox.FileTableRowView = Backbone.View.extend
       
   render:->
     @$el.html @template(@model.toJSON())
+    @delegateEvents() # Bind events
     @
 
 ShinyBox.InboxFileTableRowView = ShinyBox.FileTableRowView.extend
@@ -41,6 +42,7 @@ ShinyBox.InboxFileTableRowView = ShinyBox.FileTableRowView.extend
 
 ShinyBox.FileTableView = Backbone.View.extend
   className: 'table table-striped table-condensed'
+  title: "Saved"
   template: tpl 'file-table-tpl'
   TableRowView: ShinyBox.FileTableRowView
   initialize: ()->
@@ -48,10 +50,14 @@ ShinyBox.FileTableView = Backbone.View.extend
     @collection.on 'add', @_handleModelAdd, @
     @collection.on 'reset', @_handleReset, @
     @_handleReset @collection
+    @collection.on 'destroy', @_handleDestroy, @
+    #@collection.on 'remove', @_handleRemove, @
     
   filter: (mdl)->
-    mdl.get('path').slice(6) != 'inbox'
-
+    mdl.get('path').slice(0,6) != 'inbox'
+    
+  _handleDestroy: (model,coll)->
+    @render()
     
   _handleReset: (coll)->
     ishouldrender = @renderable
@@ -67,16 +73,17 @@ ShinyBox.FileTableView = Backbone.View.extend
     if @renderable then @render()
     
   render: ->
-    @$el.html @template({})
+    @$el.html @template({title:@title})
     for view in @_views
       @$el.append view.render().el
     @
     
     
 ShinyBox.InboxFileTableView = ShinyBox.FileTableView.extend
+  title: "Inbox"
   TableRowView: ShinyBox.InboxFileTableRowView  
   filter: (mdl)->
-    mdl.get('path').slice(6) == 'inbox'
+    mdl.get('path').slice(0,6) == 'inbox'
 
 ShinyBox.DropperApp = Backbone.View.extend
   className: "alert alert-info dropper-app"
@@ -160,7 +167,7 @@ ShinyBox.App = Backbone.View.extend
     #@router.on 'route:dropper', @setDropperMode, @
     #@router.on 'route:manager', @setManagerMode, @
   
-    @bucket = new XDFile.Bucket id:options.domain
+    @bucket = new XDFile.Bucket domain:options.domain
     @dropperApp = new ShinyBox.DropperApp model:@bucket
     @managerApp = new ShinyBox.ManagerApp model:@bucket
     @dropperApp.on 'mode:manager', ()=>
@@ -172,7 +179,7 @@ ShinyBox.App = Backbone.View.extend
     @bucket.files.fetch()
     
   setDomain: (domain)->
-    @bucket.set id:domain
+    @bucket.set domain:domain
     @refresh()
     
   setDropperMode: ()->

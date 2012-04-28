@@ -32,7 +32,7 @@
 	  <td><%= filetype %></td>
 	  <td><%= size %></td>
 	  <td><div class="progress progress-info progress-striped active"><div class="bar" style="width: 0%;"></div></div></td>
-	  <td><button class="delete btn btn-danger btn-mini">Delete</button></td>
+	  <td><button class="delete btn btn-danger btn-mini">Delete <i class="icon-trash icon-white"></i></button></button></td>
 	</script>
 	
 	<script type="text/template" id="inbox-file-row-tpl">
@@ -41,8 +41,8 @@
 	  <td><%= filetype %></td>
 	  <td><%= size %></td>
 	  <td><div class="progress progress-info progress-striped active"><div class="bar" style="width: 0%;"></div></div></td>
-	  <td><button class="delete btn btn-danger btn-mini">Delete<i class="icon-trash"></i></button></td>
-	  <td><button class="save btn btn-success btn-mini">Save<i class="icon-arrow-right"></i></button></td>
+	  <td><button class="delete btn btn-danger btn-mini">Delete <i class="icon-trash icon-white"></i></button></td>
+	  <td><button class="save btn btn-success btn-mini">Save <i class="icon-arrow-right icon-white"></i></button></td>
 	</tr>
 	</script>
 	
@@ -57,6 +57,7 @@
 	</script>
 	
 	<script type="text/template" id="file-table-tpl">
+	<h3><%= title %></h3>
     <thead>
         <tr>
             <th>Name</th><th>Type</th><th>Size</th><th>Progress</th>
@@ -88,6 +89,7 @@
     (function() {
         _.extend(XDFile.Settings, {
 		  APP_URL:'{{ APP_URL }}',
+          APP_DOMAIN:'{{APP_DOMAIN}}',
 		  FILE_UPLOAD_URL:'{{ FILE_UPLOAD_URL }}',
           AWS_ACCESS_KEY_ID:'{{AWS_ACCESS_KEY_ID}}',
           STATIC_BUCKET_ACL:'{{STATIC_BUCKET_ACL}}'
