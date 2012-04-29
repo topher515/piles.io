@@ -8,7 +8,17 @@ tpl = (id)->
   return _.template $t.html()
 
 
-ShinyBox.FileTableRowView = Backbone.View.extend
+ShinyBox.View = Backbone.View.extend
+  getSubview: (model)->
+    return @_subviews?[model.cid]
+  setSubview: (model,view)->
+    if not @_subviews
+      @_subviews = {}
+    return @_subviews[model.cid] = view
+  getSubviews: ->
+    return (view for modelCid, view of (@_subviews)) or []
+
+ShinyBox.FileTableRowView = ShinyBox.View.extend
   tagName: 'tr'
   events:
     "click .delete":"trash"  
@@ -40,24 +50,27 @@ ShinyBox.InboxFileTableRowView = ShinyBox.FileTableRowView.extend
     @model.save path:'', success:()->
       $saveBtn.removeAttr 'disabled'
 
-ShinyBox.FileTableView = Backbone.View.extend
+ShinyBox.FileTableView = ShinyBox.View.extend
   className: 'table table-striped table-condensed'
   title: "Saved"
   template: tpl 'file-table-tpl'
   TableRowView: ShinyBox.FileTableRowView
-  initialize: ()->
-    @_views = []
+  initialize: (options)->
     @collection.on 'add', @_handleModelAdd, @
     @collection.on 'reset', @_handleReset, @
     @_handleReset @collection
     @collection.on 'destroy', @_handleDestroy, @
     #@collection.on 'remove', @_handleRemove, @
+    @collection.on 'change:path', @_handleChangePath, @
     
   filter: (mdl)->
     mdl.get('path').slice(0,6) != 'inbox'
     
+  _handleChangePath: (model,value,options)->
+    @render() # Re-render if something was aadded to inbox
+
   _handleDestroy: (model,coll)->
-    @render()
+    @getSubview(model).remove()
     
   _handleReset: (coll)->
     ishouldrender = @renderable
@@ -69,23 +82,27 @@ ShinyBox.FileTableView = Backbone.View.extend
   _handleModelAdd: (mdl)->
     if not @filter mdl
       return
-    @_views.push (new @TableRowView(model:mdl))
+    @setSubview mdl, (new @TableRowView(model:mdl))
     if @renderable then @render()
     
   render: ->
     @$el.html @template({title:@title})
-    for view in @_views
+    for view in @getSubviews()
       @$el.append view.render().el
     @
     
     
 ShinyBox.InboxFileTableView = ShinyBox.FileTableView.extend
   title: "Inbox"
-  TableRowView: ShinyBox.InboxFileTableRowView  
+  TableRowView: ShinyBox.InboxFileTableRowView
+  #_handleChangePath: (model,value,options)->
+  #  if value == 'inbox'
+  #    @render() # Re-render if something was aadded to inbox
   filter: (mdl)->
     mdl.get('path').slice(0,6) == 'inbox'
+  
 
-ShinyBox.DropperApp = Backbone.View.extend
+ShinyBox.DropperApp = ShinyBox.View.extend
   className: "alert alert-info dropper-app"
   template: tpl 'dropper-app-tpl'
   events:
@@ -143,7 +160,7 @@ ShinyBox.DropperApp = Backbone.View.extend
     return @
 
 
-ShinyBox.ManagerApp = Backbone.View.extend
+ShinyBox.ManagerApp = ShinyBox.View.extend
   
   initialize: ()->
     @inboxFilesView = new ShinyBox.InboxFileTableView id:'inbox-file-table', collection:@model.files
@@ -161,7 +178,7 @@ ShinyBox.ManagerApp = Backbone.View.extend
 #    "dropper": "dropper"
 #    "manager": "manager"
 
-ShinyBox.App = Backbone.View.extend
+ShinyBox.App = ShinyBox.View.extend
   initialize: (options)->
     #@router = ShinyBox.Router()
     #@router.on 'route:dropper', @setDropperMode, @
@@ -193,12 +210,15 @@ ShinyBox.App = Backbone.View.extend
     @trigger 'minSize', 700, 600
 
 setupAjaxProxy = (options, complete)->
-  # Setup so that ajax requests to the `APP_URL` are proxied through xdbackone
+  # Setup so that ajax requests to `options.appUrl` are proxied through xdbackone
   jqAjax = $.ajax
-  appUrl = options.appUrl
+  opts = _.extend {
+    onlyInterceptAppUrls: false
+    prependAppUrl:true
+    }, options
   xdbackbone = new easyXDM.Rpc {
       isHost: true
-      remote: appUrl + 'xdbackbone.html'
+      remote: opts.appUrl + 'xdbackbone.html'
       onReady: ()->
         $.ajax = ()->
           if typeof arguments[0] == 'string'
@@ -208,12 +228,17 @@ setupAjaxProxy = (options, complete)->
             url = arguments[0].url
             obj = arguments[0]
             
-          if url and url.slice(0, appUrl.length) == appUrl
-            # We call the xdbackbone ajax which takes callbacks appended to
-            # then end of the arguments
-            return xdbackbone.ajax.call @, url, obj, obj.success, obj.error
-          else
-            jqAjax.apply @, arguments
+          if opts.onlyInterceptAppUrls
+            if url and url.slice(0, opts.appUrl.length) == opts.appUrl
+              # We call the xdbackbone ajax which takes callbacks appended to
+              # then end of the arguments
+              return xdbackbone.ajax.call @, url, obj, obj.success, obj.error
+            else
+              jqAjax.apply @, arguments
+          else if opts.prependAppUrl
+            if url and url.slice(0, 4) != 'http'
+              return xdbackbone.ajax.call @, (opts.appUrl + url), obj, obj.success, obj.error
+              
         complete && complete()
     },
     {

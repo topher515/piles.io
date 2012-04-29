@@ -1,12 +1,18 @@
-(->
 if not window.Backbone 
   throw "XDFile requires the Backbone.js framework" 
 if not window._
   throw "XDFile requires the Underscore.js utility library"
   
 window.XDFile = window.XDFile || {}
-
 XDFile.Settings or= {}
+
+getValue = (object, prop)->
+  if not (object and object[prop]) 
+    return null
+  return if _.isFunction(object[prop]) then object[prop]() else object[prop]
+
+urlError = ()->
+  throw "Missing URL info for file"
 
 XDFile.IconGetter = ()->
   
@@ -68,6 +74,11 @@ XDFile.File = Backbone.Model.extend
     bucket:null
 
   idAttribute: "uuid"
+
+  url: ->
+    base = getValue(@collection, "url") or getValue(this, "urlRoot") or urlError()
+    return base  if @isNew()
+    base + (if base.charAt(base.length - 1) is "/" then "" else "/") + encodeURIComponent(@id) + "/" # So much work for a slash!
 
   initialize: (options)->
     pos = {}
@@ -148,8 +159,8 @@ XDFile.FileCollection = Backbone.Collection.extend
   parse: (response)->
     return response.objects
   url:()->
-    XDFile.Settings.APP_URL + 'files/'
-
+    #XDFile.Settings.APP_URL + 'files/'
+    XDFile.Settings.API_PREFIX + 'files/'
 
 XDFile.Bucket = Backbone.Model.extend
   initialize:()->
@@ -174,13 +185,13 @@ XDFile.Bucket = Backbone.Model.extend
     @files.on 'filepersist:stop', actMinus
     
   _handleAdd: (model,collection)->
-    model.set "bucket", @get "domain" # @url()
+    model.set "bucket", @url()
     
   idAttribute: "domain"
     
   urlRoot:()->
-    XDFile.Settings.APP_URL + 'buckets/'
-  
+    #XDFile.Settings.APP_URL + 'buckets/'
+    XDFile.Settings.API_PREFIX + 'buckets/'
 
 XDFile.FileUploadController = (options)->
   ### Performs AJAX uploads
@@ -243,7 +254,3 @@ XDFile.FileUploadController = (options)->
       @trigger "fileupload:start"
       @jqXHR = $el.fileupload "send", files: [ @opts.file ]
   @
-  
-
-  
-)

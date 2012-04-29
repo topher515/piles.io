@@ -177,7 +177,7 @@ class FilesResource(ModelResource, MixMe):
         #authentication = ApiKeyAuthentication()
         authorization = FilesAuthorization()
         list_allowed_methods = ['get', 'post']
-        detail_allowed_methods = ['get', 'delete'] #'put',?
+        detail_allowed_methods = ['get', 'delete', 'put']
 
         filtering = {
             'bucket': ALL_WITH_RELATIONS,
@@ -232,6 +232,5 @@ class FilesResource(ModelResource, MixMe):
     #    #box = self.box_no_auth(request,domain)
     #    return super(FilesResource,self).post_list(request,**kwargs)
         
-
 
     
