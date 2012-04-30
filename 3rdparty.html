@@ -7,7 +7,8 @@
 	(function() {
 		var dom = 'localhost:9090' //shinybox.rlunch.webfactional.com'
 	    window._shiny = window._shiny || [];
-	    _shiny.push(['domain', location.host]);
+	    //_shiny.push(['domain', location.host]);
+		_shiny.push(['shinyid','1'])
 		_shiny.push(['remote','http://'+dom+'/html/dropper.html'])
 	    _shiny.push(['container', 'shinybox'])
 		function jsDynaLoad(b,c){function f(h,d){d=d||function(){};var a=document.createElement("script");a.type="text/javascript";if(a.readyState)a.onreadystatechange=function(){if(a.readyState==="loaded"||a.readyState==="complete"){a.onreadystatechange=null;d()}};else a.onload=function(){d()};a.src=h;document.getElementsByTagName("head")[0].appendChild(a)}c=c||function(){};if(typeof b==="string")f(b,c);else if(b instanceof Array){var e=0,i=b.length,g=function(){if(e>=i){c();return false}f(b[e],g);e++};

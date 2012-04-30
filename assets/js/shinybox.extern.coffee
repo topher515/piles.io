@@ -19,12 +19,12 @@ Extern.bootstrap = (options)->
         width: '500px'
         height: '580px'
     onReady: (->
-      rpc.setDomain options.domain)
+      rpc.siteInit options)
   }, {
       local:
         resize: Extern.resize
       remote:
-        setDomain: {}
+        siteInit: {}
   }
   
 

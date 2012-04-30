@@ -209,8 +209,9 @@ ShinyBox.App = ShinyBox.View.extend
     @managerApp.render().$el.appendTo $('#content')
     @trigger 'minSize', 700, 600
 
-setupAjaxProxy = (options, complete)->
+setupAjaxProxy = (options)->
   # Setup so that ajax requests to `options.appUrl` are proxied through xdbackone
+  $setupDefer = $.Deferred()
   jqAjax = $.ajax
   opts = _.extend {
     onlyInterceptAppUrls: false
@@ -239,42 +240,36 @@ setupAjaxProxy = (options, complete)->
             if url and url.slice(0, 4) != 'http'
               return xdbackbone.ajax.call @, (opts.appUrl + url), obj, obj.success, obj.error
               
-        complete && complete()
+        $setupDefer.resolve()
     },
     {
       remote: {
         ajax: {}
       }
     }
-  
+  return $setupDefer
 
 
 
 
 ShinyBox.xdmBootstrap = ()->
+  $proxySetup = setupAjaxProxy appUrl:"http://#{ ShinyBox.Settings.APP_DOMAIN }/"
 
-  deferred = $.Deferred()
-  setupAjaxProxy (appUrl:"http://#{ ShinyBox.Settings.APP_DOMAIN }/"), deferred.resolve
-  app = new ShinyBox.App({})
-  app.setDropperMode()
+  setupApp = (options)->
+    $proxySetup.done ()->
+      app = new ShinyBox.App({})
+      app.setDropperMode()
+      app.on 'minSize', externRpc.resize
   
   
   # Setup the crossdomain interface
   externRpc = new easyXDM.Rpc {},
     {
       local:
-        setDomain: (domain)->
-          deferred.then ->
-            app.setDomain(domain)
-          
-              #dropperApp.on 'fileactivity:stop fileactivity:start', ()->
-              #  w = Math.max dropperApp.$el.width(), dropperApp.$('table').width()
-              #  options.externRpc.resize w, dropperApp.$el.height()
-              
+        siteInit: setupApp
+           
       remote:
         resize: {}
-          
     }
-  app.on 'minSize', externRpc.resize
   
   
