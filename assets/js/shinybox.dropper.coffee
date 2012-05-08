@@ -40,6 +40,7 @@ ShinyBox.FileTableRowView = ShinyBox.View.extend
     @delegateEvents() # Bind events
     @
 
+
 ShinyBox.InboxFileTableRowView = ShinyBox.FileTableRowView.extend
   events:
     "click .delete":"trash"  

@@ -5,6 +5,12 @@ if not window._
   
 window.XDFile = window.XDFile || {}
 XDFile.Settings or= {}
+XDFile.Settings.set = (name,value)->
+  XDFile.Settings[name] = value
+XDFile.Settings.get = (name)->
+  if (XDFile.Settings[name])
+    return XDFile.Settings[name]
+  throw {name:"Settings_Error",description:"The #{name} setting has not been set (yet?)"}
 
 getValue = (object, prop)->
   if not (object and object[prop]) 
@@ -134,7 +140,7 @@ XDFile.File = Backbone.Model.extend
     @fileUploader = new @uploadController.FileUploader 
       file:file
       formData: _.bind @formData, @
-      url: XDFile.Settings.FILE_UPLOAD_URL or '/'
+      url: XDFile.Settings.get('FILE_UPLOAD_URL') or '/'
     # Proxy the fileUploader's events through this file
     @fileUploader.bind 'all', ()=>
       @trigger.apply this, arguments
@@ -146,7 +152,7 @@ XDFile.File = Backbone.Model.extend
     ).fail ->###
 
   downloadUrl: ->
-    "http://" + XDFile.Settings.APP_DOMAIN + "/xdfile/" + @get("pid") + "/files/" + @get("id") + "/content"
+    "http://" + XDFile.Settings.get('APP_DOMAIN') + "/xdfile/" + @get("pid") + "/files/" + @get("id") + "/content"
 
   #delete: ->
   #  @trigger "filework:start"
@@ -159,7 +165,7 @@ XDFile.FileCollection = Backbone.Collection.extend
   parse: (response)->
     return response.objects
   url:()->
-    XDFile.Settings.API_PREFIX + 'files/'
+    XDFile.Settings.get('API_PREFIX') + 'files/'
 
 XDFile.Bucket = Backbone.Model.extend
   initialize:()->
@@ -193,7 +199,7 @@ XDFile.Bucket = Backbone.Model.extend
       @_handleAdd model,collection###
     
   url:()->
-    XDFile.Settings.API_PREFIX + 'buckets/' + (@get 'id') + '/'
+    XDFile.Settings.get('API_PREFIX') + 'buckets/' + (@get 'id') + '/'
 
 XDFile.FileUploadController = (options)->
   ### Performs AJAX uploads
@@ -206,8 +212,8 @@ XDFile.FileUploadController = (options)->
   postUrl = options.uploadUrl
   fuc = this
   defaultFormData = 
-    AWSAccessKeyId: XDFile.Settings.AWS_ACCESS_KEY_ID
-    acl: XDFile.Settings.STATIC_BUCKET_ACL
+    AWSAccessKeyId: XDFile.Settings.get('AWS_ACCESS_KEY_ID')
+    acl: XDFile.Settings.get('STATIC_BUCKET_ACL')
 
   @obj2tuple = (formobj)=>
     newfdata = []
@@ -231,12 +237,12 @@ XDFile.FileUploadController = (options)->
         paramName: "file"
         type: "POST"
         # Setup event bindings for this jquery plugin to our system
-        progress:(data)=>
-          @trigger "fileupload:progress", parseInt(data.loaded / data.total * 100)
-        fail:=>
+        progress:(e,data)=>
+          @trigger "fileupload:progress", parseInt(e.loaded / e.total * 100)
+        fail:(e,data)=>
           @trigger "fileupload:error"
           @trigger "fileupload:stop"
-        done:=> 
+        done:(e,data)=> 
           $el.fileupload "destroy"
           @trigger "fileupload:success"
           @trigger "fileupload:stop"
