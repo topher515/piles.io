@@ -66,3 +66,6 @@ class File(models.Model):
     success_ts = models.DateTimeField(null=True,blank=True)
     expires_ts = ExpiresDateTimeField(db_index=True,null=True)
     path = models.CharField(max_length=1024, default='inbox')
+    
+    def __str__(self):
+        return "%s (%s)" % (self.name, self.started_ts)

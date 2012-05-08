@@ -159,7 +159,6 @@ XDFile.FileCollection = Backbone.Collection.extend
   parse: (response)->
     return response.objects
   url:()->
-    #XDFile.Settings.APP_URL + 'files/'
     XDFile.Settings.API_PREFIX + 'files/'
 
 XDFile.Bucket = Backbone.Model.extend
