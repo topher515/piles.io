@@ -16,8 +16,8 @@ Extern.bootstrap = (options)->
     props: 
       style: 
         border: "1px solid #DDD"
-        width: '500px'
-        height: '580px'
+        width: '450px'
+        height: '90px'
     onReady: (->
       rpc.siteInit options)
   }, {

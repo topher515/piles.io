@@ -14,6 +14,16 @@ private_acp_xml_tpl = """<?xml version="1.0" encoding="UTF-8"?><AccessControlPol
 class UnspecifiedCanonicalUserId(Exception):
     pass
 
+class EntityWrapper(object):
+    def __init__(self,entity):
+        self.entity = entity
+    def __setitem__(self,name,val):
+        setattr(self.entity,name,val)
+    
+    def __getitem__(self,name):
+        return getattr(self.entity,name)
+
+
 class S3Store(object):
     
     def __init__(self,s3conn,bucket,canonical_user={},bucket_acl='private'):
@@ -41,7 +51,9 @@ class S3Store(object):
     aws_secret_access_key = property(lambda s: s.s3conn.aws_secret_access_key)
     aws_access_key_id = property(lambda s: s.s3conn.aws_access_key_id)
     
-    def add_storage_info(self,entity):
+    def add_storage_info(self,entity,by_attr=False):
+        if by_attr:
+            entity = EntityWrapper(entity)
         disp = 'inline;' if entity['filetype'].startswith('image') else 'attachment;'
         
         policy,signature = self.build_policy_doc(entity['key'], content_type=entity['filetype'], content_disposition=disp )
@@ -180,7 +192,9 @@ class S3Store(object):
     
 
 class FakeStore(object):
-    def add_storage_info(self,entity):
+    def add_storage_info(self,entity,by_attr=False):
+        if by_attr:
+            entity = EntityWrapper(entity)
         policy,signature = ('kittens_are_great','John Hancock')
         entity['policy'] = policy
         entity['signature'] = signature

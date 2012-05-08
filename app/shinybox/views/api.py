@@ -140,7 +140,7 @@ class ShinyBoxResource(ModelResource):
         }
     
     admin = fields.ToOneField(AdminResource, 'admin', full=True)
-    files = fields.ToManyField('shinybox.views.api.FilesResource', 'files')
+    files = fields.ToManyField('shinybox.views.api.FilesResource', 'files', full=True)
     
 #    def override_urls(self):
 #        return [
@@ -175,6 +175,7 @@ class FilesResource(ModelResource, MixMe):
     
     class Meta:
         resource_name = 'files'
+        always_return_data = True
         queryset = File.objects.all()
         #authentication = ApiKeyAuthentication()
         authorization = FilesAuthorization()
@@ -197,7 +198,7 @@ class FilesResource(ModelResource, MixMe):
     #    return obj_list.filter(bucket__domain=self._bucket_domain)
   
     def dispatch(self, request_type, request, **kwargs):
-        print "File kwargs: %s" % kwargs
+        #print "File kwargs: %s" % kwargs
         self.ensure_uploader(request)
         return super(FilesResource,self).dispatch(request_type, request, **kwargs)
 
@@ -213,22 +214,21 @@ class FilesResource(ModelResource, MixMe):
         #kwargs['bucket'] = ShinyBox.objects.get(domain=request.POST.get('bucket'))
         
         kwargs["path"] = "inbox"
+        self.get_content_store().add_storage_info(bundle.data)
         return super(FilesResource,self).obj_create(bundle, request, **kwargs)
 
     def hydate(self, bundle):
         bundle.obj.bucket = ShinyBox.objects.get(domain=bundle.data.pop('bucket'))
-        print bundle
+        #print bundle
         return bundle
 
-    def alter_detail_data_to_serialize(self, request, data):
-        if request.POST:
-            data = ContentStore(\
-                s3conn=(settings.AWS_ACCESS_KEY_ID,settings.AWS_SECRET_ACCESS_KEY),
-                bucket=settings.STATIC_BUCKET,
-                bucket_acl=settings.STATIC_BUCKET_ACL
-            ).add_storage_info(data)
-        return super(FilesResource,self).alter_detail_data_to_serialize(request,data)
-
+    def get_content_store(self):
+        return ContentStore(\
+            s3conn=(settings.AWS_ACCESS_KEY_ID,settings.AWS_SECRET_ACCESS_KEY),
+            bucket=settings.STATIC_BUCKET,
+            bucket_acl=settings.STATIC_BUCKET_ACL
+        )
+        
     #def post_list(self, request, **kwargs):
     #    self.ensure_uploader(request)
     #    #box = self.box_no_auth(request,domain)

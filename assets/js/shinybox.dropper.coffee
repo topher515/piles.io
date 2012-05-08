@@ -67,10 +67,14 @@ ShinyBox.FileTableView = ShinyBox.View.extend
     mdl.get('path').slice(0,6) != 'inbox'
     
   _handleChangePath: (model,value,options)->
-    @render() # Re-render if something was aadded to inbox
+    if not @filter(model)
+      @getSubview(model).remove()
+    else
+      @_handleModelAdd model
 
   _handleDestroy: (model,coll)->
-    @getSubview(model).remove()
+    if @filter(model)
+      @getSubview(model).remove()
     
   _handleReset: (coll)->
     ishouldrender = @renderable
@@ -88,7 +92,7 @@ ShinyBox.FileTableView = ShinyBox.View.extend
   render: ->
     @$el.html @template({title:@title})
     for view in @getSubviews()
-      @$el.append view.render().el
+      @$('tbody').append view.render().el
     @
     
     
@@ -184,7 +188,8 @@ ShinyBox.App = ShinyBox.View.extend
     #@router.on 'route:dropper', @setDropperMode, @
     #@router.on 'route:manager', @setManagerMode, @
   
-    @bucket = new XDFile.Bucket domain:options.domain
+    @bucket = new XDFile.Bucket id:options.shinyid
+    @bucket.fetch()
     @dropperApp = new ShinyBox.DropperApp model:@bucket
     @managerApp = new ShinyBox.ManagerApp model:@bucket
     @dropperApp.on 'mode:manager', ()=>
@@ -219,7 +224,7 @@ setupAjaxProxy = (options)->
     }, options
   xdbackbone = new easyXDM.Rpc {
       isHost: true
-      remote: opts.appUrl + 'xdbackbone.html'
+      remote: opts.appUrl + '/xdbackbone.html'
       onReady: ()->
         $.ajax = ()->
           if typeof arguments[0] == 'string'
@@ -253,14 +258,13 @@ setupAjaxProxy = (options)->
 
 
 ShinyBox.xdmBootstrap = ()->
-  $proxySetup = setupAjaxProxy appUrl:"http://#{ ShinyBox.Settings.APP_DOMAIN }/"
+  $proxySetup = setupAjaxProxy appUrl:"http://#{ ShinyBox.Settings.APP_DOMAIN }"
 
   setupApp = (options)->
     $proxySetup.done ()->
-      app = new ShinyBox.App({})
-      app.setDropperMode()
+      app = new ShinyBox.App({shinyid:options.shinyid})
       app.on 'minSize', externRpc.resize
-  
+      app.setDropperMode()
   
   # Setup the crossdomain interface
   externRpc = new easyXDM.Rpc {},

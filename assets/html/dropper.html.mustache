@@ -15,49 +15,48 @@
     }
     .dropper-app {
         position:relative;
-        min-height:150px;
+        min-height:90px;
         overflow:hidden;
-    	}
-		.dropper-app .manage {
-			position:absolute;
-			top:10px;
-			right:10px;
-		}
-	
+      }
+    .dropper-app .manage {
+      position:absolute;
+      top:10px;
+      right:10px;
+    }
+  
     
     </style>
-	
-	<script type="text/template" id="file-row-tpl">
-	  <td><%= name %></td>
-	  <td><%= filetype %></td>
-	  <td><%= size %></td>
-	  <td><div class="progress progress-info progress-striped active"><div class="bar" style="width: 0%;"></div></div></td>
-	  <td><button class="delete btn btn-danger btn-mini">Delete <i class="icon-trash icon-white"></i></button></button></td>
-	</script>
-	
-	<script type="text/template" id="inbox-file-row-tpl">
-	<tr>
-	  <td><%= name %></td>
-	  <td><%= filetype %></td>
-	  <td><%= size %></td>
-	  <td><div class="progress progress-info progress-striped active"><div class="bar" style="width: 0%;"></div></div></td>
-	  <td><button class="delete btn btn-danger btn-mini">Delete <i class="icon-trash icon-white"></i></button></td>
-	  <td><button class="save btn btn-success btn-mini">Save <i class="icon-arrow-right icon-white"></i></button></td>
-	</tr>
-	</script>
-	
-	
-	<script type="text/template" id="dropper-app-tpl">
+  
+  <script type="text/template" id="file-row-tpl">
+    <td><%= name %></td>
+    <td><%= filetype %></td>
+    <td><%= size %></td>
+    <td><div class="progress progress-info progress-striped active"><div class="bar" style="width: 0%;"></div></div></td>
+    <td><button class="delete btn btn-danger btn-mini">Delete <i class="icon-trash icon-white"></i></button></button></td>
+  </script>
+  
+  <script type="text/template" id="inbox-file-row-tpl">
+    <td><%= name %></td>
+    <td><%= filetype %></td>
+    <td><%= size %></td>
+    <td><div class="progress progress-info progress-striped active"><div class="bar" style="width: 0%;"></div></div></td>
+    <td><button class="delete btn btn-danger btn-mini">Delete <i class="icon-trash icon-white"></i></button></td>
+    <td><button class="save btn btn-success btn-mini">Save <i class="icon-arrow-right icon-white"></i></button></td>
+  </script>
+  
+  
+  <script type="text/template" id="dropper-app-tpl">
         <h3>Drag your files here...</h3>
         <form>
             <p>...or click to upload.</p>
             <input type="file" />
         </form>
-		<button class="btn manage">Manage <i class="icon-th-list"></i></button>
-	</script>
-	
-	<script type="text/template" id="file-table-tpl">
-	<h3><%= title %></h3>
+    <button class="btn manage"><i class="icon-th-list"></i></button>
+  </script>
+  
+  <script type="text/template" id="file-table-tpl">
+  <h3><%= title %></h3>
+  <table>
     <thead>
         <tr>
             <th>Name</th><th>Type</th><th>Size</th><th>Progress</th>
@@ -65,13 +64,14 @@
     </thead>
     <tbody>
     </tbody>
-	</script>
+  </table>
+  </script>
     
 </head>
 <body>
     
     <div id="content">
-		
+    
     </div>
     
     <!-- Scripts -->
@@ -88,20 +88,18 @@
     <script>
     (function() {
         _.extend(XDFile.Settings, {
-		  APP_URL:'{{ APP_URL }}',
-		  API_PREFIX:'1/',
+      API_PREFIX:'/1/',
           APP_DOMAIN:'{{APP_DOMAIN}}',
-		  FILE_UPLOAD_URL:'{{ FILE_UPLOAD_URL }}',
+      FILE_UPLOAD_URL:'{{ FILE_UPLOAD_URL }}',
           AWS_ACCESS_KEY_ID:'{{AWS_ACCESS_KEY_ID}}',
           STATIC_BUCKET_ACL:'{{STATIC_BUCKET_ACL}}'
           })
         _.extend(ShinyBox.Settings, {
-		  APP_URL:'{{ APP_URL }}',
           APP_DOMAIN:'{{APP_DOMAIN}}',
           STATIC_DOMAIN:'{{STATIC_DOMAIN}}',
         })
         ShinyBox.xdmBootstrap()
-		
+    
     })()
     </script>
     {{/settings}}

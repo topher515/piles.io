@@ -166,9 +166,7 @@ XDFile.Bucket = Backbone.Model.extend
   initialize:()->
     self = @
     @files = new XDFile.FileCollection
-    @files.on "add", @_handleAdd, @
-    #@files.url = ()=>
-    #  self.url() + '/files/'
+    @files.on 'add', @_handleAdd, @
     fileActivity = 0
     actMinus = ->
       fileActivity -= 1
@@ -183,15 +181,20 @@ XDFile.Bucket = Backbone.Model.extend
     @files.on 'fileupload:stop', actMinus
     @files.on 'filepersist:start', actPlus
     @files.on 'filepersist:stop', actMinus
+
+  parse:(response)->
+    @files.reset(response.files)
+    response
     
   _handleAdd: (model,collection)->
     model.set "bucket", @url()
     
-  idAttribute: "domain"
+  ###_handleReset:(collection)->
+    collection.forEach (model)=>
+      @_handleAdd model,collection###
     
-  urlRoot:()->
-    #XDFile.Settings.APP_URL + 'buckets/'
-    XDFile.Settings.API_PREFIX + 'buckets/'
+  url:()->
+    XDFile.Settings.API_PREFIX + 'buckets/' + (@get 'id') + '/'
 
 XDFile.FileUploadController = (options)->
   ### Performs AJAX uploads
