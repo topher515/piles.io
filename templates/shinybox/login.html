@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
+{% load bootstrap %}
 
 {% block content %}
 <div class="row">
   <div class="span6 well">
-    <form action="{% url start-page %}" method="post">
+    <form action="{% url login-page %}" method="post">
       {% csrf_token %}
-      {{form}}
+      {{form.username|bootstrap}}
+      {{form.password|bootstrap}}
       <input class="btn" type="submit" value="Login">
     </form>
   </div>

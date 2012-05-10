@@ -10,6 +10,8 @@ AWS_ACCESS_KEY_ID = settings['AWS_ACCESS_KEY_ID']
 AWS_SECRET_ACCESS_KEY = settings['AWS_SECRET_ACCESS_KEY']
 STATIC_BUCKET = settings['STATIC_BUCKET']
 STATIC_BUCKET_ACL = settings['STATIC_BUCKET_ACL']
+STRIPE_PUBLISHABLE_KEY = settings['STRIPE_PUBLISHABLE_KEY']
+STRIPE_SECRET_KEY = settings['STRIPE_SECRET_KEY']
 
 DEBUG = settings['DEBUG']
 TEMPLATE_DEBUG = DEBUG
@@ -136,12 +138,13 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
     'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
+    # Apps
     'tastypie',
     'south',
+    'bootstrapform',
+    # My Apps
     'shinybox',
 )
 

@@ -2,39 +2,30 @@ from django.db import models
 import uuid
 from datetime import datetime, timedelta
 
-from south.modelsinspector import add_introspection_rules
-add_introspection_rules([], ["^shinybox\.models\.UUIDField"])
-add_introspection_rules([], ["^shinybox\.models\.ExpiresDateTimeField"])
+from fields import UUIDField, ExpiresDateTimeField
 
-class UUIDField(models.CharField) :
-    def __init__(self, *args, **kwargs):
-        kwargs['max_length'] = kwargs.get('max_length', 64 )
-        kwargs['blank'] = True
-        models.CharField.__init__(self, *args, **kwargs)
-    
-    def pre_save(self, model_instance, add):
-        if add :
-            value = str(uuid.uuid4())
-            setattr(model_instance, self.attname, value)
-            return value
-        else:
-            return super(models.CharField, self).pre_save(model_instance, add)
+import stripe
+stripe.api_key = "Ndzrlauz734dK6xG5PKhk3LfLy1EQEKs"   
 
-
-class ExpiresDateTimeField(models.DateTimeField):
-    def __init__(self, *args, **kwargs):
-        kwargs['db_index'] = kwargs.get('db_index', True)
-        kwargs['blank'] = True
-        self.expires = kwargs.get('expires',60*60*24*7) # Default is seven days
-        super(ExpiresDateTimeField,self).__init__(*args,**kwargs)
-        
-    def pre_save(self, model_instance, add):
-        if add:
-            value = datetime.now() + timedelta(seconds=self.expires)
-            setattr(model_instance, self.attname, value) 
-        return super(ExpiresDateTimeField,self).pre_save(model_instance,add)
             
-
+class Customer(models.Model):
+    user = models.ForeignKey('auth.User')
+    external_id = models.CharField(max_length=32)
+    status = models.CharField(max_length=10)
+        
+    STATUS_OK = ('trialing','active','past_due')
+    STATUS_BAD = ('canceled','unpaid')
+    
+    def get_stripe_customer(self):
+        if not self._stripe_cust_cache:
+            self._stripe_cust_cache = stripe.Customer.retrieve(self.external_id)
+        return self._stripe_cust_cache
+        
+    def is_current(self,remote=False):
+        if not self.status or remote:
+            self.status = self.get_stripe_customer().subscription.status
+        return self.status in Customer.STATUS_OK:
+        
         
 class Uploader(models.Model):
     uuid = UUIDField(primary_key=True, editable=False)

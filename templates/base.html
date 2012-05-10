@@ -2,13 +2,45 @@
 <head>
     <title>Shiny Box</title>
     <link rel="stylesheet" type="text/css" href="http://{{STATIC_DOMAIN}}/css/bootstrap.min.css" />
+	<script src="http://{{STATIC_DOMAIN}}/js/jquery-1.7.1.min.js"></script>
+    <style>
+    #content {
+      margin-top:90px;
+    }
+    </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <div id="content" class="container">
-    {% block content %}
-
-	{% endblock %}
+  <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <a class="brand" href="/">Shinybox</a>
+        <div class="nav-collapse collapse">
+          <ul class="nav">
+            <li class="active">
+              <a href="/start/">Get Started</a>
+            </li>
+          </ul>
+          <ul class="nav pull-right">
+            <li>
+              <a href="/login/">Login</a>
+            </li
+          </ul>
+          
+        </div>
+        
+      </div>
     </div>
+  </div>
+  <div id="content" class="container">
+  {% block content %}
+
+  {% endblock %}
+  </div>
 </body>
 </html>

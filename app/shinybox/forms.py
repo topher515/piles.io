@@ -21,3 +21,7 @@ class FileForm(forms.ModelForm):
     class Meta:
         model = File
         exclude = ('uploader','bucket') # Set in view
+        
+class PayForm(forms.ModelForm):
+    stripe_token = form.CharField(max_length=64)
+    plan_name = form.CharField(max_length=32)

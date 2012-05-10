@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404, redirect
    
 from shinybox.forms import *
 from shinybox.models import *
-   
+
 
 class StartView(FormView):
     template_name = 'shinybox/start.html'
@@ -38,8 +38,21 @@ class LoginView(FormView):
     template_name = 'shinybox/login.html'
     form_class = AuthenticationForm
     def form_valid(self,form):
-        login(request, form.get_user())
+        login(self.request, form.get_user())
         return redirect('deploy-page')
+        
+
+class PayView(FormView):
+    template_name = "shinybox/pay.html"
+    def form_valid(self, form):
+        stripe_customer = stripe.Customer.create(
+            card=form.cleaned_data['stripe_token'],
+            plan=form.cleaned_data['plan_name'],
+            email=self.request.user.email
+        )
+        customer = Customer(
+            external_id = stripe_customer.id
+        )
         
  
 class DeployView(TemplateView):

@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     url(r'^login/$', page.LoginView.as_view(), name='login-page'),
     url(r'^deploy/$', page.DeployView.as_view(), name='deploy-page'),
     #url(r'^manage/(?P<pile_domain>\w\d\.-_+)/$', ManageView.as_view(), name='shinybox-manage'),
+    url(r'^pay/$', page.PayView.as_view(), name='pay-page'),
     
     # XDBackbone
     url(r'^xdbackbone\.html$', direct_to_template, {'template':'xdbackbone.html'}),

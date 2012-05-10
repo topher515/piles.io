@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load bootstrap %}
+
+{% block extra_head %}
+<script type="text/javascript" src="https://js.stripe.com/v1/"></script>
+<script type="text/javascript">
+  Stripe.setPublishableKey('{{ STRIPE_PUBLISHABLE_KEY }}');
+  stripeParams = {
+    number: ".card-number",
+    cvc:".card-cvc",
+    exp_month:".card-expiry-month",
+    exp_year:".card-expiry-year"
+  }
+  function stripeResponseHandler(status, response) {
+      if (response.error) {
+          $('.submit-button').removeAttr("disabled");
+          // show the errors on the form
+          $(stripeParams[response.error.param])
+            .closest('control-group').addClass('error')
+            .find('help-block').html('response.error.message')
+      } else {
+          var form$ = $("#payment-form");
+          // token contains id, last4, and card type
+          var token = response['id'];
+          // insert the token into the form so it gets submitted to the server
+          form$.append("<input type='hidden' name='stripe_token' value='" + token + "'/>");
+          // and submit
+          form$.get(0).submit();
+      }
+  }
+  $(document).ready(function() {
+    $("#payment-form").submit(function(event) {
+      // disable the submit button to prevent repeated clicks
+      $('.submit-button').attr("disabled", "disabled");
+      
+      stripeData = {};
+      for (var i in stripeParams) {
+        stripeData[i] = $(stripeParams[i]).val()
+      }
+      Stripe.createToken(stripeData, stripeResponseHandler);
+
+      // prevent the form from submitting with the default action
+      return false;
+    });
+  });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="span6 well">
+    <form action="{% url pay-page %}" method="POST" id="payment-form">
+      <div class="control-group">
+        <label>Card Number</label>
+        <input type="text" size="20" autocomplete="off" class="card-number"/>
+        <span class="help-block"></span>
+      </div>
+
+      <div class="control-group">
+        <label>CVC</label>
+        <input type="text" size="4" autocomplete="off" class="card-cvc"/>
+        <span class="help-block"></span>
+      </div>
+      
+      <div class="control-group">
+        <label>Expiration (MM/YYYY)</label>
+        <input type="text" size="2" class="card-expiry-month"/>
+        <span> / </span>
+        <input type="text" size="4" class="card-expiry-year"/>
+        <span class="help-block">This is what you will use to sign in.</span>
+      </div>
+      
+      <button type="submit" class="submit-button">Submit Payment</button>
+    </form>
+  </div>
+</div>
+
+
+{% endblock %}
