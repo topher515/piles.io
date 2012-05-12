@@ -14,4 +14,4 @@ TEMPLATE_PATHS: ["/Users/cwilcox/Projects/shinybox/templates/"]
 RESOURCE_PATH: "/Users/cwilcox/Projects/shinybox/resources/"
 
 STRIPE_PUBLISHABLE_KEY: "pk_I8BqRm30RrEt4EkNzzGVjobbQzVgf"  # test public key
-STRIPE_SECRETY_KEY: "pk_I8BqRm30RrEt4EkNzzGVjobbQzVgf" # test secret key
+STRIPE_SECRET_KEY: "pk_I8BqRm30RrEt4EkNzzGVjobbQzVgf" # test secret key

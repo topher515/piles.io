@@ -1,8 +1,10 @@
+from django.db import models
+
 from south.modelsinspector import add_introspection_rules
 add_introspection_rules([], ["^shinybox\.models\.UUIDField"])
 add_introspection_rules([], ["^shinybox\.models\.ExpiresDateTimeField"])
 
-class UUIDField(models.CharField) :
+class UUIDField(models.CharField):
     def __init__(self, *args, **kwargs):
         kwargs['max_length'] = kwargs.get('max_length', 64 )
         kwargs['blank'] = True

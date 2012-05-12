@@ -115,6 +115,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    #'shinybox.middleware.',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

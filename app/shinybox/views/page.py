@@ -6,7 +6,6 @@ from django.views.generic.edit import CreateView, FormView
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User, UserManager
-from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
@@ -15,7 +14,16 @@ from shinybox.forms import *
 from shinybox.models import *
 
 
-class StartView(FormView):
+class ContextMixin(object):
+    def get_context_data(self):
+        customer = Customer.objects.get(user=self.request.user) \
+            if self.request.user.is_authenticated() else None
+        return {
+            'customer':customer,
+        }
+
+
+class StartView(FormView,ContextMixin):
     template_name = 'shinybox/start.html'
     form_class = StartForm
     def get(self,request,*args,**kwargs):
@@ -34,7 +42,7 @@ class StartView(FormView):
         return redirect('deploy-page')
 
 
-class LoginView(FormView):
+class LoginView(FormView, ContextMixin):
     template_name = 'shinybox/login.html'
     form_class = AuthenticationForm
     def form_valid(self,form):
@@ -42,8 +50,9 @@ class LoginView(FormView):
         return redirect('deploy-page')
         
 
-class PayView(FormView):
+class PayView(FormView, ContextMixin):
     template_name = "shinybox/pay.html"
+    form_class = PayForm
     def form_valid(self, form):
         stripe_customer = stripe.Customer.create(
             card=form.cleaned_data['stripe_token'],
@@ -53,15 +62,16 @@ class PayView(FormView):
         customer = Customer(
             external_id = stripe_customer.id
         )
+        return redirect('deploy-page')
         
  
-class DeployView(TemplateView):
+class DeployView(TemplateView, ContextMixin):
     template_name = 'shinybox/deploy.html'
     def get_context_data(self):
         return {}
         
         
-class ManageView(TemplateView):
+class ManageView(TemplateView,ContextMixin):
     template_name = 'shinybox/manage.html'
     def get_context_data(self, pile_domain, *args, **kwargs):
         return {

@@ -9,12 +9,14 @@ stripe.api_key = "Ndzrlauz734dK6xG5PKhk3LfLy1EQEKs"
 
             
 class Customer(models.Model):
-    user = models.ForeignKey('auth.User')
+    user = models.OneToOneField('auth.User')
     external_id = models.CharField(max_length=32)
-    status = models.CharField(max_length=10)
+    status = models.CharField(max_length=10,default='trialing')
         
     STATUS_OK = ('trialing','active','past_due')
     STATUS_BAD = ('canceled','unpaid')
+    
+    objects = CustomerManager()
     
     def get_stripe_customer(self):
         if not self._stripe_cust_cache:
@@ -24,7 +26,13 @@ class Customer(models.Model):
     def is_current(self,remote=False):
         if not self.status or remote:
             self.status = self.get_stripe_customer().subscription.status
-        return self.status in Customer.STATUS_OK:
+        return self.status in Customer.STATUS_OK
+        
+    def get_subscription(self):
+        return self.get_stripe_customer().subscription
+        
+    def get_plan(self):
+        return self.get_subscription().plan
         
         
 class Uploader(models.Model):

@@ -16,8 +16,8 @@
           $('.submit-button').removeAttr("disabled");
           // show the errors on the form
           $(stripeParams[response.error.param])
-            .closest('control-group').addClass('error')
-            .find('help-block').html('response.error.message')
+            .closest('.control-group').addClass('error')
+            .find('.help-block').html(response.error.message)
       } else {
           var form$ = $("#payment-form");
           // token contains id, last4, and card type
@@ -50,27 +50,27 @@
 <div class="row">
   <div class="span6 well">
     <form action="{% url pay-page %}" method="POST" id="payment-form">
+		{% csrf_token %}
       <div class="control-group">
         <label>Card Number</label>
-        <input type="text" size="20" autocomplete="off" class="card-number"/>
+        <input type="text" size="20" autocomplete="off" class="card-number span3"/>
         <span class="help-block"></span>
       </div>
 
       <div class="control-group">
         <label>CVC</label>
-        <input type="text" size="4" autocomplete="off" class="card-cvc"/>
+        <input type="text" size="4" autocomplete="off" class="card-cvc span1"/>
         <span class="help-block"></span>
       </div>
       
       <div class="control-group">
         <label>Expiration (MM/YYYY)</label>
-        <input type="text" size="2" class="card-expiry-month"/>
+        <input type="text" size="2" class="card-expiry-month span1"/>
         <span> / </span>
-        <input type="text" size="4" class="card-expiry-year"/>
-        <span class="help-block">This is what you will use to sign in.</span>
+        <input type="text" size="4" class="card-expiry-year span1"/>
       </div>
       
-      <button type="submit" class="submit-button">Submit Payment</button>
+      <button type="submit" class="btn btn-accept submit-button">Submit Payment</button>
     </form>
   </div>
 </div>
