@@ -38,9 +38,6 @@ settings.add_conf({
 'DIRNAME': os.path.abspath(os.path.dirname(__file__)),
 
 ### API Keys
-'CHARGIFY_API_KEY': 'xxXPsiW-FGTHA6STZ6P0',
-'AWS_ACCESS_KEY_ID': '0Z67F08VD9JMM1WKRDR2',
-'AWS_SECRET_ACCESS_KEY': 'g6o8NjU3ClIYJmaGurL+sKctlQrpEUF6irQyrpPX',
 
 ### App settings
 # The name of the S3 bucket where the application's user content and static files will live
